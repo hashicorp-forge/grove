@@ -1,0 +1,248 @@
+{
+    "from": "2022-08-22",
+    "to": "2022-08-23",
+    "page_size": 30,
+    "next_page_token": "next_token",
+    "activity_logs": [
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:45:54Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:45:19Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:44:54Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:44:49Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:44:17Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:43:45Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:43:33Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:42:49Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:41:45Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:41:31Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:40:57Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:40:38Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:40:14Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:39:04Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:38:48Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:38:43Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:38:02Z",
+            "type": "Sign out",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:38:01Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:37:57Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:37:53Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:37:28Z",
+            "type": "Sign out",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:36:44Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:36:26Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:36:26Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:35:46Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:35:43Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:35:35Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:34:29Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:34:15Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        },
+        {
+            "email": "test@test.com",
+            "time": "2022-08-23T14:34:10Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        }
+    ]
+}
