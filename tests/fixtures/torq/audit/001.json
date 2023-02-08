@@ -1,0 +1,50 @@
+{
+    "audit_logs": [
+        {
+            "id": "11111111-1111-1111-1111-111111111111",
+            "timestamp": "2022-06-27T11:35:10.681687Z",
+            "email": "john@hashicorp.com",
+            "actor_name": "John Doe",
+            "actor_type": "web_app",
+            "action": "Workflow edited",
+            "resource_id": "11111111-1111-1111-1111-111111111111",
+            "resource_name": "foo",
+            "ip": "1.2.3.4",
+            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0",
+            "account_id": "11111111-1111-1111-1111-111111111111",
+            "account_name": "hashicorp"
+        },
+        {
+            "id": "11111111-1111-1111-1111-111111111111",
+            "timestamp": "2022-06-24T21:25:08.790925Z",
+            "email": "jane@hashicorp.com",
+            "actor_name": "Jane Doe",
+            "actor_type": "web_app",
+            "action": "Custom step created",
+            "resource_id": "11111111-1111-1111-1111-111111111112",
+            "resource_name": "bar",
+            "ip": "73.103.50.129",
+            "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36",
+            "account_id": "11111111-1111-1111-1111-111111111111",
+            "account_name": "hashicorp"
+        },
+        {
+            "id": "0c52fed6-322c-4618-9814-eb24219cff49",
+            "timestamp": "2022-06-24T21:24:46.311499Z",
+            "email": "john@hashicorp.com",
+            "actor_name": "John Doe",
+            "actor_type": "web_app",
+            "action": "Workflow updated",
+            "resource_id": "83d9ef1c-6333-41cf-8d23-6cd69f3f7bde",
+            "resource_name": "foo bar",
+            "ip": "73.103.50.129",
+            "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36",
+            "extra_data": {
+                "revision_id": "11111111-1111-1111-1111-111111111111"
+            },
+            "account_id": "11111111-1111-1111-1111-111111111111",
+            "account_name": "hashicorp"
+        }
+    ],
+    "next_page_token": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+}

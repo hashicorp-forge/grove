@@ -1,0 +1,20 @@
+{
+    "activity_logs": [
+        {
+            "id": "11111111-1111-1111-1111-111111111112",
+            "account_id": "111111-1111-1111-1111-1111111111",
+            "event": {
+                "id": "11111111-1111-1111-1111-1111111111",
+                "timestamp": "2022-06-24T18:15:06.380622Z",
+                "pretty_id": "AA-011112",
+                "body": "{\"account_id\":\"111111111111\",\"ads_ref\":\"ADS-1\",\"detection_engine\":\"sumologic\",\"event_log\":{\"event_source\":\"aws_cloudtrail\",\"raw\":\"{\\\"eventVersion\\\":\\\"1.08\\\",\\\"userIdentity\\\":{\\\"type\\\":\\\"IAMUser\\\",\\\"principalId\\\":\\\"AIDARPSTFF7RUVMB354RJ\\\",\\\"arn\\\":\\\"arn:aws:iam::111111111111:user/circleci\\\",\\\"accountId\\\":\\\"111111111111\\\",\\\"accessKeyId\\\":\\\"AKIARPSTFF7RSVGKJ36M\\\",\\\"userName\\\":\\\"circleci\\\"},\\\"eventTime\\\":\\\"2022-06-24T18:00:43Z\\\",\\\"eventSource\\\":\\\"ec2.amazonaws.com\\\",\\\"eventName\\\":\\\"ModifyImageAttribute\\\",\\\"awsRegion\\\":\\\"us-west-2\\\",\\\"sourceIPAddress\\\":\\\"11.11.11.11\\\",\\\"userAgent\\\":\\\"APN/1.0 HashiCorp/1.0 packer-plugin-amazon/1.1.0 (+https://www.packer.io/docs/builders/amazon) Packer/1.8.1 (+https://www.packer.io) aws-sdk-go/1.42.29 (go1.17.8; linux; amd64)\\\",\\\"requestParameters\\\":{\\\"imageId\\\":\\\"ami-1111111111111\\\",\\\"launchPermission\\\":{\\\"add\\\":{\\\"items\\\":[{\\\"userId\\\":\\\"111111111111\\\"},{\\\"userId\\\":\\\"111111111111\\\"},{\\\"userId\\\":\\\"111111111111\\\"},{\\\"userId\\\":\\\"111111111111\\\"},{\\\"userId\\\":\\\"111111111111\\\"},{\\\"userId\\\":\\\"111111111111\\\"},{\\\"userId\\\":\\\"111111111111\\\"},{\\\"userId\\\":\\\"111111111111\\\"},{\\\"userId\\\":\\\"111111111111\\\"},{\\\"userId\\\":\\\"111111111111\\\"},{\\\"userId\\\":\\\"111111111111\\\"},{\\\"userId\\\":\\\"111111111111\\\"},{\\\"userId\\\":\\\"111111111111\\\"},{\\\"userId\\\":\\\"111111111111\\\"},{\\\"userId\\\":\\\"111111111111\\\"}]}},\\\"attributeType\\\":\\\"launchPermission\\\"},\\\"responseElements\\\":{\\\"requestId\\\":\\\"1111111111\\\",\\\"_return\\\":true},\\\"requestID\\\":\\\"111111111\\\",\\\"eventID\\\":\\\"31111111\\\",\\\"readOnly\\\":false,\\\"eventType\\\":\\\"AwsApiCall\\\",\\\"managementEvent\\\":true,\\\"recipientAccountId\\\":\\\"111111111\\\",\\\"eventCategory\\\":\\\"Management\\\",\\\"tlsDetails\\\":{\\\"tlsVersion\\\":\\\"TLSv1.2\\\",\\\"cipherSuite\\\":\\\"ECDHE-RSA-AES128-GCM-SHA256\\\",\\\"clientProvidedHostHeader\\\":\\\"ec2.us-west-2.amazonaws.com\\\"}}\"},\"event_timestamp\":\"2022-06-24T18:00:43Z\",\"link\":\"https://github.com/hashicorp/hc-security-hound/blob/main/documentation/ADS/ADS-1.md\",\"resource\":\"ami-11111111111111111\",\"runbook\":\"ADS-1\",\"schema_version\":\"1.0\",\"severity\":\"High\",\"summary\":\"AWS Modify image attribute was detected\",\"title\":\"ADS-1\"}",
+                "type": "integration",
+                "integration": {
+                    "integration_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+                    "integration_name": "ads-ingress-v2.0",
+                    "integration_type": "webhook"
+                }
+            }
+        }
+    ]
+}
