@@ -1,0 +1,6 @@
+{
+    "access_token": "testtoken",
+    "token_type": "bearer",
+    "expires_in": 3599,
+    "scope": "scope:test:test"
+}

@@ -1,0 +1,156 @@
+{
+    "total": 1563,
+    "data": [
+        {
+            "requestTime": "2021-10-12T21:48:30.721Z",
+            "userAgent": "Test user agent",
+            "taskDisplayName": "testTask",
+            "taskId": "0000",
+            "ipAddress": "00.00.000.000",
+            "deviceType": "Desktop",
+            "activityAction": "READ",
+            "systemAccount": "test@test.com",
+            "sessionId": "1a2b3c4d"
+        },
+        {
+            "requestTime": "2021-10-12T21:48:30.816Z",
+            "userAgent": "Test user agent",
+            "taskDisplayName": "testTask",
+            "taskId": "0000",
+            "ipAddress": "00.00.000.000",
+            "deviceType": "Desktop",
+            "activityAction": "READ",
+            "systemAccount": "test@test.com",
+            "sessionId": "1a2b3c4d"
+        },
+        {
+            "requestTime": "2021-10-12T21:48:30.832Z",
+            "userAgent": "Test user agent",
+            "taskDisplayName": "testTask",
+            "taskId": "0000",
+            "target": {
+                "descriptor": "Home",
+                "id": "0000000"
+            },
+            "ipAddress": "00.00.000.000",
+            "deviceType": "Desktop",
+            "activityAction": "READ",
+            "systemAccount": "test@test.com",
+            "sessionId": "1a2b3c4d"
+        },
+        {
+            "requestTime": "2021-10-12T21:48:30.924Z",
+            "userAgent": "Test user agent",
+            "taskDisplayName": "testTask",
+            "taskId": "0000",
+            "ipAddress": "00.00.000.000",
+            "deviceType": "Desktop",
+            "activityAction": "READ",
+            "systemAccount": "test@test.com",
+            "sessionId": "1a2b3c4d"
+        },
+        {
+            "requestTime": "2021-10-12T21:48:30.968Z",
+            "userAgent": "Test user agent",
+            "taskDisplayName": "testTask",
+            "taskId": "0000",
+            "ipAddress": "00.00.000.000",
+            "deviceType": "Desktop",
+            "activityAction": "READ",
+            "systemAccount": "test@test.com",
+            "sessionId": "1a2b3c4d"
+        },
+        {
+            "requestTime": "2021-10-12T21:48:31.004Z",
+            "userAgent": "Test user agent",
+            "taskDisplayName": "testTask",
+            "taskId": "0000",
+            "target": {
+                "descriptor": "Home",
+                "id": "596614f55c1c10000c9e834a112a0007"
+            },
+            "ipAddress": "00.00.000.000",
+            "deviceType": "Desktop",
+            "activityAction": "READ",
+            "systemAccount": "test@test.com",
+            "sessionId": "1a2b3c4d"
+        },
+        {
+            "requestTime": "2021-10-12T21:48:31.199Z",
+            "userAgent": "Test user agent",
+            "taskDisplayName": "testTask",
+            "taskId": "0000",
+            "ipAddress": "00.00.000.000",
+            "deviceType": "Desktop",
+            "activityAction": "READ",
+            "systemAccount": "test@test.com",
+            "sessionId": "1a2b3c4d"
+        },
+        {
+            "requestTime": "2021-10-12T21:48:31.479Z",
+            "userAgent": "Test user agent",
+            "taskDisplayName": "testTask",
+            "taskId": "0000",
+            "ipAddress": "00.00.000.000",
+            "deviceType": "Desktop",
+            "activityAction": "READ",
+            "systemAccount": "test@test.com",
+            "sessionId": "1a2b3c4d"
+        },
+        {
+            "requestTime": "2021-10-12T21:49:23.099Z",
+            "userAgent": "Test user agent",
+            "taskDisplayName": "testTask",
+            "taskId": "0000",
+            "ipAddress": "00.00.000.000",
+            "deviceType": "Desktop",
+            "activityAction": "READ",
+            "systemAccount": "test@test.com",
+            "sessionId": "1a2b3c4d"
+        },
+        {
+            "requestTime": "2021-10-12T21:49:23.802Z",
+            "userAgent": "Test user agent",
+            "taskDisplayName": "testTask",
+            "taskId": "0000",
+            "ipAddress": "00.00.000.000",
+            "deviceType": "Desktop",
+            "activityAction": "READ",
+            "systemAccount": "test@test.com",
+            "sessionId": "1a2b3c4d"
+        },
+        {
+            "requestTime": "2021-10-12T23:48:37.189Z",
+            "userAgent": "Test user agent",
+            "taskDisplayName": "testTask",
+            "taskId": "0000",
+            "ipAddress": "00.00.000.000",
+            "deviceType": "Desktop",
+            "activityAction": "READ",
+            "systemAccount": "test@test.com",
+            "sessionId": "1a2b3c4d"
+        },
+        {
+            "requestTime": "2021-10-12T23:50:07.885Z",
+            "userAgent": "Test user agent",
+            "taskDisplayName": "testTask",
+            "taskId": "0000",
+            "ipAddress": "00.00.000.000",
+            "deviceType": "Desktop",
+            "activityAction": "READ",
+            "systemAccount": "test@test.com",
+            "sessionId": "1a2b3c4d"
+        },
+        {
+            "requestTime": "2021-10-12T23:50:09.752Z",
+            "userAgent": "Test user agent",
+            "taskDisplayName": "testTask",
+            "taskId": "0000",
+            "ipAddress": "00.00.000.000",
+            "deviceType": "Desktop",
+            "activityAction": "READ",
+            "systemAccount": "test@test.com",
+            "sessionId": "1a2b3c4d"
+        }
+    ]
+}
