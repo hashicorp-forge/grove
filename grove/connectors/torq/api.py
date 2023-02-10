@@ -154,7 +154,7 @@ class Client:
             f"{self.base_url}/{endpoint}",
             params={
                 "start_time": start_time,
-                "page_size": limit,
+                "page_size": str(limit),
                 "page_token": cursor,
             },
         )
