@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """Atlassian API client.
 
 As Atlassian does not currently support the Events API, this client has been created in

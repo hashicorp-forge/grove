@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """Provides Mock implementations for unit and integration tests."""
 
 from typing import Any

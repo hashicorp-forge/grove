@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 # Create a DynamoDB table for Grove to use; this is following the "single-table" pattern.
 resource "aws_dynamodb_table" "grove" {
   name           = var.name

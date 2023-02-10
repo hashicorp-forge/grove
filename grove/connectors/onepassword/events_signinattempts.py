@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """1Password Signin Attempt event log connector for Grove."""
 
 import datetime

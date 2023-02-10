@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """ Provides post generation hooks to handle optional files.
 
 This is required to ensure that files not relevant for the given project type are

@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 # Create the bucket for Grove to output collected logs to.
 resource "aws_s3_bucket" "logs" {
   bucket = "${var.name}-output"

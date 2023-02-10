@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """Custom types used throughout Grove."""
 
 from collections.abc import MutableMapping

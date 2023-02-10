@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """Twilio messages connector for Grove."""
 
 from datetime import datetime, timedelta, timezone

@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """Implements tests for the SalesForce Marketing Cloud security event collector."""
 
 import os

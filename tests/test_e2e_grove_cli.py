@@ -1,4 +1,8 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """Implements e2e tests for grove using the heartbeat connector."""
+
 import json
 import os
 import subprocess

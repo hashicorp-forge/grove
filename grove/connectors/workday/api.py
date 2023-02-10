@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """Workday API client.
 
 As the Python Workday client is no longer maintained this client has been created to

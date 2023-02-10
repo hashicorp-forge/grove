@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """Provides helpers for plugin loading."""
 
 from importlib.metadata import EntryPoint, entry_points

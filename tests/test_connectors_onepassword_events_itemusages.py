@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """Implements unit tests for the 1Password Event Item Usage collector."""
 
 import os

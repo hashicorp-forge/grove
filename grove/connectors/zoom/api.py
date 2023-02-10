@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """Zoom API client.
 
 As the Python Zoom client does not currently support Audit API, this client has been created in

@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 data "aws_caller_identity" "current" {}
 
 # Wire up required permissions for ECS to access other Grove resources in AWS.

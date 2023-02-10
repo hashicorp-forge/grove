@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """Constants used throughout Grove."""
 
 # The prefix for all pointers in the cache.

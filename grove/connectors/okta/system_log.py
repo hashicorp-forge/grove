@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """Okta SystemLog connector for Grove."""
 
 from datetime import datetime, timedelta

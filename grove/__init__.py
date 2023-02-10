@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """A framework for collecting and transforming SaaS logs."""
 
 from grove import caches  # noqa: F401

@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 # CloudWatch Logs are used for operational logs from ECS fargate, not for collected
 # logs.
 resource "aws_cloudwatch_log_group" "grove" {

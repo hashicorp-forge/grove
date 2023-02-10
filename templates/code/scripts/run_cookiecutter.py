@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
 
 from cookiecutter.main import cookiecutter
 

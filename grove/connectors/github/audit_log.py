@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """GitHub Audit connector for Grove."""
 
 from datetime import datetime, timedelta, timezone

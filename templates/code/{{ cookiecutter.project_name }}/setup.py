@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Setup for {{cookiecutter.project_slug}}."""
 import os
 

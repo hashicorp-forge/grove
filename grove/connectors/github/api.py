@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """GitHub API client.
 
 As PyGitHub does not currently support the Audit API, this client has been created in

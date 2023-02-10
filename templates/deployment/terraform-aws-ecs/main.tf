@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 # Create SSM parameters for all Grove configuration documents.
 resource "aws_ssm_parameter" "connector_documents" {
   for_each = fileset(path.module, "connectors/**/*.json")

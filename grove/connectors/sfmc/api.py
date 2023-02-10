@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """SalesForce Marketing Cloud audit API client.
 
 The FuelSDK for Python is quite a heavy client - as it handles both SOAP and REST. The

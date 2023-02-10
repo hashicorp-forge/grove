@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """Grove AWS Lambda entrypoint."""
 
 from typing import Any, Dict

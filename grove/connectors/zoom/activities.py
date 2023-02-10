@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """Zoom activity log connector for Grove."""
 
 from datetime import datetime, timedelta

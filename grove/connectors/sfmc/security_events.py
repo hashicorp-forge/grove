@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """SalesForce Marketing Cloud Security security event connector for Grove."""
 
 from datetime import datetime, timedelta
