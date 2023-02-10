@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 """Terraform Cloud audit trail API client.
 
 The official TFC SDK does not currently support the Audit API, so interactions need
