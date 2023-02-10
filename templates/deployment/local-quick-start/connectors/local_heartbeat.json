@@ -1,0 +1,8 @@
+{
+  "name": "heartbeat",
+  "identity": "heartbeat",
+  "connector": "local_heartbeat",
+  "key": "",
+  "interval": 5,
+  "count": 5
+}
