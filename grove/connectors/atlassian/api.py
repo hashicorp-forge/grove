@@ -8,6 +8,7 @@ import logging
 from typing import Dict, Optional
 
 import requests
+
 from grove.exceptions import RequestFailedException
 from grove.types import AuditLogEntries, HTTPResponse
 
@@ -19,7 +20,7 @@ class Client:
         self,
         identity: Optional[str] = None,
         token: Optional[str] = None,
-    ) -> None:
+    ):
         """Setup a new client.
 
         :param identity: The name of the Atlassian organisation.

@@ -2,9 +2,9 @@
 resource "aws_ssm_parameter" "connector_documents" {
   for_each = fileset(path.module, "connectors/**/*.json")
 
-  type     = "SecureString"
-  value    = file(each.value)
-  name     = format("/grove/connectors/%s", trimprefix(trimsuffix(each.value, ".json"), "connectors/"))
+  type  = "SecureString"
+  value = file(each.value)
+  name  = format("/grove/connectors/%s", trimprefix(trimsuffix(each.value, ".json"), "connectors/"))
 }
 
 # Deploy Grove into ECS Fargate.

@@ -1,0 +1,7 @@
+{
+    "key": "BEARER_TOKEN_HERE",
+    "identity": "ORGANIZATION_NAME_HERE",
+    "domain": "oktapreview.com",
+    "name": "okta-system-log-example",
+    "connector": "okta_system_log"
+}

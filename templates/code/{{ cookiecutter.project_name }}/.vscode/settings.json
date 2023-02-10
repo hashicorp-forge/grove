@@ -1,0 +1,37 @@
+{
+    "python.formatting.provider": "black",
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Args": [
+        "--config setup.cfg"
+    ],
+    "python.linting.mypyEnabled": true,
+    "python.linting.mypyArgs": [
+        "--config-file setup.cfg"
+    ],
+    "isort.args": [
+        "-sp setup.cfg"
+    ],
+    "python.linting.pylintEnabled": false,
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        },
+        "editor.tabSize": 4,
+        "editor.formatOnSave": true
+    },
+    "[shellscript]": {
+        "editor.tabSize": 4,
+        "files.eol": "\n"
+    },
+    "[yaml]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.autoIndent": "advanced"
+    },
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}

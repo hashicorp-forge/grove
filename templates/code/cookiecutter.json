@@ -1,0 +1,14 @@
+{
+    "project_type": ["outputs", "caches", "secrets", "configs", "connectors"],
+    "project_description": "A short description about this project.",
+    "provider_name": "company name",
+    "provider_product": "application name",
+    "provider_slug": "{{ cookiecutter.provider_name.lower().replace(' ', '_').replace('-', '_') }}_{{ cookiecutter.provider_product.lower().replace(' ', '_').replace('-', '_') }}",
+    "project_slug": "grove_{{ cookiecutter.project_type }}_{{ cookiecutter.provider_slug }}",
+    "project_name": "{{ cookiecutter.project_slug.replace('_', '-') }}",
+    "repository": "github.com/author/{{ cookiecutter.project_name }}",
+    "full_name": "Author Name",
+    "email": "author@example.org",
+    "license": "Mozilla Public License 2.0",
+    "copyright": "Copyright {% now 'utc', '%Y' %} Author Inc."
+}

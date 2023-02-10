@@ -7,23 +7,26 @@ from typing import Dict, Optional
 from urllib.parse import unquote
 
 import requests
+
 from grove.exceptions import RateLimitException, RequestFailedException
 from grove.types import AuditLogEntries, HTTPResponse
 
-API_BASE_URI = "https://{identity}.okta.com"
+API_BASE_URI = "https://{identity}.{domain}"
 API_PAGE_SIZE = 1000
 
 
 class Client:
     def __init__(
         self,
+        domain: str = "okta.com",
         identity: Optional[str] = None,
         token: Optional[str] = None,
         retry: Optional[bool] = True,
-    ) -> None:
+    ):
         """Setup a new client.
 
         :param identity: The Okta subdomain.
+        :param domain: The Okta domain, without customer subdomain.
         :param token: The Okta API key.
         :param retry: Whether to automatically retry if recoverable errors are
             encountered, such as rate-limiting.
@@ -36,7 +39,7 @@ class Client:
             "Authorization": f"SSWS {token}",
         }
 
-        self._api_base_uri = API_BASE_URI.format(identity=identity)
+        self._api_base_uri = API_BASE_URI.format(identity=identity, domain=domain)
 
     def _parse_link_header(self, link: str) -> str:
         """Attempts to parse a URL from the provided Link header.
@@ -49,9 +52,10 @@ class Client:
         """
         # A link header may contain N entries ("next" and "self").
         url = None
-        links = link.split(",")
         next_url = None
         self_url = None
+        links = link.split(",")
+
         for entry in links:
             link_parts = entry.split(";")
             link_rel = link_parts[-1].strip()
@@ -64,12 +68,12 @@ class Client:
 
         # If self_url and next_url are equal than this is the last page, return a
         # value error, otherwise return the next page url.
-        if next_url == self_url:
+        if not next_url or next_url == self_url:
             raise ValueError()
-        else:
-            url = next_url
 
         # Try to mitigate SSRFs where a baked Link header is returned.
+        url = next_url
+
         if self._api_base_uri.lower() not in url.lower():
             raise ValueError(
                 f"{self._api_base_uri} not found in Link header ({url}). Ignoring."
@@ -160,7 +164,7 @@ class Client:
                 params={
                     "since": since,
                     "sortOrder": "ASCENDING",
-                    "limit": API_PAGE_SIZE,
+                    "limit": str(API_PAGE_SIZE),
                 },
             )
 
@@ -171,4 +175,4 @@ class Client:
             cursor = None
 
         # Return the cursor and the results to allow the caller to page as required.
-        return AuditLogEntries(cursor=cursor, entries=result.body)
+        return AuditLogEntries(cursor=cursor, entries=result.body)  # type: ignore

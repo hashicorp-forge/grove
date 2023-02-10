@@ -1,0 +1,6 @@
+{
+    "key": "AUTH_TOKEN_HERE",
+    "identity": "ACCOUNT_SID_HERE",
+    "name": "twilio-audit-events-example",
+    "connector": "twilio_monitor_events"
+}

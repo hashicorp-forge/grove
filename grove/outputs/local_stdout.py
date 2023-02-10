@@ -17,7 +17,7 @@ class Handler(BaseOutput):
         identity: str,
         operation: str,
         part: int = 0,
-    ) -> None:
+    ):
         """Print captured data to stdout.
 
         :param data: Log data to write.
@@ -46,14 +46,14 @@ class Handler(BaseOutput):
         )
 
     def serialize(self, data: List[Any], metadata: Dict[str, Any]) -> bytes:
-        """Serialise data to a standard format (NDJSON).
+        """Serialize data to a standard format (NDJSON).
 
-        :param data: A list of log entries to serialise to JSON.
+        :param data: A list of log entries to serialize to JSON.
         :param metadata: Metadata to append to JSON before serialisation.
 
-        :return: Log data serialised as NDJSON.
+        :return: Log data serialized as NDJSON.
 
-        :raises DataFormatException: Cannot serialise the input to JSON.
+        :raises DataFormatException: Cannot serialize the input to JSON.
         """
         candidate = []
 
@@ -65,7 +65,7 @@ class Handler(BaseOutput):
             try:
                 candidate.append(json.dumps(entry, separators=(",", ":")))
             except TypeError as err:
-                message = f"Unable to serialise to JSON: {err}"
+                message = f"Unable to serialize to JSON: {err}"
                 raise DataFormatException(message)
 
         return bytes("\r\n".join(candidate), "utf-8")

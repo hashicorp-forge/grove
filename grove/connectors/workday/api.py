@@ -9,6 +9,7 @@ import time
 from typing import Any, Dict, Optional
 
 import requests
+
 from grove.exceptions import RateLimitException, RequestFailedException
 from grove.types import AuditLogEntries, HTTPResponse
 
@@ -25,7 +26,7 @@ class Client:
         client_secret: Optional[str] = None,
         refresh_token: Optional[str] = None,
         retry: Optional[bool] = True,
-    ) -> None:
+    ):
         """Setup a new client.
 
         :param base_url: The Workday instance base url
@@ -137,9 +138,9 @@ class Client:
 
     def get_activity_logging(
         self,
+        cursor: int = 0,
         to_date: Optional[str] = None,
         from_date: Optional[str] = None,
-        cursor: Optional[int] = 0,
     ) -> AuditLogEntries:
         """Fetches a list of audit logs which match the provided filters.
 
@@ -160,8 +161,8 @@ class Client:
                 "from": from_date,
                 "to": to_date,
                 "instancesReturned": "3",
-                "limit": API_PAGE_SIZE,
-                "offset": cursor,
+                "limit": str(API_PAGE_SIZE),
+                "offset": str(cursor),
             },
         )
 
@@ -171,7 +172,7 @@ class Client:
         if len(data) == API_PAGE_SIZE:
             cursor += API_PAGE_SIZE
         else:
-            cursor = None
+            cursor = 0
 
         # Return the cursor and the results to allow the caller to page as required.
         return AuditLogEntries(cursor=cursor, entries=data)

@@ -1,4 +1,4 @@
-"""Zoom activity log connector for grove."""
+"""Zoom activity log connector for Grove."""
 
 from datetime import datetime, timedelta
 
@@ -22,7 +22,7 @@ class Connector(BaseConnector):
         This is required as this is a third authentication element required by Zoom.
         """
         try:
-            return self.configuration.client_id
+            return self.configuration.client_id  # type: ignore
         except AttributeError:
             return None
 

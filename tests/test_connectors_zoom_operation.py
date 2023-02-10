@@ -1,15 +1,15 @@
 """Implements unit tests for the Zoom Operation Log collector."""
 
-import base64
 import os
 import re
 import unittest
 from unittest.mock import patch
 
 import responses
+from responses import matchers
+
 from grove.connectors.zoom.operationlogs import Connector
 from grove.models import ConnectorConfig
-from responses import matchers
 from tests import mocks
 
 
@@ -62,7 +62,7 @@ class ZoomOperationLogsTestCase(unittest.TestCase):
                 ).read(),
                 "utf-8",
             ),
-            match=[matchers.header_matcher({"Authorization": f"Bearer testtoken"})],
+            match=[matchers.header_matcher({"Authorization": "Bearer testtoken"})],
         )
 
         # The last page returns no cursor.
@@ -77,7 +77,7 @@ class ZoomOperationLogsTestCase(unittest.TestCase):
                 ).read(),
                 "utf-8",
             ),
-            match=[matchers.header_matcher({"Authorization": f"Bearer testtoken"})],
+            match=[matchers.header_matcher({"Authorization": "Bearer testtoken"})],
         )
 
         self.connector.run()
@@ -114,7 +114,7 @@ class ZoomOperationLogsTestCase(unittest.TestCase):
                 ).read(),
                 "utf-8",
             ),
-            match=[matchers.header_matcher({"Authorization": f"Bearer testtoken"})],
+            match=[matchers.header_matcher({"Authorization": "Bearer testtoken"})],
         )
 
         self.connector.run()

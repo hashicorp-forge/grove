@@ -1,0 +1,6 @@
+{
+    "key": "BEARER_TOKEN_HERE",
+    "identity": "ORGANIZATION_NAME_HERE",
+    "name": "tfc-audit-trails-example",
+    "connector": "tfc_audit_trails"
+}

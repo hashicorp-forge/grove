@@ -1,0 +1,17 @@
+{
+    "logs": [
+        {
+            "timestamp": "5",
+            "event": "Example E"
+        },
+        {
+            "timestamp": "6",
+            "event": "Example F"
+        },
+        {
+            "timestamp": "7",
+            "event": "Example G"
+        }
+    ],
+    "cursor": "NEXT_AGAIN"
+}

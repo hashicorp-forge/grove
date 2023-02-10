@@ -1,0 +1,284 @@
+{
+    "limit": 25,
+    "next_cursor": null,
+    "records": [
+        {
+            "action": "delete",
+            "actors": [
+                {
+                    "id": "AD11231",
+                    "summary": "Jane Doe",
+                    "type": "user_reference"
+                }
+            ],
+            "details": {
+                "fields": [
+                    {
+                        "before_value": "StatusPage.io Transient 14469",
+                        "name": "name"
+                    },
+                    {
+                        "before_value": null,
+                        "name": "description"
+                    },
+                    {
+                        "before_value": "always_high",
+                        "name": "incident_severity"
+                    },
+                    {
+                        "before_value": "create_incidents",
+                        "name": "alert_creation"
+                    },
+                    {
+                        "before_value": "",
+                        "name": "auto_resolve_timeout"
+                    },
+                    {
+                        "before_value": "",
+                        "name": "acknowledgement_timeout"
+                    },
+                    {
+                        "before_value": null,
+                        "name": "alert_grouping"
+                    },
+                    {
+                        "before_value": "",
+                        "name": "alert_grouping_timeout"
+                    }
+                ],
+                "references": [
+                    {
+                        "name": "escalation_policy",
+                        "removed": [
+                            {
+                                "id": "PKJYS9K",
+                                "summary": "Cloud Doormat Approvals",
+                                "type": "escalation_policy_reference"
+                            }
+                        ]
+                    }
+                ],
+                "resource": {
+                    "id": "P15G72J",
+                    "summary": "StatusPage.io Transient 14469",
+                    "type": "service_reference"
+                }
+            },
+            "execution_context": {
+                "request_id": "12439b261e601e6e1d5a2fc10bce9125"
+            },
+            "execution_time": "2021-09-08T18:05:45.120Z",
+            "id": "XpoURt1WfhPWGxURPXuH3ifPDcIKcdOP_MW1Jto1gjA",
+            "method": {
+                "description": "pre-auth",
+                "truncated_token": "SZtr",
+                "type": "api_token"
+            },
+            "root_resource": {
+                "id": "P15G72J",
+                "summary": "StatusPage.io Transient 14469",
+                "type": "service_reference"
+            }
+        },
+        {
+            "action": "update",
+            "actors": [
+                {
+                    "id": "AD11231",
+                    "summary": "Jane Doe",
+                    "type": "user_reference"
+                }
+            ],
+            "details": {
+                "references": [
+                    {
+                        "added": [
+                            {
+                                "id": "P9JGQP8",
+                                "summary": "Engineering",
+                                "type": "team_reference"
+                            }
+                        ],
+                        "name": "teams"
+                    }
+                ],
+                "resource": {
+                    "id": "P15G72J",
+                    "summary": "StatusPage.io Transient 14469",
+                    "type": "service_reference"
+                }
+            },
+            "execution_context": {
+                "request_id": "725a238b4d1e5fbc497878299d163a42"
+            },
+            "execution_time": "2021-09-08T18:04:31.905Z",
+            "id": "z0jksSKZgyOHniznERNL35jcqczCmUVnLzzZaK9cZEw",
+            "method": {
+                "description": "pre-auth",
+                "truncated_token": "SZtr",
+                "type": "api_token"
+            },
+            "root_resource": {
+                "id": "P15G72J",
+                "summary": "StatusPage.io Transient 14469",
+                "type": "service_reference"
+            }
+        },
+        {
+            "action": "create",
+            "actors": [
+                {
+                    "id": "AD11231",
+                    "summary": "Jane Doe",
+                    "type": "user_reference"
+                }
+            ],
+            "details": {
+                "fields": [
+                    {
+                        "name": "name",
+                        "value": "StatusPage.io Transient 14469"
+                    },
+                    {
+                        "name": "description",
+                        "value": null
+                    },
+                    {
+                        "name": "incident_severity",
+                        "value": "always_high"
+                    },
+                    {
+                        "name": "alert_creation",
+                        "value": "create_incidents"
+                    },
+                    {
+                        "name": "auto_resolve_timeout",
+                        "value": ""
+                    },
+                    {
+                        "name": "acknowledgement_timeout",
+                        "value": ""
+                    },
+                    {
+                        "name": "alert_grouping",
+                        "value": null
+                    },
+                    {
+                        "name": "alert_grouping_timeout",
+                        "value": ""
+                    }
+                ],
+                "references": [
+                    {
+                        "added": [
+                            {
+                                "id": "PKJYS9K",
+                                "summary": "Cloud Doormat Approvals",
+                                "type": "escalation_policy_reference"
+                            }
+                        ],
+                        "name": "escalation_policy"
+                    }
+                ],
+                "resource": {
+                    "id": "P15G72J",
+                    "summary": "StatusPage.io Transient 14469",
+                    "type": "service_reference"
+                }
+            },
+            "execution_context": {
+                "request_id": "725a238b4d1e5fbc497878299d163a42"
+            },
+            "execution_time": "2021-09-08T18:03:31.900Z",
+            "id": "qc1K-20GTAy4YtssvabXOhufHRSO4h4MCXXCubHU86s",
+            "method": {
+                "description": "pre-auth",
+                "truncated_token": "SZtr",
+                "type": "api_token"
+            },
+            "root_resource": {
+                "id": "P15G72J",
+                "summary": "StatusPage.io Transient 14469",
+                "type": "service_reference"
+            }
+        },
+        {
+            "action": "delete",
+            "actors": [
+                {
+                    "id": "AD11231",
+                    "summary": "Jane Doe",
+                    "type": "user_reference"
+                }
+            ],
+            "details": {
+                "fields": [
+                    {
+                        "before_value": "StatusPage.io Transient 21565",
+                        "name": "name"
+                    },
+                    {
+                        "before_value": null,
+                        "name": "description"
+                    },
+                    {
+                        "before_value": "always_high",
+                        "name": "incident_severity"
+                    },
+                    {
+                        "before_value": "create_incidents",
+                        "name": "alert_creation"
+                    },
+                    {
+                        "before_value": "",
+                        "name": "auto_resolve_timeout"
+                    },
+                    {
+                        "before_value": "",
+                        "name": "acknowledgement_timeout"
+                    },
+                    {
+                        "before_value": null,
+                        "name": "alert_grouping"
+                    },
+                    {
+                        "before_value": "",
+                        "name": "alert_grouping_timeout"
+                    }
+                ],
+                "references": [
+                    {
+                        "name": "escalation_policy",
+                        "removed": [
+                            {
+                                "id": "PKJYS9K",
+                                "summary": "Cloud Doormat Approvals",
+                                "type": "escalation_policy_reference"
+                            }
+                        ]
+                    }
+                ],
+                "resource": {
+                    "id": "PHKCO5Z",
+                    "summary": "StatusPage.io Transient 21565",
+                    "type": "service_reference"
+                }
+            },
+            "execution_context": {
+                "request_id": "f4bf4b4ae9c9ae4db0edd2fa65c83a68"
+            },
+            "execution_time": "2021-09-08T16:53:31.865Z",
+            "id": "-hsCcLItpyf07FVWE0TPsY7Lbpjv9l5Jh75Igf_HjMI",
+            "method": {
+                "description": "pre-auth",
+                "truncated_token": "SZtr",
+                "type": "api_token"
+            },
+            "root_resource": {
+                "id": "PHKCO5Z",
+                "summary": "StatusPage.io Transient 21565",
+                "type": "service_reference"
+            }
+        }
+    ]
+}

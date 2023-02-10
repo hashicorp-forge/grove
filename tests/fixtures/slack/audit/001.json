@@ -1,0 +1,38 @@
+{
+   "entries":[
+      {
+         "id":"b79e48be-6b30-45b5-84cd-336a4ef80a54",
+         "date_create":1521214344,
+         "action":"user_login",
+         "actor":{
+            "type":"user",
+            "user":{
+               "id":"W123AB456",
+               "name":"First User",
+               "email":"first@example.org"
+            }
+         },
+         "entity":{
+            "type":"user",
+            "user":{
+               "id":"W123AB456",
+               "name":"First User",
+               "email":"second@example.org"
+            }
+         },
+         "context":{
+            "location":{
+               "type":"enterprise",
+               "id":"E1701NCCA",
+               "name":"Corp Corp",
+               "domain":"corpcorp"
+            },
+            "ua":"Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/64.0.3282.186 Safari\/537.36",
+            "ip_address":"192.0.2.1"
+         }
+      }
+   ],
+   "response_metadata": {
+      "next_cursor": "CURSOR_VALUE"
+   }
+}

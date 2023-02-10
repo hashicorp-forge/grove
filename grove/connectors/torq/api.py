@@ -21,7 +21,7 @@ class Client:
         key: Optional[str] = None,
         bearer_token: Optional[str] = None,
         retry: Optional[bool] = True,
-    ) -> None:
+    ):
         """Setup a new client.
 
         :param base_url: The Torq api url - default is https://api.tor.io/public
@@ -65,7 +65,7 @@ class Client:
         try:
             response = requests.get(url, headers=self.headers, params=params)
             response.raise_for_status()
-        except requests.exceptions.HTTPError as err:
+        except requests.exceptions.RequestException as err:
             raise RequestFailedException(err)
 
         return HTTPResponse(headers=response.headers, body=response.json())
@@ -87,13 +87,9 @@ class Client:
         :return: The response to the request in JSON.
         """
         try:
-            response = requests.post(
-                url,
-                headers=headers,
-                data=data,
-            )
+            response = requests.post(url, headers=headers, data=data)
             response.raise_for_status()
-        except requests.exceptions.HTTPError as err:
+        except requests.exceptions.RequestException as err:
             raise RequestFailedException(err)
 
         return response.json()
@@ -101,7 +97,7 @@ class Client:
     def refresh_bearer_token(self):
         """Use Basic Auth to get Bearer Token
 
-        :returns: If the request is successful, the bearer token is returned to
+        :return: If the request is successful, the bearer token is returned to
             the Client class header.
         """
         auth_url = "https://auth.torq.io/v1/auth/token"
@@ -154,7 +150,7 @@ class Client:
             f"{self.base_url}/{endpoint}",
             params={
                 "start_time": start_time,
-                "page_size": limit,
+                "page_size": str(limit),
                 "page_token": cursor,
             },
         )

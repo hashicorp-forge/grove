@@ -5,7 +5,7 @@
             "id": "test_id",
             "attributes": {
                 "time": "2022-05-12T19:13:13Z",
-                "action": "test_action",
+                "action": "another_test_action",
                 "actor": {
                     "id": "test_id",
                     "name": "test name",

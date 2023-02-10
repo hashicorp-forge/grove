@@ -1,0 +1,7 @@
+{
+    "key": "PASSWORD_HERE",
+    "identity": "USERNAME_HERE",
+    "token": "SECURITY_TOKEN_HERE",
+    "name": "salesforce-event-log-example",
+    "connector": "sf_event_log"
+}

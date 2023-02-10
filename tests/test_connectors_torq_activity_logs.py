@@ -1,5 +1,6 @@
 """Implements unit tests for the Torq Activity Log collector."""
 
+import base64
 import os
 import re
 import unittest

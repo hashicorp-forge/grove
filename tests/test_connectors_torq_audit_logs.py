@@ -1,5 +1,6 @@
 """Implements unit tests for the Torq Audit Log collector."""
 
+import base64
 import os
 import re
 import unittest

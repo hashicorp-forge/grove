@@ -6,6 +6,7 @@ import unittest
 from unittest.mock import patch
 
 import responses
+
 from grove.connectors.okta.system_log import Connector
 from grove.models import ConnectorConfig
 from tests import mocks

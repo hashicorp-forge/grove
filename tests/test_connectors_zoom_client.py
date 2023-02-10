@@ -7,8 +7,9 @@ import unittest
 from unittest.mock import patch
 
 import responses
-from grove.connectors.zoom import api
 from responses import matchers
+
+from grove.connectors.zoom import api
 from tests import mocks
 
 

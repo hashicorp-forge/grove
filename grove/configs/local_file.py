@@ -6,12 +6,12 @@ import logging
 from json import JSONDecodeError
 from typing import List
 
-from grove.exceptions import ConfigurationException, DataFormatException
-from grove.helpers import parsing
-from grove.models import ConnectorConfig
 from pydantic import BaseSettings, Field, ValidationError
 
 from grove.configs import BaseConfig
+from grove.exceptions import ConfigurationException, DataFormatException
+from grove.helpers import parsing
+from grove.models import ConnectorConfig
 
 
 class Configuration(BaseSettings):

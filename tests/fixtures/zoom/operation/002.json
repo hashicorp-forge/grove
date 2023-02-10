@@ -6,7 +6,7 @@
     "operation_logs": [
         {
             "time": "2022-08-23T14:46:17Z",
-            "operator": "test@test.com",
+            "operator": "test1@test.com",
             "category_type": "Recording",
             "action": "test",
             "operation_detail": "test"

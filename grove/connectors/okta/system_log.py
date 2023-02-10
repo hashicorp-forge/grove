@@ -1,4 +1,4 @@
-"""Okta SystemLog connector for grove."""
+"""Okta SystemLog connector for Grove."""
 
 from datetime import datetime, timedelta
 
@@ -13,13 +13,28 @@ class Connector(BaseConnector):
     POINTER_PATH = "published"
     LOG_ORDER = CHRONOLOGICAL
 
+    @property
+    def domain(self):
+        """Fetches the Okta domain from the configuration.
+
+        This field is used to allow configuration of collection of log data from
+        specific Okta domains, including okta-emea.com, and oktapreview.com. This must
+        not include the customer name / organisation name.  The default is 'okta.com'.
+
+        :return: The "domain" portion of the connector's configuration.
+        """
+        try:
+            return self.configuration.domain  # type: ignore
+        except AttributeError:
+            return "okta.com"
+
     def collect(self):
         """Collects all logs from the Okta Audit API.
 
         This will first check whether there are any pointers cached to indicate previous
         collections. If not, the last week of data will be collected.
         """
-        client = Client(identity=self.identity, token=self.key)
+        client = Client(identity=self.identity, token=self.key, domain=self.domain)
         cursor = None
 
         # If no pointer is stored then a previous run hasn't been performed, so set the

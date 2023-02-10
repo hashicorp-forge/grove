@@ -1,0 +1,16 @@
+{
+    "totalSize": 2,
+    "done": true,
+    "records": [{
+        "attributes": {
+            "type": "EventLogFile",
+            "url": "/services/data/v42.0/sobjects/EventLogFile/ZZZ4v000002FFFFFF0"
+        },
+        "Id": "ZZZ4v000002FFFFFF0",
+        "ApiVersion": 51.0,
+        "EventType": "Login",
+        "CreatedDate": "2021-06-03T12:19:12.000+0000",
+        "LogDate": "2021-06-02T00:00:00.000+0000",
+        "LogFile": "/services/data/v42.0/sobjects/EventLogFile/ZZZ4v000002FFFFFF0/LogFile"
+    }]
+}

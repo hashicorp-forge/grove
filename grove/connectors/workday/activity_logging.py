@@ -1,4 +1,4 @@
-"""Workday Audit connector for grove."""
+"""Workday Audit connector for Grove."""
 
 from datetime import datetime, timedelta
 
@@ -25,7 +25,7 @@ class Connector(BaseConnector):
         :return: The "base_url" portion of the connector's configuration.
         """
         try:
-            return self.configuration.base_url
+            return self.configuration.base_url  # type: ignore
         except AttributeError:
             return None
 
@@ -38,7 +38,7 @@ class Connector(BaseConnector):
         :return: The "client_id" portion of the connector's configuration.
         """
         try:
-            return self.configuration.client_id
+            return self.configuration.client_id  # type: ignore
         except AttributeError:
             return None
 
@@ -51,7 +51,7 @@ class Connector(BaseConnector):
         :return: The "client_secret" portion of the connector's configuration.
         """
         try:
-            return self.configuration.client_secret
+            return self.configuration.client_secret  # type: ignore
         except AttributeError:
             return None
 
@@ -96,6 +96,6 @@ class Connector(BaseConnector):
             self.save(log.entries)
 
             # Check if we need to continue paging.
-            cursor = log.cursor
-            if cursor is None:
+            cursor = log.cursor  # type: ignore
+            if not cursor:
                 break

@@ -10,6 +10,7 @@ import time
 from typing import Any, Dict, Optional
 
 import requests
+
 from grove.exceptions import RateLimitException, RequestFailedException
 from grove.types import AuditLogEntries, HTTPResponse
 
@@ -23,7 +24,7 @@ class Client:
         client_id: Optional[str] = None,
         key: Optional[str] = None,
         retry: Optional[bool] = True,
-    ) -> None:
+    ):
         """Setup a new client.
 
         :param identity: The Zoom account ID
@@ -136,15 +137,14 @@ class Client:
         result_field: str,
         to_date: Optional[str] = None,
         from_date: Optional[str] = None,
-        cursor: Optional[int] = 0,
+        cursor: Optional[str] = None,
     ) -> AuditLogEntries:
         """Fetches a list of logs from Zoom which match the provided filters.
 
         :param from_date: The required date of the earliest log entry.
         :param to_date: The required date of the latest log entry.
         :param limit: The maximum number of items to include in a single response.
-        :param cursor: The index position of the first object in a response collection.
-            Cursor to use when fetching events (pagination).
+        :param cursor: The 'next_page_token' returned from a request.
 
         :return: AuditLogEntries object containing a pagination cursor, and log entries.
         """

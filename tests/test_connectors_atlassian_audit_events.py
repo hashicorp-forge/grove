@@ -6,6 +6,7 @@ import unittest
 from unittest.mock import patch
 
 import responses
+
 from grove.connectors.atlassian.audit_events import Connector
 from grove.models import ConnectorConfig
 from tests import mocks

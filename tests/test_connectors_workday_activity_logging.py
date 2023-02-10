@@ -6,6 +6,7 @@ import unittest
 from unittest.mock import patch
 
 import responses
+
 from grove.connectors.workday.activity_logging import Connector
 from grove.exceptions import RequestFailedException
 from grove.models import ConnectorConfig

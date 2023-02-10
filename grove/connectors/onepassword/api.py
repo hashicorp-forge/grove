@@ -19,8 +19,8 @@ class Client:
         hostname: Optional[str] = API_HOSTNAME,
         token: Optional[str] = None,
         retry: Optional[bool] = True,
-    ) -> None:
-        """Setup a new 1Password API Client.
+    ):
+        """Setup a new 1Password audit log client.
 
         :param hostname: Hostname of the 1Password API to interact with.
         :param token: 1Password token to authenticate with.
@@ -62,9 +62,9 @@ class Client:
                 )
                 response.raise_for_status()
                 break
-            except requests.exceptions.HTTPError as err:
-                if err.response.status_code == 429:
-                    # Retry on rate-limit, but only if requested.
+            except requests.exceptions.RequestException as err:
+                # Retry on rate-limit, but only if requested.
+                if getattr(err.response, "status_code", None) == 429:
                     self.logger.warning("Rate-limit was exceeded during request")
                     if self.retry:
                         time.sleep(1)

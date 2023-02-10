@@ -1,0 +1,30 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  tox:
+    {% raw -%}
+    name: tox
+    runs-on: ${{ matrix.os }}
+    {% endraw -%}
+
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ '3.9', '3.10' ]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      {% raw %}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      {% endraw %}
+
+      - run: pip install tox
+
+      - run: tox

@@ -1,4 +1,4 @@
-"""Atlassian Audit connector for grove."""
+"""Atlassian Audit connector for Grove."""
 
 from datetime import datetime, timedelta, timezone
 
@@ -56,7 +56,7 @@ class Connector(BaseConnector):
 
         # Page over data using the cursor, saving returned data page by page.
         while True:
-            log = client.get_audit(from_date=start, cursor=cursor)
+            log = client.get_audit(from_date=str(start), cursor=cursor)
 
             # Save this batch of log entries.
             self.save(log.entries)
