@@ -1,0 +1,33 @@
+{
+   "data": [
+     {
+       "id": "ae66e491-db59-457c-8445-9c908ee726ae",
+       "version": "0",
+       "type": "Resource",
+       "timestamp": "2020-06-30T17:52:46.000Z",
+       "auth": {
+         "accessor_id": "user-MaPuLxAXvtq2PWTH",
+         "description": "pveverka",
+         "type": "Client",
+         "impersonator_id": null,
+         "organization_id": "org-AGLwRmx1snv34Yts"
+       },
+       "request": {
+         "id": "4df584d4-7e2a-01e6-6cc0-4adbefa020e6"
+       },
+       "resource": {
+         "id": "at-sjt83qTw3GZatuPm",
+         "type": "authentication_token",
+         "action": "create",
+         "meta": null
+       }
+     }
+   ],
+   "pagination": {
+     "current_page": 2,
+     "prev_page": 1,
+     "next_page": null,
+     "total_pages": 1,
+     "total_count": 1
+   }
+ }

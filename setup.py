@@ -45,7 +45,7 @@ setup(
             "sfmc_audit_events = grove.connectors.sfmc.audit_events:Connector",
             "sfmc_security_events = grove.connectors.sfmc.security_events:Connector",
             "slack_audit_logs = grove.connectors.slack.audit_logs:Connector",
-            # "tfc_audit_trails = grove.connectors.tfc.audit_trails:Connector",
+            "tfc_audit_trails = grove.connectors.tfc.audit_trails:Connector",
             "torq_activity_logs = grove.connectors.torq.activity_logs:Connector",
             "torq_audit_logs = grove.connectors.torq.audit_logs:Connector",
             "twilio_monitor_events = grove.connectors.twilio.monitor_events:Connector",
