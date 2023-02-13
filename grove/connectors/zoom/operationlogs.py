@@ -10,7 +10,7 @@ from grove.connectors.zoom import api
 from grove.constants import REVERSE_CHRONOLOGICAL
 from grove.exceptions import NotFoundException
 
-DATESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+DATESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
 class Connector(BaseConnector):
@@ -52,7 +52,7 @@ class Connector(BaseConnector):
                 DATESTAMP_FORMAT
             )
 
-        # Get log data from the upstream API. A "from" and "to" datetime query parameters
+        # Get log data from the upstream API. "From" and "to" datetime query parameters
         # are required. This API only gets data from a YYYYMMDD date range.
         while True:
             log = client.get_operationlogs(

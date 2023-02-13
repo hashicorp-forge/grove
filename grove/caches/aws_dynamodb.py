@@ -236,8 +236,8 @@ class Handler(BaseCache):
 
         # Apply a constraint, if set.
         if constraint is not None:
-            options["ExpressionAttributeNames"] = {"#data": "data"}
             options["ConditionExpression"] = "#data = :constraint"
+            options["ExpressionAttributeNames"] = {"#data": "data"}
             options["ExpressionAttributeValues"] = {
                 ":constraint": {"S": str(constraint)}
             }
