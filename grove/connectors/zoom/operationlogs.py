@@ -59,8 +59,18 @@ class Connector(BaseConnector):
                 from_date=self.pointer, to_date=now, cursor=cursor
             )
 
+            # Zoom is troublesome as their API only allows filtering by date, not time.
+            # As a result of this we need to do an additional step to ignore anything
+            # after our pointer.
+            candidates = self.deduplicate_by_pointer(log.entries)
+
             # Save this batch of log entries.
-            self.save(log.entries)
+            self.save(candidates)
+
+            # If any log entries were filtered, the pointer was found, so we can skip
+            # everything else.
+            if len(candidates) != len(log.entries):
+                break
 
             # Check if we need to continue paging.
             cursor = log.cursor

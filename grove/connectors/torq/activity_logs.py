@@ -18,6 +18,7 @@ class Connector(BaseConnector):
 
     def collect(self):
         """Collects all activity logs from the Torq API.
+
         This will first check whether there are any pointers cached to indicate previous
         collections. If not, a 7 day look-back of data will be collected.
         """

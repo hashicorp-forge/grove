@@ -36,7 +36,7 @@ class Connector(BaseConnector):
         """Collects all events from the Twilio Monitor Event API.
 
         This will first check whether there are any pointers cached to indicate previous
-        collections. If not, the 24-hours of data will be collected.
+        collections. If not, the 7-days of data will be collected.
         """
         # Construct the client based on whether "API key" or "auth token" authentication
         # is configured.
@@ -46,11 +46,11 @@ class Connector(BaseConnector):
             client = Client(self.identity, self.key)
 
         # If no pointer is stored then a previous run hasn't been performed, so set the
-        # pointer to 24-hours ago.
+        # pointer to a week ago.
         try:
             _ = self.pointer
         except NotFoundException:
-            self.pointer = (datetime.now(timezone.utc) - timedelta(days=1)).strftime(
+            self.pointer = (datetime.now(timezone.utc) - timedelta(days=7)).strftime(
                 "%Y-%m-%dT%H:%M:%S%z"
             )
 

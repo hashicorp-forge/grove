@@ -244,11 +244,11 @@ class BaseConnector:
 
         :return: A count of entries saved.
         """
-        entries = self.deduplicate(candidates)
+        entries = self.deduplicate_by_hash(candidates)
 
         if len(entries) < 1:
             self.logger.warning(
-                "No log entries passed to save, skipping.", extra=self.log_context
+                "No log entries to save, skipping.", extra=self.log_context
             )
             return
 
@@ -513,8 +513,8 @@ class BaseConnector:
 
         return hashes
 
-    def deduplicate(self, candidates: List[Any]):
-        """Deduplicate log entries.
+    def deduplicate_by_hash(self, candidates: List[Any]):
+        """Deduplicate log entries by their hash.
 
         This is performed by generating a hash of the log entry, and comparing these
         hashes against recently seen events in the cache with the same pointer value.
@@ -526,7 +526,7 @@ class BaseConnector:
 
         :param candidates: A list of log entries to deduplicate.
 
-        :return: A deduplicated list of events.
+        :return: A deduplicated list of log entries.
         """
         entries = []
         old_hashes = self.hashes
@@ -534,19 +534,19 @@ class BaseConnector:
 
         # Check whether these log entries have been seen already.
         for candidate in candidates:
-            current_hash = self.hash_entry(candidate)
-            current_pointer = jmespath.search(self.POINTER_PATH, candidate)
+            candidate_hash = self.hash_entry(candidate)
+            candidate_pointer = str(jmespath.search(self.POINTER_PATH, candidate))
 
             # Track this log entry's hash.
-            if current_pointer not in new_hashes:
-                new_hashes[current_pointer] = set()
+            if candidate_pointer not in new_hashes:
+                new_hashes[candidate_pointer] = set()
 
-            new_hashes[current_pointer].add(current_hash)
+            new_hashes[candidate_pointer].add(candidate_hash)
 
             # Check if the hash for this log entry is in the cache, and if so, skip it.
             try:
-                if current_pointer in old_hashes:
-                    if current_hash in old_hashes[current_pointer]:
+                if candidate_pointer in old_hashes:
+                    if candidate_hash in old_hashes[candidate_pointer]:
                         continue
             except KeyError:
                 pass
@@ -555,6 +555,88 @@ class BaseConnector:
 
         # Update known in-memory hashes to include our new entries.
         self.hashes = {**old_hashes, **new_hashes}
+
+        return entries
+
+    def deduplicate_by_pointer(self, candidates: List[Any]):
+        """Deduplicate log entries by pointer values.
+
+        Deduplicates records which occur before or after a pointer on the current
+        page - depending on whether log entries are in chronological or reverse
+        chronological order. This enables deduplication of log events within the same
+        page of results, and is intended to solve for cases where a provider's filters
+        are not as granular as the pointer value.
+
+        For example, some provider's only allow filtering on a date (YYYY-MM-DD) while
+        returning log entries with timestamps that have millisecond precision.
+
+        :param candidates: A list of log entries to deduplicate.
+
+        :return: A deduplicated list of log entries.
+        """
+        if self.LOG_ORDER == CHRONOLOGICAL:
+            return self._deduplicate_by_pointer_chronological(candidates)
+
+        if self.LOG_ORDER == REVERSE_CHRONOLOGICAL:
+            return self._deduplicate_by_pointer_reverse_chronological(candidates)
+
+    def _deduplicate_by_pointer_chronological(self, candidates: List[Any]):
+        """Deduplicates chronological log entries by their pointer.
+
+        :param candidates: A list of log entries to deduplicate.
+
+        :return: A deduplicated list of log entries.
+        """
+        entries = []
+        pointer_passed = False
+
+        for candidate in candidates:
+            candidate_pointer = str(jmespath.search(self.POINTER_PATH, candidate))
+
+            if candidate_pointer == self.pointer:
+                pointer_passed = True
+
+            # Only track chronological records on and after the pointer.
+            if pointer_passed:
+                entries.append(candidate)
+
+        # If we never encountered the pointer, don't filter the records at all. This may
+        # cause some duplicates if the pointer is on a subsequent page, but we always
+        # prefer duplicates in these cases.
+        if not pointer_passed:
+            entries = candidates
+
+        return entries
+
+    def _deduplicate_by_pointer_reverse_chronological(self, candidates: List[Any]):
+        """Deduplicates reverse chronological log entries by their pointer.
+
+        :param candidates: A list of log entries to deduplicate.
+
+        :return: A deduplicated list of log entries.
+        """
+        entries = []
+        pointer_found = False
+        pointer_passed = False
+
+        for candidate in candidates:
+            candidate_pointer = jmespath.search(self.POINTER_PATH, candidate)
+
+            if candidate_pointer == self.pointer:
+                pointer_found = True
+
+            if pointer_found and candidate_pointer != self.pointer:
+                pointer_passed = True
+                break
+
+            if not pointer_passed:
+                entries.append(candidate)
+
+        # If we never encountered the pointer, don't filter the records at all. This may
+        # cause some duplicates if the pointer is on a subsequent page, but we always
+        # prefer duplicates in these cases.
+        if not pointer_passed:
+            entries = candidates
 
         return entries
 
