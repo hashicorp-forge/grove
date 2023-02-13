@@ -69,9 +69,11 @@ class ConnectorDeduplicationTestCase(unittest.TestCase):
         # current pointer" operation.
         second_collection = Connector(config=config, context=context)
 
-        # Copy the cache state from the first collection. This is required as in-memory
-        # cache is bound to connector instances, it does not persist as it's intended
-        # for development and local "one-shot" use only.
+        # In-memory cache does not support locking as it's only intended for local
+        # "one-shot" execution, and development use. As a result, we have to currently
+        # clone the state of one cache to the other to simulate this.
+        #
+        # TODO: Remove the need for this, as it's going to cause confusion in future.
         second_collection._cache._data = first_collection._cache._data
 
         self.add_response(
@@ -117,6 +119,12 @@ class ConnectorDeduplicationTestCase(unittest.TestCase):
         # Perform a collection with the latest pointer, and ensure that only new records
         # are returned.
         second_collection = Connector(config=config, context=context)
+
+        # In-memory cache does not support locking as it's only intended for local
+        # "one-shot" execution, and development use. As a result, we have to currently
+        # clone the state of one cache to the other to simulate this.
+        #
+        # TODO: Remove the need for this, as it's going to cause confusion in future.
         second_collection._cache._data = first_collection._cache._data
 
         self.add_response(

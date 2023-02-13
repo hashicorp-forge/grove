@@ -167,19 +167,19 @@ class Handler(BaseCache):
         :raises AccessException: An issue occurred when storing the value.
         :raises DataFormatException: The provided constraint was not satisfied.
         """
-        kwargs: Dict[str, Any] = {}
-        kwargs["ExpressionAttributeValues"] = {":data": {"S": str(value)}}
+        options: Dict[str, Any] = {}
+        options["ExpressionAttributeValues"] = {":data": {"S": str(value)}}
 
         if not_set and constraint is not None:
             raise ValueError("A value cannot both have a constraint AND not be set.")
 
         # Construct an appropriate filter based on input parameters.
         if not_set:
-            kwargs["ConditionExpression"] = "attribute_not_exists(#data)"
+            options["ConditionExpression"] = "attribute_not_exists(#data)"
 
         if constraint is not None:
-            kwargs["ConditionExpression"] = "#data = :constraint"
-            kwargs["ExpressionAttributeValues"][":constraint"] = {"S": str(constraint)}
+            options["ConditionExpression"] = "#data = :constraint"
+            options["ExpressionAttributeValues"][":constraint"] = {"S": str(constraint)}
 
         # Attempt to set the item.
         try:
@@ -188,7 +188,7 @@ class Handler(BaseCache):
                 Key={"pk": {"S": str(pk)}, "sk": {"S": str(sk)}},
                 UpdateExpression="SET #data = :data",
                 ExpressionAttributeNames={"#data": "data"},
-                **kwargs,
+                **options,
             )
         except ClientError as err:
             # Handle conditional check failures differently as these may indicate
@@ -232,18 +232,21 @@ class Handler(BaseCache):
         :raises AccessException: An issue occurred when deleting the value.
         :raises DataFormatException: The provided constraint was not satisfied.
         """
-        kwargs: Dict[str, Any] = {}
+        options: Dict[str, Any] = {}
 
         # Apply a constraint, if set.
         if constraint is not None:
-            kwargs["ConditionExpression"] = "#data = :constraint"
-            kwargs["ExpressionAttributeValues"][":constraint"] = {"S": str(constraint)}
+            options["ExpressionAttributeNames"] = {"#data": "data"}
+            options["ConditionExpression"] = "#data = :constraint"
+            options["ExpressionAttributeValues"] = {
+                ":constraint": {"S": str(constraint)}
+            }
 
         try:
             self._store.delete_item(
                 TableName=self.config.table,
                 Key={"pk": {"S": pk}, "sk": {"S": sk}},
-                **kwargs,
+                **options,
             )
         except ClientError as err:
             # Handle conditional check failures differently as these may indicate

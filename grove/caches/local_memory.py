@@ -93,6 +93,7 @@ class Handler(BaseCache):
         """
         # To enforce constraints, we first need the current value - if any.
         current = None
+
         try:
             current = self._data[pk][sk]
         except KeyError:
