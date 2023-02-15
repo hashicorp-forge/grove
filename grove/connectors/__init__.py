@@ -191,6 +191,12 @@ class BaseConnector:
                 extra={"exception": err, **self.log_context},
             )
             return
+        except NotFoundException:
+            self.logger.debug(
+                "Skipping pointer swap and clean-up as there is no next-pointer",
+                extra={**self.log_context},
+            )
+            return
 
         # If the collection complete without error delete the window locations and
         # the next pointer from cache, if set.
