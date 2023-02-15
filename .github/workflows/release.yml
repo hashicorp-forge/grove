@@ -19,43 +19,6 @@ permissions:
   id-token: write
 
 jobs:
-  # Finally, generate and publish documentation after a successful release.
-  documentation:
-    # needs: release
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
-      - name: Install dependencies
-        run: python -m pip install --upgrade pip setuptools wheel twine
-
-      - name: Install development tools
-        run: pip install .[tests]
-
-      - name: Generate documentation
-        run: make documentation
-
-      - name: Setup Github Pages
-        uses: actions/configure-pages@v2
-
-      - name: Upload documentation artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: docs/_generated/
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
-
   # Ship it! 🚀
   release:
     runs-on: ubuntu-latest
@@ -103,3 +66,40 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             GROVE_VERSION=${{ github.ref_name }}
+
+  # Finally, generate and publish documentation after a successful release.
+  documentation:
+    needs: release
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip setuptools wheel twine
+
+      - name: Install development tools
+        run: pip install .[tests]
+
+      - name: Generate documentation
+        run: make documentation
+
+      - name: Setup Github Pages
+        uses: actions/configure-pages@v2
+
+      - name: Upload documentation artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: docs/_generated/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
