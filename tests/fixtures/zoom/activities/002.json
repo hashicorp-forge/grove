@@ -1,0 +1,16 @@
+{
+    "from": "2022-08-22",
+    "to": "2022-08-23",
+    "page_size": 1,
+    "next_page_token": "",
+    "activity_logs": [
+        {
+            "email": "test1@test.com",
+            "time": "2022-08-23T14:45:54Z",
+            "type": "Sign in",
+            "ip_address": "0.0.0.0",
+            "client_type": "OS",
+            "version": "0.0.0.0"
+        }
+    ]
+}

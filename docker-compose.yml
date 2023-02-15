@@ -1,0 +1,16 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+version: "3.9"
+services:
+  grove:
+    build:
+      context: .
+      dockerfile: templates/deployment/local-quick-start/Dockerfile
+    environment:
+      GROVE_OUTPUT_HANDLER: "local_stdout"
+      GROVE_CONFIG_HANDLER: "local_file"
+      GROVE_CACHE_HANDLER: "local_memory"
+      GROVE_CONFIG_LOCAL_FILE_PATH: "/app/local-quick-start/connectors"
+    volumes:
+      - .:/app

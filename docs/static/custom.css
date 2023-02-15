@@ -1,0 +1,41 @@
+article {
+    line-height: 1.6;
+}
+
+ul {
+    padding-left: 2rem;
+}
+
+p {
+    margin: 0 0 18px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    color: var(--color-foreground-secondary);
+}
+
+.grove-logo h1 {
+    font-family: 'Brush Script MT', cursive;
+    padding-top: 0px;
+    font-size: 420%;
+    padding-left: 10%;
+    text-align: center;
+}
+
+.sidebar-logo {
+    width: 160px;
+}
+
+.admonition {
+    padding: 0 0.9rem 0.9rem;
+}
+
+p.admonition-title {
+    margin: 0 -0.9rem 0.8rem -0.9rem
+}

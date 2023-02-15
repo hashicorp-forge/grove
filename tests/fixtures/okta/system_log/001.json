@@ -1,0 +1,117 @@
+[{
+    "actor": {
+        "id": "someid",
+        "type": "PublicClientApp",
+        "alternateId": "someid",
+        "displayName": "somename",
+        "detailEntry": null
+    },
+    "client": {
+        "userAgent": {
+            "rawUserAgent": "Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0",
+            "os": "Linux",
+            "browser": "FIREFOX"
+        },
+        "zone": "null",
+        "device": "Computer",
+        "id": "someid",
+        "ipAddress": "000.000.00.000",
+        "geographicalContext": {
+            "city": "city",
+            "state": "state",
+            "country": "United States",
+            "postalCode": "zip",
+            "geolocation": {
+                "lat": 11.1111,
+                "lon": -11.1111
+            }
+        }
+    },
+    "device": null,
+    "authenticationContext": {
+        "authenticationProvider": null,
+        "credentialProvider": null,
+        "credentialType": null,
+        "issuer": null,
+        "interface": null,
+        "authenticationStep": 0,
+        "externalSessionId": "sessionid-QdDA"
+    },
+    "displayMessage": "OAuth2 authorization code request",
+    "eventType": "app.oauth2.as.authorize.code",
+    "outcome": {
+        "result": "SUCCESS",
+        "reason": null
+    },
+    "published": "2021-06-24T00:04:08.123Z",
+    "securityContext": {
+        "asNumber": 20115,
+        "asOrg": "interestingtohave",
+        "isp": "interestingtohave",
+        "domain": "domain.com",
+        "isProxy": false
+    },
+    "severity": "INFO",
+    "debugContext": {
+        "debugData": {
+            "redirectUri": "http://localhost/implicit/callback",
+            "grantedScopes": "openid, email, profile",
+            "responseMode": "okta_post_message",
+            "authorizationServerName": "servername",
+            "authorizationServer": "server",
+            "rule": "rule",
+            "requestUri": "/oauth2/na/v1/authorize",
+            "requestedScopes": "openid, profile, email",
+            "userId": "userid",
+            "url": "/oauth2/userid/v1/authorize?client_id=clientid&code_challenge=code-code&code_challenge_method=S256&nonce=nonce&prompt=none&redirect_uri=localhostcallback&response_mode=okta_post_message&response_type=code&state=state&scope=openid%20profile%20email",
+            "responseType": "code",
+            "requestId": "requestid",
+            "state": "state",
+            "grantType": "authorization_code",
+            "policy": "policy"
+        }
+    },
+    "legacyEventType": "app.oauth2.as.authorize.code_success",
+    "transaction": {
+        "type": "WEB",
+        "id": "webid",
+        "detail": {}
+    },
+    "uuid": "uuid",
+    "version": "0",
+    "request": {
+        "ipChain": [
+            {
+                "ip": "000.000.00.000",
+                "geographicalContext": {
+                    "city": "somecity",
+                    "state": "somestate",
+                    "country": "United States",
+                    "postalCode": "somezipcode",
+                    "geolocation": {
+                        "lat": 11.1111,
+                        "lon": -11.1111
+                    }
+                },
+                "version": "V4",
+                "source": null
+            }
+        ]
+    },
+    "target": [
+        {
+            "id": "id",
+            "type": "User",
+            "alternateId": null,
+            "displayName": null,
+            "detailEntry": null
+        },
+        {
+            "id": "id",
+            "type": "code",
+            "alternateId": null,
+            "displayName": "Authorization Code",
+            "detailEntry": null
+        }
+    ]
+}]

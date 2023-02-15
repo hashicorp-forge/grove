@@ -1,0 +1,9 @@
+{
+    "key": "REFRESH_TOKEN_HERE",
+    "identity": "TENANT_ID_HERE",
+    "base_url": "CHANGE_ME.workday.com",
+    "client_id": "CLIENT_ID_HERE",
+    "client_secret": "CLIENT_SECRET_HERE",
+    "name": "workday-activity-logging-example",
+    "connector": "workday_activity_logging"
+}

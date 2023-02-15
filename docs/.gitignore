@@ -1,0 +1,4 @@
+# Don't commit generated documentation.
+*.*.rst
+_generated/*
+!_generated/.gitignore

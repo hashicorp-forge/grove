@@ -1,0 +1,25 @@
+{
+    "alerts": [{
+        "customerId": "C0FFEE",
+        "alertId": "3695002E-C05F-42B7-94BA-4C8558293375",
+        "createTime": "2021-04-03T14:05:39.950458Z",
+        "startTime": "2021-04-02T14:05:39.551Z",
+        "endTime": "2021-04-02T14:05:39.551Z",
+        "type": "User suspended (spam)",
+        "source": "Google identity",
+        "data": {
+            "@type": "type.googleapis.com/google.apps.alertcenter.type.AccountWarning",
+            "email": "example@hashicorp.com"
+        },
+        "metadata": {
+            "customerId": "C0FFEE",
+            "alertId": "3695002E-C05F-42B7-94BA-4C8558293375",
+            "status": "NOT_STARTED",
+            "updateTime": "2021-04-03T14:05:39.950458Z",
+            "severity": "HIGH",
+            "etag": "dGVzdAo="
+        },
+        "updateTime": "2021-04-03T14:05:39.950458Z",
+        "etag": "dGVzdAo="
+    }]
+}

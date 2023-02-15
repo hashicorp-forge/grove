@@ -1,0 +1,29 @@
+{
+    "items": [{
+        "uuid": "56YE2TYN2VFYRLNSHKPW5NVT5D",
+        "session_uuid": "A5K6COGVRVEJXJW3XQZGS7VAMN",
+        "timestamp": "2021-03-01T16:42:50-03:00",
+        "category": "firewall_failed",
+        "type": "continent_blocked",
+        "country": "France",
+        "details": {
+            "value": "Europe"
+        },
+        "target_user": {
+            "uuid": "IR7VJHJ36JHINBFAD7V2T5MP3E",
+            "name": "Wendy Appleseed",
+            "email": "wendy_appleseed@agilebits.com"
+        },
+        "client": {
+            "app_name": "1Password Extension",
+            "app_version": "20127",
+            "platform_name": "Chrome",
+            "platform_version": "string",
+            "os_name": "MacOSX",
+            "os_version": "10.15.6",
+            "ip": "13.227.95.22"
+        }
+    }],
+    "cursor": "aGVsbG8hIGlzIGl0IG1lIHlvdSBhcmUgbG9va2luZyBmb3IK",
+    "has_more": false
+}

@@ -1,0 +1,32 @@
+{
+    "items": [{
+        "kind": "admin#reports#activity",
+        "id": {
+            "time": "2021-10-27T23:59:31.657Z",
+            "uniqueQualifier": "-2132132132132132132",
+            "applicationName": "admin",
+            "customerId": "C0FFEE"
+        },
+        "etag": "\"EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\"",
+        "actor": {
+            "callerType": "USER",
+            "email": "example@hashicorp.com",
+            "profileId": "345345345345345345345"
+        },
+        "ipAddress": "192.0.2.2",
+        "events": [{
+            "type": "GROUP_SETTINGS",
+            "name": "ADD_GROUP_MEMBER",
+            "parameters": [{
+                    "name": "USER_EMAIL",
+                    "value": "example@hashicorp.com"
+                },
+                {
+                    "name": "GROUP_EMAIL",
+                    "value": "example@hashicorp.com"
+                }
+            ]
+        }]
+    }],
+    "nextPageToken": "AAAA"
+}

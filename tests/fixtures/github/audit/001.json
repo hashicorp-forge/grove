@@ -1,0 +1,38 @@
+[
+    {
+      "secrets_passed": [
+        "EXAMPLE_SECRET"
+      ],
+      "@timestamp": 1625045793351,
+      "job_name": "scan (thinger)",
+      "org": "examplecorp",
+      "repo": "examplecorp/thinger",
+      "created_at": 1625045793351,
+      "action": "workflows.prepared_workflow_job",
+      "is_hosted_runner": true,
+      "runner_labels": [
+        "ubuntu-latest"
+      ],
+      "workflow_run_id": 100000000,
+      "_document_id": "C0FF:EEC0:C0FFEE:C0FFEE:C0FFEE",
+      "environment_name": ""
+    },
+    {
+      "secrets_passed": [
+        "EXAMPLE_SECRET"
+      ],
+      "@timestamp": 1625045793361,
+      "job_name": "scan (foo)",
+      "org": "examplecorp",
+      "repo": "examplecorp/foo",
+      "created_at": 1625045793361,
+      "action": "workflows.prepared_workflow_job",
+      "is_hosted_runner": true,
+      "runner_labels": [
+        "ubuntu-latest"
+      ],
+      "workflow_run_id": 100000000,
+      "_document_id": "C0FF:EEC0:C0FFEE:C0FFEE:C0FFEE",
+      "environment_name": ""
+    }
+]

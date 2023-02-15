@@ -1,0 +1,28 @@
+{
+    "items": [
+        {
+            "uuid": "56YE2TYN2VFYRLNSHKPW5NVT5E",
+            "timestamp": "2020-06-11T16:32:50-03:00",
+            "used_version": 0,
+            "vault_uuid": "56YE2TYN2VFYRLNSHKPW5NVT5E",
+            "item_uuid": "56YE2TYN2VFYRLNSHKPW5NVT5E",
+            "user": {
+              "uuid": "56YE2TYN2VFYRLNSHKPW5NVT5E",
+              "name": "Wendy Appleseed",
+              "email": "wendy_appleseed@agilebits.com"
+            },
+            "client": {
+              "app_name": "1Password Extension",
+              "app_version": "20127",
+              "platform_name": "Chrome",
+              "platform_version": "string",
+              "os_name": "MacOSX",
+              "os_version": "10.15.6",
+              "ip": "13.227.95.22"
+            },
+          "action": "secure-copy"
+          }
+    ],
+    "cursor": "aGVsbG8hIGlzIGl0IG1lIHlvdSBhcmUgbG9va2luZyBmb3IK",
+    "has_more": true
+  }

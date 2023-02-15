@@ -1,0 +1,7 @@
+{
+    "connector": "zoom-activities-sample",
+    "key": "CLIENT_SECRET",
+    "identity": "ACCOUNT_ID",
+    "name": "name-example",
+    "client_id": "CLIENT_ID"
+}

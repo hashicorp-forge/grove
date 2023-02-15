@@ -1,0 +1,6 @@
+{
+    "key": "BEARER_TOKEN_HERE",
+    "identity": "ORGANIZATION_NAME_HERE",
+    "name": "1password-events-itemusages-example",
+    "connector": "onepassword_events_itemusages"
+}

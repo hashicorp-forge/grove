@@ -1,0 +1,21 @@
+{
+    "logs": [
+        {
+            "timestamp": "7",
+            "event": "Example G"
+        },
+        {
+            "timestamp": "6",
+            "event": "Example F"
+        },
+        {
+            "timestamp": "5",
+            "event": "Example E"
+        },
+        {
+            "timestamp": "4",
+            "event": "Example D"
+        }
+    ],
+    "cursor": "RANDOM_VALUE"
+}

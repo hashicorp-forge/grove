@@ -1,0 +1,6 @@
+{
+    "key": "AUTH_TOKEN_HERE",
+    "identity": "ACCOUNT_SID_HERE",
+    "name": "twilio-messages-example",
+    "connector": "twilio_messages"
+}

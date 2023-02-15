@@ -1,0 +1,7 @@
+{
+    "key": "BEARER_TOKEN_HERE",
+    "identity": "ENTERPRISE_NAME_HERE",
+    "name": "github-enterprises-audit-log-example",
+    "connector": "github_audit_log",
+    "scope": "enterprises"
+}

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns="urn:partner.soap.sforce.com"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <soapenv:Body>
+        <loginResponse>
+            <result>
+                <passwordExpired>false</passwordExpired>
+                <serverUrl>https://example.my.salesforce.com/services/Soap/u/7.0/XYZXYZXYZXYZXYZ</serverUrl>
+                <sessionId>XXXXXXXXXXXXXXX!TOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKEN</sessionId>
+                <userId>1000v00000ZZZZZZZZ</userId>
+                <userInfo>
+                    <accessibilityMode>false</accessibilityMode>
+                    <currencySymbol xsi:nil="true" />
+                    <organizationId>XXXXXXXXXXXXXXXYYY</organizationId>
+                    <organizationMultiCurrency>true</organizationMultiCurrency>
+                    <organizationName>HashiCorp</organizationName>
+                    <userDefaultCurrencyIsoCode>USD</userDefaultCurrencyIsoCode>
+                    <userEmail>user@example.org</userEmail>
+                    <userFullName>Unit Test</userFullName>
+                    <userId>1000v00000ZZZZZZZZ</userId>
+                    <userLanguage>en_US</userLanguage>
+                    <userLocale>en_US</userLocale>
+                    <userTimeZone>America/Los_Angeles</userTimeZone>
+                    <userUiSkin>Theme3</userUiSkin>
+                </userInfo>
+            </result>
+        </loginResponse>
+    </soapenv:Body>
+</soapenv:Envelope>

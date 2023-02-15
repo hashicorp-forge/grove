@@ -1,0 +1,6 @@
+{
+    "key": "BEARER_TOKEN_HERE",
+    "identity": "ENTERPRISE_ID_HERE",
+    "name": "slack-audit-logs-example",
+    "connector": "slack_audit_logs"
+}

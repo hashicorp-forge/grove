@@ -1,0 +1,33 @@
+{
+   "data": [
+     {
+       "id": "1752a56e-dbde-4f64-a19f-072270a4cad6",
+       "version": "0",
+       "type": "Resource",
+       "timestamp": "2020-06-30T17:52:46.000Z",
+       "auth": {
+         "accessor_id": "user-AAAAAAAAAAAA",
+         "description": "Event",
+         "type": "Client",
+         "impersonator_id": null,
+         "organization_id": "org-BBBBBBBBBBBB"
+       },
+       "request": {
+         "id": "c9e99d32-b0de-4b5e-960a-7cde7b69b9e7"
+       },
+       "resource": {
+         "id": "at-CCCCCCCCCCCC",
+         "type": "authentication_token",
+         "action": "create",
+         "meta": null
+       }
+     }
+   ],
+   "pagination": {
+     "current_page": 1,
+     "prev_page": null,
+     "next_page": 2,
+     "total_pages": 2,
+     "total_count": 3
+   }
+ }

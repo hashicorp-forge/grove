@@ -1,0 +1,6 @@
+{
+    "key": "PASSWORD_HERE",
+    "identity": "USERNAME_HERE",
+    "name": "torq-audit-logs-example",
+    "connector": "torq_audit_logs"
+}
