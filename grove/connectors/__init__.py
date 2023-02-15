@@ -10,6 +10,7 @@ import json
 import logging
 import os
 from typing import Any, Dict, List, Optional
+from grove.__about__ import __version__
 
 import jmespath
 
@@ -449,6 +450,7 @@ class BaseConnector:
             "previous_pointer": self.pointer_previous,
             "collection_time": datetime.datetime.utcnow().strftime(DATESTAMP_FORMAT),
             "runtime": self.runtime_context,
+            "version": __version__,
         }
 
     def cache_key(self, prefix: str = CACHE_KEY_POINTER) -> str:
