@@ -50,8 +50,8 @@ isn't listed here, support can be added by creating a custom connector!
 
 ### Documentation
 
-Please see the [Grove documentation](https://www.hashicorp.com) for full documentation,
-information about Grove's internals, and API information.
+Please see the [Grove documentation](https://hashicorp-forge.github.io/grove/) for full
+documentation, information about Grove's internals, and API information.
 
 ### Quick Start
 
@@ -65,4 +65,4 @@ docker compose up
 ```
 
 This should see log messages from a "heartbeat" connector every 5 seconds. For more
-detailed examples and information, please see the [Grove documentation](https://www.hashicorp.com).
+detailed examples and information, please see the [Grove documentation](https://hashicorp-forge.github.io/grove/).

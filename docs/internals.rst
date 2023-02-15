@@ -196,20 +196,20 @@ These pointers are stored in the configured cache backend.
 
 .. Warning::
 
-   **Grove preferences duplicate records over missed records!**
+   **Grove preferences duplicate log entries over missed log entries!**
    
    As a result, duplicate data may occur where the upstream service uses inclusive range
    filtering. This is in order to prevent having to cache an identifier for every record
    ever seen, which would be expensive.
 
 As an example, Slack's Audit API uses a unix timestamp to as a way to filter which
-audit events should be returned. If and all known records were collected, the timestamp
-of the last record collected fetched would be stored in the cache, and considered the
-pointer.
+audit events should be returned. If and all known log entries were collected, the
+timestamp of the last record collected fetched would be stored in the cache, and
+considered the pointer.
 
 If no existing pointer is in the cache, the connector will provide an initial value
-which is appropriate for the application. When Grove next runs, only records generated
-since / after this pointer would be collected.
+which is appropriate for the application. When Grove next runs, only log entries
+generated since / after this pointer would be collected.
 
 .. image:: static/pointers.png
    :width: 384
@@ -219,8 +219,8 @@ since / after this pointer would be collected.
 Cache
 -----
 
-The Grove cache is used to track pointers and other volatile information which is used to
-keep track of where a Grove collection is up to. In order to make this as flexible as
+The Grove cache is used to track pointers and other volatile information which is used
+to keep track of where a Grove collection is up to. In order to make this as flexible as
 possible, the structure of this cache can be found below.
 
 Although the terms "partition key" and "sort key" are used in this documentation, these

@@ -76,7 +76,7 @@ html_css_files = [
 html_theme_options = {
     "sidebar_hide_name": True,
     "source_repository": "https://github.com/hashicorp-forge/grove",
-    "source_branch": "0.4.0",
+    "source_branch": "main",
     "source_directory": "docs/",
     # CSS.
     "light_css_variables": {

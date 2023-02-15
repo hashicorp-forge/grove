@@ -31,8 +31,8 @@ Grove how talk to Github to collect logs from the Github audit events API.
 ---------------------------------
 
 .. note::
-    Grove and its connectors should always preference duplicate records over missed
-    records.
+    Grove and its connectors should always preference duplicate log entries over missed
+    log entries.
 
 The most common cause of duplicate logs are limitations in external applications and
 services which Grove collects log data from. A number of services unfortunately do not
@@ -52,8 +52,8 @@ missed.
     2022-01-01 12:35:05.234 - Event 1 [Last record collected]
     2022-01-01 12:35:05.843 - Event 2
 
-This issue may be solved in future by performing per event / record deduplication in
-Grove, but this is not currently supported.
+Although Grove attempts to deduplicate log entries which have been seen recently, the
+current deduplication implementation is limited to the most recently seen log entries.
 
 .. _pull-request:
 
