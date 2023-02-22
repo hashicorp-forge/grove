@@ -69,6 +69,7 @@ setup(
         ],
         "grove.secrets": [
             "aws_ssm = grove.secrets.aws_ssm:Handler",
+            "hashicorp_vault = grove.secrets.hashicorp_vault:Handler",
         ],
     },
 )
