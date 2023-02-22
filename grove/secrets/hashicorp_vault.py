@@ -54,6 +54,14 @@ class Configuration(BaseSettings):
 
 class Handler(BaseSecret):
     def __init__(self):
+        """Sets up access to Vault.
+
+        This backend performs a pre-flight to validate that the configured token is
+        able to be used to query vault.
+
+        :raises ConfigurationException: There was an issue with configuration.
+        :raises AccessException: An issue occurred attempting to access Vault.
+        """
         self.logger = logging.getLogger(__name__)
 
         # Wrap validation errors to keep them in the Grove exception hierarchy.
