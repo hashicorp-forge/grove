@@ -164,7 +164,7 @@ class Handler(BaseSecret):
             field, path = self.get_field_and_path(id)
         except ValueError as err:
             raise AccessException(
-                f"Secrets handler could parse the provided Vault path of {path}. {err}"
+                f"Secrets handler could parse the provided Vault path of {id}. {err}"
             )
 
         try:
@@ -182,12 +182,12 @@ class Handler(BaseSecret):
         # Return the first string value which is located using the desired name. This is
         # intended to return the first result without consideration of the engine.
         paths = [f"data.{field}", f"data.data.{field}"]
-        secret = response.json()
+        secrets = response.json()
 
-        for path in paths:
-            candidate = jmespath.search(path, secret)
-            if type(candidate) is str:
-                return candidate
+        for candidate in paths:
+            secret = jmespath.search(candidate, secrets)
+            if type(secret) is str:
+                return secret
 
         raise AccessException(
             f"Secrets handler could not get field {field} from Vault path {path}"
