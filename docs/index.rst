@@ -16,7 +16,7 @@ Grove was created and is currently maintained by the HashiCorp security team.
 
 Out of the box, Grove provides:
 
-* 🪵 Reliable and periodic log collection of logs.
+* 🪵 Reliable and periodic collection of logs.
 * ☁️ Support a large number of widely used SaaS applications and services.
 * 🧱 Plugin based "connectors" to enable support for new applications and services.
 * 🧳 "Bring your own" caching, output, configuration, and secrets backends.
