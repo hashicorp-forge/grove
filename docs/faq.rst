@@ -103,7 +103,7 @@ duplication of log entries is still possible under certain edge cases.
 
 .. _pull-request:
 
-"I built a new plugin, can I open a pull-request?"
+"I built a new connector, can I open a pull-request?"
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 First off, thank you for helping to extend and make Grove better!
@@ -123,4 +123,4 @@ this new extension and reference it as part their deployment.
 "I built a new plugin, can I open a pull-request?"
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Please see :ref:`"I built a new plugin, can I open a pull-request?" <pull-request>`.
+Please see :ref:`"I built a new connector, can I open a pull-request?" <pull-request>`.

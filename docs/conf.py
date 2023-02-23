@@ -63,7 +63,7 @@ exclude_patterns = []
 # a list of builtin themes.
 html_theme = "furo"
 html_title = f"Grove v{__version__}"
-# html_logo = "static/logo.png"
+html_logo = "static/grove.png"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
