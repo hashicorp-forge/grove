@@ -5,7 +5,7 @@ Frequently Asked Questions
 ==========================
 
 "What is a plugin?"
----------------------
+^^^^^^^^^^^^^^^^^^^
 
 **Plugins** tell Grove how to fetch connector configuration, where Grove should put
 collected logs, how Grove should remember which logs have already been collected, and
@@ -17,7 +17,7 @@ An example of a Grove plugin is :meth:`grove.outputs.aws_s3`. This *output* plug
 Grove how to write collected logs to AWS' S3 service.
 
 "What is a connector?"
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 **Connectors**, tell Grove how to talk to particular application or service to collect
 logs. Connectors are the main units of work executed by Grove, as each connector is
@@ -27,38 +27,84 @@ prevent an issue with one application or service from affecting others.
 An example of a Grove connector is :meth:`grove.connectors.github`. This connector tells
 Grove how talk to Github to collect logs from the Github audit events API.
 
+"Do I need to deploy Grove to a cloud provider?"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Grove does not need to be deployed to a cloud provider. Although Grove was originally
+intended to collect logs periodically, Grove can support many different modes of
+operation and deployment.
+
+Grove can be deployed to a cloud provider, deployed in on-premises environments, and
+even used "locally" as a command-line tool from a workstation in order to collect logs
+as part of an specific investigation.
+
+"Why is :code:`_grove` being added to my log entries?"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Grove automatically adds metadata to collected log entries. This information is intended
+to provide provenance for collected log entries, including information about the version
+of Grove which collected the log, and run-time information about where the collection
+occurred.
+
+As an example, the following :code:`_grove` metadata would be added to Github audit log
+entries collected using Grove running from AWS Lambda:
+
+.. code-block:: json
+
+    {
+        "connector": "grove.connectors.github.audit_log",
+        "identity": "myorganisation",
+        "operation": "web",
+        "pointer": "1677153788430",
+        "previous_pointer": "1677153598959",
+        "collection_time": "2023-02-23T12:04:05Z",
+        "runtime": {
+            "runtime": "/var/task/grove/entrypoints/aws_lambda.py",
+            "runtime_id": "1c8b0bee-ea7a-41e4-842d-aa273f38f353",
+            "lambda_function_arn": "arn:aws:lambda:us-east-1:012345678912:function:grove",
+            "lambda_function_memory_size": "1024",
+            "lambda_request_id": "42d9a65e-8a56-4f5a-81b9-c193b468682c"
+        },
+        "version": "1.0.0rc1"
+    }
+
+
 "Why am I seeing duplicate logs?"
----------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. note::
     Grove and its connectors should always preference duplicate log entries over missed
     log entries.
 
 The most common cause of duplicate logs are limitations in external applications and
-services which Grove collects log data from. A number of services unfortunately do not
-support filtering of data at the same "granularity" as the data is returned.
+services which Grove collects log entries from. A number of services unfortunately do
+not support filtering of data at the same "granularity" as the data is returned.
 
-As an example, if a service returns timestamps of audit events down to the millisecond
-but only allows filtering of events to the second, all events in that second would
-need to be collected to try to prevent missed data later in the second.
+As an example, if a service returns timestamps of audit events to the millisecond but
+only allows filtering of events to the second, log entries may be missed between
+collections if Grove were to ask for audit events that happened `after` the last seen
+timestamp. However, if Grove were to ask for events that happened `on or after` the last
+seen timestamp, the last collected audit events would be recollected - leading to
+duplicates.
 
-In the example below, the previous Grove collection finished after collection of "Event
-1". However, as the service only supports filtering to the second, a filter that says
-events AFTER `2022-01-01 12:35:05` should be returned may result in "Event 2" being
-missed.
+As a concrete example of this, if a previous Grove collection was completed after
+collecting "Event 1" from the sample below, "Event 2" may be missed if a subsequent
+Grove collection requested that all events AFTER :code:`2022-01-01 12:35:05` should be
+returned.
 
 .. code-block::
 
     2022-01-01 12:35:05.234 - Event 1 [Last record collected]
-    2022-01-01 12:35:05.843 - Event 2
+    2022-01-01 12:35:05.843 - Event 2 [Potentially missed]
+    2022-01-01 12:35:06.422 - Event 3
 
-Although Grove attempts to deduplicate log entries which have been seen recently, the
-current deduplication implementation is limited to the most recently seen log entries.
+It should be noted that although Grove does perform some deduplication where possible,
+duplication of log entries is still possible under certain edge cases.
 
 .. _pull-request:
 
 "I built a new plugin, can I open a pull-request?"
------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 First off, thank you for helping to extend and make Grove better!
 
@@ -75,6 +121,6 @@ this new extension and reference it as part their deployment.
 
 
 "I built a new plugin, can I open a pull-request?"
---------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Please see :ref:`"I built a new plugin, can I open a pull-request?" <pull-request>`.

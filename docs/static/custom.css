@@ -1,3 +1,7 @@
+:root {
+    --text-color-override: #3d7c9b;
+}
+
 article {
     line-height: 1.6;
 }
@@ -17,11 +21,19 @@ h4,
 h5 {
     padding-top: 8px;
     padding-bottom: 8px;
-    color: var(--color-foreground-secondary);
+    color: var(--text-color-override);
+}
+
+.sidebar-tree .toctree-l1 > .reference {
+    color: var(--text-color-override);
+}
+
+.sidebar-brand-text {
+    text-align: center;
+    color: var(--text-color-override);
 }
 
 .grove-logo h1 {
-    font-family: 'Brush Script MT', cursive;
     padding-top: 0px;
     font-size: 420%;
     padding-left: 10%;

@@ -62,6 +62,7 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = "furo"
+html_title = f"Grove v{__version__}"
 # html_logo = "static/logo.png"
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -74,7 +75,7 @@ html_css_files = [
 ]
 
 html_theme_options = {
-    "sidebar_hide_name": True,
+    "sidebar_hide_name": False,
     "source_repository": "https://github.com/hashicorp-forge/grove",
     "source_branch": "main",
     "source_directory": "docs/",
