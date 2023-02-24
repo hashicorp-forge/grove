@@ -8,14 +8,14 @@ The following sections detail common configuration and deployment examples for G
 
 .. _deployment:
 
-Configuration
--------------
-
-For up-to-date and production ready configuration examples, please see the `templates`_
-directory inside the `Grove git`_ repository.
-
 Deployment
 ----------
 
 For up-to-date and production ready deployment examples, please see the `templates`_
+directory inside the `Grove git`_ repository.
+
+Configuration
+-------------
+
+For up-to-date and production ready configuration examples, please see the `templates`_
 directory inside the `Grove git`_ repository.

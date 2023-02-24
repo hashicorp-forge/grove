@@ -1,22 +1,21 @@
-.. rst-class:: grove-logo
-
 Grove
-====
+=====
 
-> Grove is not an official HashiCorp project.
+.. note::
+   Grove is not an official HashiCorp project.
 
 Grove is a Software as a Service (SaaS) log collection framework, designed to support
 collection of logs from services which do not natively support log streaming.
 
 Grove enables teams to collect security related events from their vendors in a reliable
-and consistent way. This data may then be stored and analyzed with a team's _existing_
+and consistent way. This data may then be stored and analyzed with a team's `existing`
 tooling in order to support threat detection and compliance programmes.
 
 Grove was created and is currently maintained by the HashiCorp security team.
 
 Out of the box, Grove provides:
 
-* 🪵 Reliable and periodic log collection of logs.
+* 🪵 Reliable and periodic collection of logs.
 * ☁️ Support a large number of widely used SaaS applications and services.
 * 🧱 Plugin based "connectors" to enable support for new applications and services.
 * 🧳 "Bring your own" caching, output, configuration, and secrets backends.

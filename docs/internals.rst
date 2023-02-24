@@ -6,8 +6,9 @@
 Overview
 =========
 
-This section of the documentation details Grove internals. This documentation is intended
-for users who wish to extend Grove, or users who are curious about how Grove works.
+This section of the documentation details Grove internals. This documentation is
+intended for users who wish to extend Grove, or users who are curious about how Grove
+works.
 
 Flow
 ----
