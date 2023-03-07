@@ -44,9 +44,10 @@ class Connector(BaseConnector):
     def delay(self):
         """Defines the amount of time to delay collection of logs (in minutes).
 
-        This is used to allow logs to become 'consistent'. Google backfill log entries
-        based on their published lag guidelines. As a result of this, collection of
-        events within this lag window may result in missed events.
+        This is used to allow time for logs to become 'consistent' before they are
+        collected. Google backfill log entries based on their published lag guidelines.
+        As a result of this, collection of events within this lag window may result in
+        missed events.
 
         As a result of these constraints, this value is configurable to allow operators
         to preference consistency over speed of delivery, and vice versa. For example,

@@ -34,7 +34,8 @@ class Configuration(BaseSettings):
         description="The name of the S3 bucket to output logs to.",
     )
     assume_role_arn: Optional[str] = Field(
-        description="An optional AWS role to assume when authenticating with AWS."
+        description="An optional AWS role to assume when authenticating with AWS.",
+        default=None,
     )
     bucket_region: Optional[str] = Field(
         description="The region that S3 the bucket exists in (default us-east-1)",
@@ -69,7 +70,7 @@ class Handler(BaseOutput):
 
         # Wrap validation errors to keep them in the Grove exception hierarchy.
         try:
-            self.config = Configuration()
+            self.config = Configuration()  # type: ignore
         except ValidationError as err:
             raise ConfigurationException(parsing.validation_error(err))
 

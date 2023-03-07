@@ -33,10 +33,12 @@ class Configuration(BaseSettings):
         description="The name of the AWS DynamoDB table to use for the cache.",
     )
     url: Optional[str] = Field(
-        description="An optional URL to use when connecting to AWS DynamoDB."
+        description="An optional URL to use when connecting to AWS DynamoDB.",
+        default=None,
     )
     assume_role_arn: Optional[str] = Field(
-        description="An optional AWS role to assume when authenticating with AWS."
+        description="An optional AWS role to assume when authenticating with AWS.",
+        default=None,
     )
     table_region: Optional[str] = Field(
         description="The region that the DynamoDB table exists in (default us-east-1)",

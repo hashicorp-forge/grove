@@ -27,13 +27,16 @@ class Configuration(BaseSettings):
         description="The address of the Vault instance to retrieve secrets from.",
     )
     token: Optional[str] = Field(
-        description="An optional vault token to use when authenticating with Vault."
+        description="An optional vault token to use when authenticating with Vault.",
+        default=None,
     )
     token_file: Optional[str] = Field(
-        description="An optional file to read the Vault token from."
+        description="An optional file to read the Vault token from.",
+        default=None,
     )
     namespace: Optional[str] = Field(
-        description="An optional Vault namespace that should be used."
+        description="An optional Vault namespace that should be used.",
+        default=None,
     )
     api_version: str = Field(
         description="An optional Vault API version to use (default: v1).",
@@ -66,7 +69,7 @@ class Handler(BaseSecret):
 
         # Wrap validation errors to keep them in the Grove exception hierarchy.
         try:
-            self.config = Configuration()
+            self.config = Configuration()  # type: ignore
         except ValidationError as err:
             raise ConfigurationException(parsing.validation_error(err))
 

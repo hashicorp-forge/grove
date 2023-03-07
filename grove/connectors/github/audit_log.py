@@ -25,9 +25,10 @@ class Connector(BaseConnector):
     def delay(self):
         """Defines the amount of time to delay collection of logs (in minutes).
 
-        This is used to allow logs to become 'consistent'. Github backfills log entries
-        but unfortunately do not provide any guidance around 'lag' time, or consistency
-        guarantees.
+        This is used to allow time for logs to become 'consistent' before they are
+        collected. This is required as Github backfills log entries but unfortunately do
+        not provide any guidance around 'lag' time, or guarantees on availability and
+        delivery.
 
         As a result of these constraints, this value is configurable to allow operators
         to preference consistency over speed of delivery, and vice versa. For example,
