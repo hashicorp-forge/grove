@@ -134,7 +134,7 @@ class Connector(BaseConnector):
             log = client.get_audit_log(
                 phrase=(
                     f"created:>={start.strftime(DATESTAMP_FORMAT)} "
-                    f"AND created:<={end.strftime(DATESTAMP_FORMAT)}"
+                    f"created:<={end.strftime(DATESTAMP_FORMAT)}"
                 ),
                 include=self.operation,
                 cursor=cursor,
