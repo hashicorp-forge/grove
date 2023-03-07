@@ -11,7 +11,7 @@ import httplib2
 from google.auth.exceptions import GoogleAuthError
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from googleapiclient.errors import Error
+from googleapiclient.errors import Error as GACError
 
 from grove.connectors import BaseConnector
 from grove.constants import REVERSE_CHRONOLOGICAL
@@ -24,14 +24,52 @@ from grove.exceptions import (
 # This connector is only interested in the GSuite Reports API.
 SCOPES = ["https://www.googleapis.com/auth/admin.reports.audit.readonly"]
 
-# Use consistent flags when formatting via isoformat() on datetime objects.
-ISO_FORMAT_FLAGS = {"sep": "T", "timespec": "milliseconds"}
+
+def as_rfc3339(date: datetime) -> str:
+    """Formats an input date into RFC3339 format.
+
+    :param date: The input datetime object to convert to RFC3339 format.
+
+    :return: An RFC 3339 format date as a string.
+    """
+    return date.isoformat(sep="T", timespec="milliseconds") + "Z"
 
 
 class Connector(BaseConnector):
     NAME = "gsuite_activities"
     POINTER_PATH = "id.time"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
+
+    @property
+    def delay(self):
+        """Defines the amount of time to delay collection of logs (in minutes).
+
+        This is used to allow logs to become 'consistent'. Google backfill log entries
+        based on their published lag guidelines. As a result of this, collection of
+        events within this lag window may result in missed events.
+
+        As a result of these constraints, this value is configurable to allow operators
+        to preference consistency over speed of delivery, and vice versa. For example,
+        a delay of 20 would instruct Grove to only collect logs after they are at least
+        20 minutes old.
+
+        This defaults to 0 (no delay).
+
+        :return: The "delay" component of the connector configuration.
+        """
+        try:
+            candidate = self.configuration.delay  # type: ignore
+        except AttributeError:
+            return 0
+
+        try:
+            candidate = int(candidate)
+        except ValueError as err:
+            raise ConfigurationException(
+                f"Configured 'delay' is not valid. Value must be an integer. {err}"
+            )
+
+        return candidate
 
     def collect(self):
         """Collects activities from the Google GSuite Reports API.
@@ -64,41 +102,53 @@ class Connector(BaseConnector):
         try:
             _ = self.pointer
         except NotFoundException:
-            # Sorry about the + 'Z' here. It turns out, if you pass the API a startTime
-            # with a timezone in '+00:00' format, which is permitted according to API
-            # validation, filtering seems to break and just return you ALL data
-            # available. Cool.
-            self.pointer = (datetime.utcnow() - timedelta(days=7)).isoformat(
-                **ISO_FORMAT_FLAGS
-            ) + "Z"
+            self.pointer = as_rfc3339(datetime.utcnow() - timedelta(days=7))
 
         # Page over all activities since the last pointer.
         more_requests = True
 
         with build("admin", "reports_v1", http=http) as service:
             while more_requests:
-                self.logger.debug(
-                    "Requesting GSuite activity list.",
-                    extra={"operation": self.operation},
-                )
+                # Transform the dates back to native to allow timedelta and comparison.
+                start = datetime.fromisoformat(self.pointer.replace("Z", ""))
+                end = datetime.utcnow() - timedelta(minutes=self.delay)
+
+                if end <= start:
+                    self.logger.debug(
+                        "Collection end time is prior to start, skipping.",
+                        extra={
+                            "start": as_rfc3339(start),
+                            "end": as_rfc3339(end),
+                            **self.log_context,
+                        },
+                    )
+                    break
+
                 if cursor:
                     self.logger.debug(
-                        "Using pageToken as cursor to request next page of results",
-                        extra={"cursor": cursor},
+                        "Using pageToken as cursor to request next page of activities.",
+                        extra={"cursor": cursor, **self.log_context},
                     )
                     request = service.activities().list(
                         userKey="all",
                         applicationName=self.operation,
-                        startTime=self.pointer,
+                        startTime=as_rfc3339(start),
+                        endTime=as_rfc3339(end),
                         pageToken=cursor,
                     )
                 else:
                     self.logger.debug(
-                        "Using startTime from pointer", extra={"pointer": self.pointer}
+                        "Using startTime from pointer to request activity list.",
+                        extra={
+                            "start": as_rfc3339(start),
+                            "end": as_rfc3339(end),
+                            **self.log_context,
+                        },
                     )
                     request = service.activities().list(
                         userKey="all",
-                        startTime=self.pointer,
+                        startTime=as_rfc3339(start),
+                        endTime=as_rfc3339(end),
                         applicationName=self.operation,
                     )
 
@@ -110,20 +160,28 @@ class Connector(BaseConnector):
                     activities = results.get("items", [])
 
                     self.logger.debug(
-                        "Got activities from the GSuite API",
-                        extra={"count": len(activities)},
+                        "Got activities from the GSuite API.",
+                        extra={
+                            "count": len(activities),
+                            **self.log_context,
+                        },
                     )
                     self.save(activities)
-                except (GoogleAuthError, Error) as err:
+                except (GoogleAuthError, GACError) as err:
                     raise RequestFailedException(f"Request to GSuite API failed: {err}")
 
                 # Determine whether we're still paging.
                 if "nextPageToken" not in results:
-                    self.logger.debug("No nextPageToken, finishing collection.")
+                    self.logger.debug(
+                        "No nextPageToken, finishing collection.",
+                        extra=self.log_context,
+                    )
                     more_requests = False
                     break
 
-                self.logger.debug("nextPageToken is present in response, paging.")
+                self.logger.debug(
+                    "nextPageToken is present, paging.", extra=self.log_context
+                )
                 cursor = results["nextPageToken"]
                 more_requests = True
 

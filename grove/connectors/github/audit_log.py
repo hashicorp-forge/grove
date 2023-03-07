@@ -122,7 +122,7 @@ class Connector(BaseConnector):
         # Get log data from the upstream API, paging as required.
         while True:
             if end <= start:
-                self.logger.info(
+                self.logger.debug(
                     "Collection end time is prior to start, skipping.",
                     extra={
                         "start": start.strftime(DATESTAMP_FORMAT),
