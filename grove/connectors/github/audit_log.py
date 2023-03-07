@@ -22,6 +22,37 @@ class Connector(BaseConnector):
     POINTER_PATH = '"@timestamp"'
 
     @property
+    def delay(self):
+        """Defines the amount of time to delay collection of logs (in minutes).
+
+        This is used to allow logs to become 'consistent'. Github backfills log entries
+        but unfortunately do not provide any guidance around 'lag' time, or consistency
+        guarantees.
+
+        As a result of these constraints, this value is configurable to allow operators
+        to preference consistency over speed of delivery, and vice versa. For example,
+        a delay of 20 would instruct Grove to only collect logs after they are at least
+        20 minutes old.
+
+        This defaults to 0 (no delay).
+
+        :return: The "delay" component of the connector configuration.
+        """
+        try:
+            candidate = self.configuration.delay  # type: ignore
+        except AttributeError:
+            return 0
+
+        try:
+            candidate = int(candidate)
+        except ValueError as err:
+            raise ConfigurationException(
+                f"Configured 'delay' is not valid. Value must be an integer. {err}"
+            )
+
+        return candidate
+
+    @property
     def scope(self):
         """Fetches the configured Github scope.
 
@@ -85,14 +116,26 @@ class Connector(BaseConnector):
 
         # Transform the pointer into an ISO8601 compatible date and construct the search
         # phrase.
-        start = datetime.utcfromtimestamp(int(self.pointer) / 1000).strftime(
-            DATESTAMP_FORMAT
-        )
+        start = datetime.utcfromtimestamp(int(self.pointer) / 1000)
+        end = datetime.utcnow() - timedelta(minutes=self.delay)
 
         # Get log data from the upstream API, paging as required.
         while True:
+            if end <= start:
+                self.logger.info(
+                    "Collection end time is prior to start, skipping.",
+                    extra={
+                        "start": start.strftime(DATESTAMP_FORMAT),
+                        "end": end.strftime(DATESTAMP_FORMAT),
+                    },
+                )
+                break
+
             log = client.get_audit_log(
-                phrase=f"created:>={start}",
+                phrase=(
+                    f"created:>={start.strftime(DATESTAMP_FORMAT)} "
+                    f"AND created:<={end.strftime(DATESTAMP_FORMAT)}"
+                ),
                 include=self.operation,
                 cursor=cursor,
             )

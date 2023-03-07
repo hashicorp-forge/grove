@@ -2,6 +2,7 @@
     "key": "BEARER_TOKEN_HERE",
     "identity": "ORGANIZATION_NAME_HERE",
     "name": "github-self-hosted-audit-log-example",
+    "delay": 10,
     "connector": "github_audit_log",
     "fqdn": "github.example.org"
 }
