@@ -1,6 +1,7 @@
 {
     "key": "BEARER_TOKEN_HERE",
     "identity": "ORGANIZATION_NAME_HERE",
+    "delay": 10,
     "name": "github-orgs-audit-log-example",
     "connector": "github_audit_log"
 }

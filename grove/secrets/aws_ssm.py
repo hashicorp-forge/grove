@@ -25,7 +25,8 @@ class Configuration(BaseSettings):
     """
 
     assume_role_arn: Optional[str] = Field(
-        description="An optional AWS role to assume when authenticating with AWS."
+        description="An optional AWS role to assume when authenticating with AWS.",
+        default=None,
     )
     ssm_region: Optional[str] = Field(
         description="The region that the parameter store exists in (default us-east-1)",

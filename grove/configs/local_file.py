@@ -48,7 +48,7 @@ class Handler(BaseConfig):
 
         # Wrap validation errors to keep them in the Grove exception hierarchy.
         try:
-            self.config = Configuration()
+            self.config = Configuration()  # type: ignore
         except ValidationError as err:
             raise ConfigurationException(parsing.validation_error(err))
 
