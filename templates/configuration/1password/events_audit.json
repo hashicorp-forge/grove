@@ -1,0 +1,6 @@
+{
+    "key": "BEARER_TOKEN_HERE",
+    "identity": "ORGANIZATION_NAME_HERE",
+    "name": "1password-events-audit",
+    "connector": "onepassword_events_audit"
+}
