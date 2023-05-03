@@ -1,0 +1,30 @@
+{
+    "cursor": "aGVsbG8hIGlzIGl0IG1lIHlvdSBhcmUgbG9va2luZyBmb3IK",
+    "has_more": true,
+    "items": [
+        {
+            "uuid": "56YE2TYN2VFYRLNSHKPW5NVT5E",
+            "timestamp": "2023-03-15T16:33:50-03:00",
+            "actor_uuid": "4HCGRGYCTRQFBMGVEGTABYDU2V",
+            "action": "activate",
+            "object_type": "account",
+            "object_uuid": "56YE2TYN2VFYRLNSHKPW5NVT5E",
+            "aux_id": 0,
+            "aux_uuid": "56YE2TYN2VFYRLNSHKPW5NVT5E",
+            "aux_info": "string",
+            "session": {
+                "uuid": "A5K6COGVRVEJXJW3XQZGS7VAMM",
+                "login_time": "2023-03-15T16:33:50-03:00",
+                "device_uuid": "553aee6b-7da1-4043-84ab-86ff036035bf",
+                "ip": "192.0.2.254"
+            },
+            "location": {
+                "country": "Canada",
+                "region": "Ontario",
+                "city": "Toronto",
+                "latitude": 43.5991,
+                "longitude": -79.4988
+            }
+        }
+    ]
+}

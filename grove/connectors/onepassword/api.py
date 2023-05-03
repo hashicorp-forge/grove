@@ -8,7 +8,6 @@ import time
 from typing import Any, Dict, Optional
 
 import requests
-
 from grove.exceptions import RateLimitException, RequestFailedException
 from grove.types import AuditLogEntries, HTTPResponse
 
@@ -148,4 +147,20 @@ class Client:
         """
         return self.get_events(
             event_type="itemusages", cursor=cursor, start_time=start_time
+        )
+
+    def get_auditevents(
+        self,
+        cursor: Optional[str] = None,
+        start_time: Optional[str] = None,
+    ) -> AuditLogEntries:
+        """Fetches a list of of actions performed by team members within a 1Password account.
+
+        :param cursor: Cursor to use when fetching results. Supersedes other parameters.
+        :param start_time: The ISO Format timestamp to query logs since.
+
+        :return: AuditLogEntries object containing a pagination cursor, and log entries.
+        """
+        return self.get_events(
+            event_type="auditevents", cursor=cursor, start_time=start_time
         )

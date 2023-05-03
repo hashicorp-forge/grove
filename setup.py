@@ -40,6 +40,7 @@ setup(
             "okta_system_log = grove.connectors.okta.system_log:Connector",
             "onepassword_events_itemusages = grove.connectors.onepassword.events_itemusages:Connector",  # noqa: B950
             "onepassword_events_signinattempts = grove.connectors.onepassword.events_signinattempts:Connector",  # noqa: B950
+            "onepassword_events_audit = grove.connectors.onepassword.events_audit:Connector",  # noqa: B950
             "pagerduty_audit_records = grove.connectors.pagerduty.audit_records:Connector",
             "sf_event_log = grove.connectors.sf.event_log:Connector",
             "sfmc_audit_events = grove.connectors.sfmc.audit_events:Connector",
