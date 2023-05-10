@@ -1,0 +1,6 @@
+{
+    "key": "TOKEN_HERE",
+    "identity": "ORGANIZATION_ID_HERE",
+    "name": "oomnitza-activities",
+    "connector": "oomnitza-activities"
+}
