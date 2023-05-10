@@ -68,8 +68,9 @@ class Client:
     ) -> AuditLogEntries:
         """Fetches a list of signing attempt logs.
 
-        :param cursor: Cursor to use when fetching results. Supersedes other parameters.
-        :param from_date: The earliest date an event represented as a UNIX epoch time.
+        :param cursor: Cursor to use when fetching results.
+        :param start_date: The earliest date an event represented as an epoch value.
+        :param end_date: The latest date an event represented as an epoch value.
 
         :return: AuditLogEntries object containing a pagination cursor, and log entries.
         """

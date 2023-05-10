@@ -1,7 +1,7 @@
 # Copyright (c) HashiCorp, Inc.
 # SPDX-License-Identifier: MPL-2.0
 
-"""Oomnitza Audit connector for Grove."""
+"""Oomnitza Activities connector for Grove."""
 import time
 from datetime import datetime, timedelta
 
@@ -40,8 +40,6 @@ class Connector(BaseConnector):
                 datetime.fromtimestamp(time.time()) - timedelta(days=2)
             ).strftime("%s")
 
-        # Get log data from the upstream API, paging is not required since this API gets all
-        # of the data.
         # Get log data from the upstream API. A "from" and "to" datetime query
         # parameters are required.
         while True:
