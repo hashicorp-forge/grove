@@ -28,7 +28,7 @@ class Connector(BaseConnector):
         cursor = 0
 
         # If no pointer is stored then a previous run hasn't been performed, so set the
-        # pointer to a week ago. In the case of the Oomnitza activities API the pointer is
+        # pointer to 2 days ago. In the case of the Oomnitza activities API the pointer is
         # the value of the "timestamp" field from the latest record retrieved from
         # the API - which is in epoch. The Oomnitza API doesnt account for milliseconds.
         now = datetime.fromtimestamp(time.time()).strftime("%s")
@@ -40,7 +40,7 @@ class Connector(BaseConnector):
                 datetime.fromtimestamp(time.time()) - timedelta(days=2)
             ).strftime("%s")
 
-        # Get log data from the upstream API. A "from" and "to" datetime query
+        # Get log data from the upstream API. A "start_date" and "end_date" datetime query
         # parameters are required.
         while True:
             log = client.get_activites(

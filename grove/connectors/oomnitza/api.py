@@ -1,11 +1,7 @@
 # Copyright (c) HashiCorp, Inc.
 # SPDX-License-Identifier: MPL-2.0
 
-"""Oomnitza API client.
-
-As Oomnitza SDK does not currently support the Activities API, this client has been created in
-the interim.
-"""
+"""Oomnitza API client."""
 
 import logging
 from typing import Dict, Optional
