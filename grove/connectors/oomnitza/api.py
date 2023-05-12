@@ -28,8 +28,9 @@ class Client:
         self.logger = logging.getLogger(__name__)
         self.headers = {
             "content-type": "application/json",
-            "Authorization2": f"{token}",
         }
+        if token:
+            self.headers["Authorization2"] = token
 
         # We need to push the identity into the URI, so we'll keep track of this.
         self._api_base_uri = API_BASE_URI.format(identity=identity)
