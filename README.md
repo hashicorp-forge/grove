@@ -32,8 +32,10 @@ isn't listed here, support can be added by creating a custom connector!
 * GSuite alerts
 * GSuite activity logs
 * Okta system logs
+* Oomnitza activity logs
 * 1Password sign-in attempt logs
 * 1Password item usage event logs
+* 1Password audit logs
 * PagerDuty audit records
 * SalesForce Cloud event logs
 * SalesForce Marketing Cloud audit event logs

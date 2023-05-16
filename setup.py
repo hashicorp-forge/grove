@@ -54,6 +54,7 @@ setup(
             "workday_activity_logging = grove.connectors.workday.activity_logging:Connector",
             "zoom_activities = grove.connectors.zoom.activities:Connector",
             "zoom_operationlogs = grove.connectors.zoom.operationlogs:Connector",
+            "oomnitza_activities = grove.connectors.oomnitza.activities:Connector",
         ],
         "grove.caches": [
             "aws_dynamodb = grove.caches.aws_dynamodb:Handler",
