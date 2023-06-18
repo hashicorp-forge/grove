@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import patch
 
 import responses
+
 from grove.connectors.oomnitza.activities import Connector
 from grove.models import ConnectorConfig
 from tests import mocks
@@ -69,7 +70,7 @@ class OomnitzaAuditTestCase(unittest.TestCase):
         # Check the pointer matches the latest execution_time value, and that the
         # expected number of logs were returned.
         self.connector.run()
-        self.assertEqual(self.connector._saved, 205)
+        self.assertEqual(self.connector._saved["logs"], 205)
         self.assertEqual(self.connector.pointer, "1682538024")
 
     @responses.activate
@@ -91,7 +92,7 @@ class OomnitzaAuditTestCase(unittest.TestCase):
 
         # Ensure only a single value is returned, and the pointer is properly set.
         self.connector.run()
-        self.assertEqual(self.connector._saved, 5)
+        self.assertEqual(self.connector._saved["logs"], 5)
         self.assertEqual(self.connector.pointer, "1680895957")
 
     @responses.activate
@@ -111,4 +112,4 @@ class OomnitzaAuditTestCase(unittest.TestCase):
             ),
         )
         self.connector.run()
-        self.assertEqual(self.connector._saved, 0)
+        self.assertEqual(self.connector._saved["logs"], 0)

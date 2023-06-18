@@ -68,7 +68,7 @@ class OktaAuditTestCase(unittest.TestCase):
         )
         # Ensure only a single value is returned, and the pointer is properly set.
         self.connector.run()
-        self.assertEqual(self.connector._saved, 1)
+        self.assertEqual(self.connector._saved["logs"], 1)
         self.assertEqual(self.connector.pointer, "2021-06-24T00:04:08.123Z")
 
     @responses.activate

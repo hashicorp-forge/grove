@@ -25,7 +25,7 @@ class Connector(BaseConnector):
         This is required as this is a third authentication element required by Zoom.
         """
         try:
-            return self.configuration.client_id  # type: ignore
+            return self.configuration.client_id
         except AttributeError:
             return None
 

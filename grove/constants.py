@@ -41,6 +41,7 @@ ENV_GROVE_LOCK_DURATION = "GROVE_LOCK_DURATION"
 PLUGIN_GROUP_CACHE = "grove.caches"
 PLUGIN_GROUP_OUTPUT = "grove.outputs"
 PLUGIN_GROUP_CONFIG = "grove.configs"
+PLUGIN_GROUP_PROCESSOR = "grove.processors"
 PLUGIN_GROUP_SECRET = "grove.secrets"  # noqa: S105
 PLUGIN_GROUP_CONNECTOR = "grove.connectors"
 

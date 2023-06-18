@@ -20,7 +20,7 @@ class Connector(BaseConnector):
         :return: The "optional_setting" component of the connector configuration.
         """
         try:
-            return self.configuration.optional_setting  # type: ignore
+            return self.configuration.optional_setting
         except AttributeError:
             return "Some Default value"
 
@@ -50,6 +50,6 @@ class Connector(BaseConnector):
             self.save(log.entries)
 
             # Break out of loop when there are no more pages.
-            cursor = log.cursor
+            cursor = log.cursor  # type: ignore
             if cursor is None:
                 break

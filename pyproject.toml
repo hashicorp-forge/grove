@@ -1,0 +1,183 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "grove"
+readme = "README.md"
+description = "A Software as a Service (SaaS) log collection framework."
+requires-python = ">=3.9"
+dynamic = ["version"]
+authors = [{name = "HashiCorp Security (TDR)"}]
+license = {text = "MPL-2.0"}
+classifiers = [
+    "Programming Language :: Python :: 3.9",
+    "Natural Language :: English",
+]
+dependencies = [
+    "urllib3<2.0",
+    "aws-lambda-powertools>=2.0,<3.0",
+    "boto3>=1.26,<2.0",
+    "requests>=2.28,<3.0",
+    "google-api-python-client>=2.68,<3.0",
+    "simple-salesforce>=1.12,<2.0",
+    "twilio>=7.15,<8.0",
+    "pydantic>=1.10,<2.0",
+    "jmespath>=1.0.0,<2.0",
+]
+
+[project.optional-dependencies]
+tests = [
+    "black",
+    "coverage",
+    "ruff",
+    "types-setuptools",
+    "isort",
+    "mypy",
+    "pip-tools",
+    "mock",
+    "pytest",
+    "pytest-cov",
+    "responses",
+    "tox",
+    "sphinx",
+    "furo",
+    "moto[s3,ssm]",
+    "types-requests",
+]
+
+[tool.setuptools.packages.find]
+include = ["grove*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "grove.__about__.__version__"}
+
+[project.scripts]
+grove = "grove.entrypoints.local_process:entrypoint"
+
+[project.entry-points."grove.entrypoints"]
+aws_lambda = "grove.entrypoints.aws_lambda:entrypoint"
+local_process = "grove.entrypoints.local_process:entrypoint"
+
+[project.entry-points."grove.connectors"]
+atlassian_audit_events = "grove.connectors.atlassian.audit_events:Connector"
+github_audit_log = "grove.connectors.github.audit_log:Connector"
+gsuite_activities = "grove.connectors.gsuite.activities:Connector"
+local_heartbeat = "grove.connectors.local.heartbeat:Connector"
+gsuite_alerts = "grove.connectors.gsuite.alerts:Connector"
+okta_system_log = "grove.connectors.okta.system_log:Connector"
+onepassword_events_itemusages = "grove.connectors.onepassword.events_itemusages:Connector"
+onepassword_events_signinattempts = "grove.connectors.onepassword.events_signinattempts:Connector"
+onepassword_events_audit = "grove.connectors.onepassword.events_audit:Connector"
+pagerduty_audit_records = "grove.connectors.pagerduty.audit_records:Connector"
+sf_event_log = "grove.connectors.sf.event_log:Connector"
+sfmc_audit_events = "grove.connectors.sfmc.audit_events:Connector"
+sfmc_security_events = "grove.connectors.sfmc.security_events:Connector"
+slack_audit_logs = "grove.connectors.slack.audit_logs:Connector"
+tfc_audit_trails = "grove.connectors.tfc.audit_trails:Connector"
+torq_activity_logs = "grove.connectors.torq.activity_logs:Connector"
+torq_audit_logs = "grove.connectors.torq.audit_logs:Connector"
+twilio_monitor_events = "grove.connectors.twilio.monitor_events:Connector"
+twilio_messages = "grove.connectors.twilio.messages:Connector"
+workday_activity_logging = "grove.connectors.workday.activity_logging:Connector"
+zoom_activities = "grove.connectors.zoom.activities:Connector"
+zoom_operationlogs = "grove.connectors.zoom.operationlogs:Connector"
+oomnitza_activities = "grove.connectors.oomnitza.activities:Connector"
+
+[project.entry-points."grove.caches"]
+aws_dynamodb = "grove.caches.aws_dynamodb:Handler"
+local_memory = "grove.caches.local_memory:Handler"
+
+[project.entry-points."grove.outputs"]
+aws_s3 = "grove.outputs.aws_s3:Handler"
+local_file = "grove.outputs.local_file:Handler"
+local_stdout = "grove.outputs.local_stdout:Handler"
+
+[project.entry-points."grove.configs"]
+aws_ssm = "grove.configs.aws_ssm:Handler"
+local_file = "grove.configs.local_file:Handler"
+
+[project.entry-points."grove.secrets"]
+aws_ssm = "grove.secrets.aws_ssm:Handler"
+hashicorp_vault = "grove.secrets.hashicorp_vault:Handler"
+
+[project.entry-points."grove.processors"]
+extract_paths = "grove.processors.extract_paths:Handler"
+filter_paths = "grove.processors.filter_paths:Handler"
+split_path = "grove.processors.split_path:Handler"
+
+[tool.mypy]
+files = [
+    "./grove/**/*.py",
+    "./tests/**/*.py"
+]
+disable_error_code = "attr-defined"
+allow_redefinition = false
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_untyped_calls = false
+ignore_errors = false
+ignore_missing_imports = true
+implicit_reexport = false
+local_partial_types = true
+strict_optional = true
+strict_equality = true
+no_implicit_optional = true
+warn_no_return = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+warn_unreachable = true
+
+[tool.isort]
+multi_line_output = 3
+profile = "black"
+
+[tool.pytest.ini_options]
+junit_family = "xunit2"
+norecursedirs = ".*"
+self-contained-html = true
+testpaths = [
+    "tests"
+]
+addopts = """
+    --strict
+    --tb=auto
+    --cov=grove
+    --cov-report=term-missing:skip-covered
+    --cov-branch
+    -p no:doctest
+    -p no:warnings
+    -s
+"""
+
+[tool.tox]
+legacy_tox_ini = """
+    [tox]
+    envlist = linters,py3
+
+    [testenv]
+    pip_version = pip
+    extras = tests
+    commands = pytest -c pyproject.toml
+    srcs = grove
+
+    [testenv:linters]
+    basepython = python3
+    usedevelop = true
+    commands =
+        {[testenv:ruff]commands}
+        {[testenv:mypy]commands}
+
+    [testenv:ruff]
+    basepython = python3
+    skip_install = true
+    commands =
+        ruff check {[testenv]srcs}
+
+    [testenv:mypy]
+    basepython3 = python3
+    skip_install = true
+    commands =
+        - mypy --config-file pyproject.toml {[testenv]srcs}
+"""

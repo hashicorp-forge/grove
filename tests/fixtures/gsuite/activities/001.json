@@ -19,11 +19,24 @@
             "name": "ADD_GROUP_MEMBER",
             "parameters": [{
                     "name": "USER_EMAIL",
-                    "value": "example@hashicorp.com"
+                    "value": "added@hashicorp.com"
                 },
                 {
                     "name": "GROUP_EMAIL",
-                    "value": "example@hashicorp.com"
+                    "value": "added@hashicorp.com"
+                }
+            ]
+        },
+        {
+            "type": "GROUP_SETTINGS",
+            "name": "REMOVE_GROUP_MEMBER",
+            "parameters": [{
+                    "name": "USER_EMAIL",
+                    "value": "replaced@hashicorp.com"
+                },
+                {
+                    "name": "GROUP_EMAIL",
+                    "value": "replaced@hashicorp.com"
                 }
             ]
         }]

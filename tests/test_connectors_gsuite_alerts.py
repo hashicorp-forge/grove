@@ -63,5 +63,5 @@ class GSuiteAlertsTestCase(unittest.TestCase):
             ],
         )
         self.connector.run()
-        self.assertEqual(self.connector._saved, 2)
+        self.assertEqual(self.connector._saved["logs"], 2)
         self.assertEqual(self.connector.pointer, "2021-04-03T14:05:39.950458Z")

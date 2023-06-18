@@ -47,7 +47,7 @@ class Connector(BaseConnector):
         :return: The "token" portion of the connector's configuration.
         """
         try:
-            return self.configuration.token  # type: ignore
+            return self.configuration.token
         except AttributeError:
             return None
 

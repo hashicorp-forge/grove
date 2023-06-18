@@ -89,5 +89,5 @@ class GitHubAuditTestCase(unittest.TestCase):
 
         # Ensure the correct number of value are returned, and the pointer properly set.
         self.connector.run()
-        self.assertEqual(self.connector._saved, 2)
+        self.assertEqual(self.connector._saved["logs"], 2)
         self.assertEqual(self.connector.pointer, "1625045793361")

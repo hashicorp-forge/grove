@@ -25,7 +25,7 @@ class Connector(BaseConnector):
         :return: The number of heartbeat messages to emit.
         """
         try:
-            return int(self.configuration.count)  # type: ignore
+            return int(self.configuration.count)
         except (AttributeError, ValueError):
             return 5
 
@@ -36,7 +36,7 @@ class Connector(BaseConnector):
         :return: The heartbeat interval, in seconds.
         """
         try:
-            return int(self.configuration.interval)  # type: ignore
+            return int(self.configuration.interval)
         except (AttributeError, ValueError):
             return 1
 

@@ -7,6 +7,7 @@ import logging
 from typing import Dict, Optional
 
 import requests
+
 from grove.exceptions import RequestFailedException
 from grove.types import AuditLogEntries, HTTPResponse
 

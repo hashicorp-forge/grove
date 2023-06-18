@@ -61,7 +61,7 @@ class ConnectorDeduplicationTestCase(unittest.TestCase):
 
         # Run a full collection first and ensure all is as we expect.
         first_collection.run()
-        self.assertEqual(first_collection._saved, 7)
+        self.assertEqual(first_collection._saved["logs"], 7)
         self.assertEqual(first_collection.pointer, "7")
 
         # Perform a collection with the latest pointer, and ensure no new records are
@@ -71,7 +71,7 @@ class ConnectorDeduplicationTestCase(unittest.TestCase):
 
         # In-memory cache does not support locking as it's only intended for local
         # "one-shot" execution, and development use. As a result, we have to currently
-        # clone the state of one cache to the other to simulate this.
+        # alias one to the other to simulate this.
         #
         # TODO: Remove the need for this, as it's going to cause confusion in future.
         second_collection._cache._data = first_collection._cache._data
@@ -81,7 +81,7 @@ class ConnectorDeduplicationTestCase(unittest.TestCase):
         )
 
         second_collection.run()
-        self.assertEqual(second_collection._saved, 0)
+        self.assertEqual(second_collection._saved["logs"], 0)
         self.assertEqual(second_collection.pointer, "7")
 
     @responses.activate
@@ -101,6 +101,8 @@ class ConnectorDeduplicationTestCase(unittest.TestCase):
 
         # Hot patch the connector to work in reverse chronological order.
         first_collection = Connector(config=config, context=context)
+
+        # This is very naughty.
         first_collection.LOG_ORDER = constants.REVERSE_CHRONOLOGICAL
 
         # Load all simulated responses in order.
@@ -113,7 +115,7 @@ class ConnectorDeduplicationTestCase(unittest.TestCase):
 
         # Run a full collection first and ensure all is as we expect.
         first_collection.run()
-        self.assertEqual(first_collection._saved, 7)
+        self.assertEqual(first_collection._saved["logs"], 7)
         self.assertEqual(first_collection.pointer, "7")
 
         # Perform a collection with the latest pointer, and ensure that only new records
@@ -122,7 +124,7 @@ class ConnectorDeduplicationTestCase(unittest.TestCase):
 
         # In-memory cache does not support locking as it's only intended for local
         # "one-shot" execution, and development use. As a result, we have to currently
-        # clone the state of one cache to the other to simulate this.
+        # alias the state of one cache to the other to simulate this.
         #
         # TODO: Remove the need for this, as it's going to cause confusion in future.
         second_collection._cache._data = first_collection._cache._data
@@ -132,5 +134,5 @@ class ConnectorDeduplicationTestCase(unittest.TestCase):
         )
 
         second_collection.run()
-        self.assertEqual(second_collection._saved, 1)
+        self.assertEqual(second_collection._saved["logs"], 1)
         self.assertEqual(second_collection.pointer, "7")

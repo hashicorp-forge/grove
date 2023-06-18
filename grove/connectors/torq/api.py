@@ -144,8 +144,8 @@ class Client:
     ) -> AuditLogEntries:
         """Fetches a list of logs from Torq which match the provided filters.
 
-        :param start_time: The required date and time of the earliest log entry.
-            Timestamps are in RFC 3339 format, for example, 2022-03-09T08:40:18.490771179Z.
+        :param start_time: The required date and time of the earliest log entry. Start
+            times are in RFC3339 format, for example, 2022-03-09T08:40:18.490771179Z.
         :param result_field: The key name for the list of logs in the returned json.
         :param to_date: The required date and time in UTC of the latest log entry.
         :param limit: The maximum number of items to include in a single response.
@@ -178,8 +178,8 @@ class Client:
     ) -> AuditLogEntries:
         """Fetches a list of audit logs from Torq which match the provided filters.
 
-        :param start_time: The required date and time of the earliest log entry.
-            Timestamps are in RFC 3339 format, for example, 2022-03-09T08:40:18.490771179Z.
+        :param start_time: The required date and time of the earliest log entry. Start
+            times are in RFC 3339 format, for example, 2022-03-09T08:40:18.490771179Z.
         :param to_date: The required date and time in UTC of the latest log entry.
         :param cursor: The cursor to use when paging.
 
@@ -197,8 +197,8 @@ class Client:
     ) -> AuditLogEntries:
         """Fetches a list of activity logs from Torq which match the provided filters.
 
-        :param start_time: The required date and time of the earliest log entry.
-            Timestamps are in RFC 3339 format, for example, 2022-03-09T08:40:18.490771179Z.
+        :param start_time: The required date and time of the earliest log entry. Start
+            times are in RFC 3339 format, for example, 2022-03-09T08:40:18.490771179Z.
         :param to_date: The required date and time in UTC of the latest log entry.
         :param cursor: The cursor to use when paging.
 

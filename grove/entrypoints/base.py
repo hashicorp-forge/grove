@@ -84,7 +84,7 @@ def entrypoint(context: Dict[str, Any]):
     try:
         configurations = configure()
     except GroveException as err:
-        logger.fatal(
+        logger.critical(
             "Failed to initialise configuration handler", extra={"exception": err}
         )
         return
@@ -93,7 +93,7 @@ def entrypoint(context: Dict[str, Any]):
     try:
         workers = int(os.environ.get(ENV_GROVE_WORKER_COUNT, DEFAULT_WORKER_COUNT))
     except ValueError as err:
-        logger.fatal(
+        logger.critical(
             f"Worker count ('{ENV_GROVE_WORKER_COUNT}') must be a number.",
             extra={"exception": err},
         )

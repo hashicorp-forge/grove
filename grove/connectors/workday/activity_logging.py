@@ -28,7 +28,7 @@ class Connector(BaseConnector):
         :return: The "base_url" portion of the connector's configuration.
         """
         try:
-            return self.configuration.base_url  # type: ignore
+            return self.configuration.base_url
         except AttributeError:
             return None
 
@@ -41,7 +41,7 @@ class Connector(BaseConnector):
         :return: The "client_id" portion of the connector's configuration.
         """
         try:
-            return self.configuration.client_id  # type: ignore
+            return self.configuration.client_id
         except AttributeError:
             return None
 
@@ -54,7 +54,7 @@ class Connector(BaseConnector):
         :return: The "client_secret" portion of the connector's configuration.
         """
         try:
-            return self.configuration.client_secret  # type: ignore
+            return self.configuration.client_secret
         except AttributeError:
             return None
 
@@ -92,7 +92,9 @@ class Connector(BaseConnector):
         # parameters are required.
         while True:
             log = client.get_activity_logging(
-                from_date=self.pointer, to_date=now, cursor=cursor
+                from_date=self.pointer,
+                to_date=now,
+                cursor=cursor,
             )
 
             # Save this batch of log entries.

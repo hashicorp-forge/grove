@@ -5,7 +5,8 @@
 
 import base64
 import binascii
-from typing import Dict
+from enum import Enum
+from typing import Dict, List
 
 from pydantic import BaseModel, Extra, Field, root_validator, validator
 
@@ -36,8 +37,36 @@ def decode(value: str, encoding: str) -> str:
     raise DataFormatException(f"Unknown encoding method '{encoding}'")
 
 
+class ProcessorConfig(BaseModel, extra=Extra.allow):
+    """A processor configuration object.
+
+    A processor configuration object represents information used by processors to
+    perform some set of operations on log entries. This base configuration object
+    is bare-bones as processors may define their own required configuration fields.
+    """
+
+    # Name is an arbitrary name administrators can provide to processors to enable
+    # better tracking and identification of processors.
+    name: str
+
+    # Processor defines the processor which should be run. This must match the plugin
+    # entrypoint name.
+    processor: str
+
+
+class OutputStream(str, Enum):
+    """Defines supported output 'streams'.
+
+    This is used to allow routing of original / raw collected data differently to
+    post processed data.
+    """
+
+    raw = "raw"
+    processed = "processed"
+
+
 class ConnectorConfig(BaseModel, extra=Extra.allow):
-    """A connector configuration object.
+    """Defines the connector configuration structure.
 
     A configuration object represents information which Grove uses to call a given
     connector. All connectors must have at least a name, key, identity, and connector
@@ -72,6 +101,19 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
     # Operations allow connectors and users to filter which 'type' of events to collect
     # from API endpoints which allow filtering records to return.
     operation: str = Field(OPERATION_DEFAULT)
+
+    # Processors allow processing of data during collection.
+    processors: List[ProcessorConfig] = Field([])
+
+    # Outputs allows specification of what type of data to output, and with what
+    # descriptor. By default, any processed logs will be output with a descriptor of
+    # 'processed', and raw logs with a descriptor of 'logs'.
+    outputs: Dict[str, OutputStream] = Field(
+        {
+            "logs": OutputStream.raw,
+            "processed": OutputStream.processed,
+        }
+    )
 
     @validator("key")
     def _validate_key_or_secret(cls, value, values, field):  # noqa: B902

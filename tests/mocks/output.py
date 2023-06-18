@@ -7,6 +7,7 @@ from grove.outputs import BaseOutput
 
 
 class TestHandler(BaseOutput):
-    def submit(self, *arg, **kwargs):
+    __test__ = False
+
+    def submit(self, *args, **kwargs):
         """Does nothing, successfully."""
-        return

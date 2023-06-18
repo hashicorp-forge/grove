@@ -59,7 +59,7 @@ class Connector(BaseConnector):
         :return: The "delay" component of the connector configuration.
         """
         try:
-            candidate = self.configuration.delay  # type: ignore
+            candidate = self.configuration.delay
         except AttributeError:
             return 0
 
