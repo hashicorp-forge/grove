@@ -348,6 +348,8 @@ class BaseConnector:
         # Always refresh our lock while saving. This allows us to grab a new lock for
         # every page of data to try and prevent our lock expiring before we've performed
         # a full collection.
+        #
+        # Unlock is not called here, as it's performed by the caller.
         self.lock()
 
         if self.LOG_ORDER == CHRONOLOGICAL:

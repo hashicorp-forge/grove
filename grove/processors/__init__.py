@@ -40,7 +40,6 @@ class BaseProcessor(abc.ABC):
                 f"Processor configuration is invalid. {parsing.validation_error(err)}"
             )
 
-    @abc.abstractmethod
     def process(self, entry: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Performs a set of processes against a log entry.
 
@@ -50,8 +49,9 @@ class BaseProcessor(abc.ABC):
             the list should contain a single element. If the log entry is to be dropped,
             an empty list should be used.
         """
-        pass
+        return [entry]
 
     def finalize(self):
         """Performs a final set of operations after logs have been saved."""
+
         return
