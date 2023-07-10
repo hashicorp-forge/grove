@@ -1,6 +1,6 @@
 """Grove metadata."""
 
-__version__ = "1.0.0rc4"
+__version__ = "1.0.0rc5"
 __title__ = "grove"
 __license__ = "Mozilla Public License 2.0"
 __copyright__ = "Copyright 2023 HashiCorp, Inc."
