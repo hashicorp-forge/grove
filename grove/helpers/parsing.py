@@ -5,7 +5,6 @@
 
 import json
 import re
-from functools import cache
 from typing import Any, Dict, List
 
 from pydantic import ValidationError
@@ -49,7 +48,6 @@ def quick_copy(value: Any):
     return json.loads(json.dumps(value))
 
 
-@cache
 def quote_aware_split(value: str, delimiter=".") -> List[str]:
     """Splits a value by delimiter, returning a list.
 
