@@ -10,24 +10,11 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath("../grove/"))
-
-# Set defaults, and then load __about__ from the project.
-__title__ = None
-__about__ = None
-__author__ = None
-__version__ = None
-__copyright__ = None
-
-exec(open(os.path.abspath("../grove/__about__.py")).read())
-
+from grove.__about__ import __copyright__, __title__, __version__
 
 # -- Project information -----------------------------------------------------
 
-author = __author__
+author = "HashiCorp Security (TDR)"
 project = __title__.title()
 copyright = __copyright__
 
@@ -63,7 +50,7 @@ exclude_patterns = []
 # a list of builtin themes.
 html_theme = "furo"
 html_title = f"Grove v{__version__}"
-html_logo = "static/grove.png"
+# html_logo = "static/grove.png"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -86,7 +73,7 @@ html_theme_options = {
         "admonition-title-font-size": "0.9rem",
     },
     "dark_css_variables": {
-        "color-foreground-secondary": "#444",
+        "color-foreground-secondary": "#9ca0a5",
         "admonition-font-size": "0.9rem",
         "admonition-title-font-size": "0.9rem",
     },
