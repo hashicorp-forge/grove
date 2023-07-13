@@ -288,9 +288,11 @@ class BaseConnector:
             if number_of_entries < 1:
                 self.logger.info(
                     "No log entries to output for stream, skipping.",
-                    stream=stream,
-                    descriptor=descriptor,
-                    extra=self.log_context,
+                    extra={
+                        "stream": stream,
+                        "descriptor": descriptor,
+                        **self.log_context,
+                    },
                 )
                 continue
 
