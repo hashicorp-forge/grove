@@ -287,7 +287,9 @@ class BaseConnector:
             number_of_entries = len(to_save)
             if number_of_entries < 1:
                 self.logger.info(
-                    "No log entries to output, skipping.",
+                    "No log entries to output for stream, skipping.",
+                    stream=stream,
+                    descriptor=descriptor,
                     extra=self.log_context,
                 )
                 continue
@@ -698,7 +700,7 @@ class BaseConnector:
         """
         # Shortcut where there are no processors configured.
         if len(self._processors) < 1:
-            return entries
+            return []
 
         # As processors can modify the number of entries, we need to loop over them
         # multiple times.
