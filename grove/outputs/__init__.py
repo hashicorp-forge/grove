@@ -90,7 +90,7 @@ class BaseOutput(abc.ABC):
         # This is expensive but we can't just json.dumps into gzip.compress as that
         # will not yield NDJSON.
         for entry in data:
-            # Skip entry log entries.
+            # Skip empty log entries.
             if entry is None:
                 continue
 
