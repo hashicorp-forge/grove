@@ -1,6 +1,6 @@
 <p align="center">
     <br /><br />
-    <img src="docs/static/grove-logo-small.png?raw=True">
+    <img src="docs/static/grove-logo-small.png?raw=True" alt="Grove">
     <br />
 </p>
 
@@ -28,7 +28,7 @@ us via email at security@hashicorp.com, rather than filing a GitHub issue.
 
 <p align="center">
     <br /><br />
-    <img src="docs/static/grove-support.png?raw=True">
+    <img src="docs/static/grove-support.png?raw=True" alt="Grove support overview">
     <br />
 </p>
 
