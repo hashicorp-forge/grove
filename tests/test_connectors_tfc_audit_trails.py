@@ -99,7 +99,7 @@ class TFCAuditTestCase(unittest.TestCase):
         )
 
         self.connector.run()
-        self.assertEqual(self.connector._saved, 3)
+        self.assertEqual(self.connector._saved["logs"], 3)
         self.assertEqual(self.connector.pointer, "2020-06-30T17:52:46.000Z")
 
     @responses.activate
@@ -119,5 +119,5 @@ class TFCAuditTestCase(unittest.TestCase):
         )
 
         self.connector.run()
-        self.assertEqual(self.connector._saved, 5)
+        self.assertEqual(self.connector._saved["logs"], 5)
         self.assertEqual(self.connector.pointer, "2020-06-30T17:52:46.000Z")

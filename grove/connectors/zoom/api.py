@@ -3,8 +3,8 @@
 
 """Zoom API client.
 
-As the Python Zoom client does not currently support Audit API, this client has been created in
-the interim.
+As the Python Zoom client does not currently support Audit API, this client has been
+created in the interim.
 """
 
 import base64
@@ -151,9 +151,9 @@ class Client:
 
         :return: AuditLogEntries object containing a pagination cursor, and log entries.
         """
-        # The endpoint returns the same total value of results regardless of the limit and
-        # offset parameters. The pagination parameters determine the amount of content
-        # in the data[] array.
+        # The endpoint returns the same total value of results regardless of the limit
+        # and offset parameters. The pagination parameters determine the amount of
+        # content in the data[] array.
 
         result = self._get(
             f"{API_BASE_URI}/{endpoint}",

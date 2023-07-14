@@ -40,7 +40,7 @@ class Connector(BaseConnector):
         :return: The "delay" component of the connector configuration.
         """
         try:
-            candidate = self.configuration.delay  # type: ignore
+            candidate = self.configuration.delay
         except AttributeError:
             return 0
 
@@ -63,7 +63,7 @@ class Connector(BaseConnector):
         :return: The "scope" component of the connector configuration.
         """
         try:
-            candidate = self.configuration.scope  # type: ignore
+            candidate = self.configuration.scope
         except AttributeError:
             return "orgs"
 
@@ -84,7 +84,7 @@ class Connector(BaseConnector):
         :return: The "fqdn" component of the connector configuration.
         """
         try:
-            return self.configuration.fqdn  # type: ignore
+            return self.configuration.fqdn
         except AttributeError:
             return "api.github.com"
 

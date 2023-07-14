@@ -69,7 +69,7 @@ class SFMCAuditTestCase(unittest.TestCase):
         # Check the pointer matches the latest value, and that the expected number of
         # logs were returned.
         self.connector.collect()
-        self.assertEqual(self.connector._saved, 2)
+        self.assertEqual(self.connector._saved["logs"], 2)
         self.assertEqual(self.connector.pointer, "2019-01-02T12:00:00.00")
 
     @responses.activate
@@ -89,5 +89,5 @@ class SFMCAuditTestCase(unittest.TestCase):
         )
 
         self.connector.collect()
-        self.assertEqual(self.connector._saved, 7)
+        self.assertEqual(self.connector._saved["logs"], 7)
         self.assertEqual(self.connector.pointer, "2019-01-07T12:00:00.00")

@@ -115,5 +115,5 @@ class SFEventLogTestCase(unittest.TestCase):
         # Check the pointer matches the latest value, and that the expected number of
         # logs were returned.
         self.connector.collect()
-        self.assertEqual(self.connector._saved, 2)
+        self.assertEqual(self.connector._saved["logs"], 2)
         self.assertEqual(self.connector.pointer, "2038-01-19T03:00:00.000Z")

@@ -8,6 +8,7 @@ import time
 from typing import Any, Dict, Optional
 
 import requests
+
 from grove.exceptions import RateLimitException, RequestFailedException
 from grove.types import AuditLogEntries, HTTPResponse
 
@@ -154,7 +155,7 @@ class Client:
         cursor: Optional[str] = None,
         start_time: Optional[str] = None,
     ) -> AuditLogEntries:
-        """Fetches a list of of actions performed by team members within a 1Password account.
+        """Fetches a list of actions performed by members of a 1Password account.
 
         :param cursor: Cursor to use when fetching results. Supersedes other parameters.
         :param start_time: The ISO Format timestamp to query logs since.

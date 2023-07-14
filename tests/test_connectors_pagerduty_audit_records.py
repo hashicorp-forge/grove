@@ -104,7 +104,7 @@ class PagerDutyAuditTestCase(unittest.TestCase):
         # Check the pointer matches the latest execution_time value, and that the
         # expected number of logs were returned.
         self.connector.run()
-        self.assertEqual(self.connector._saved, 5)
+        self.assertEqual(self.connector._saved["logs"], 5)
         self.assertEqual(self.connector.pointer, "2021-09-08T18:03:32.120Z")
 
     @responses.activate
@@ -126,5 +126,5 @@ class PagerDutyAuditTestCase(unittest.TestCase):
 
         # Set the chunk size large enough that no chunking is required.
         self.connector.run()
-        self.assertEqual(self.connector._saved, 4)
+        self.assertEqual(self.connector._saved["logs"], 4)
         self.assertEqual(self.connector.pointer, "2021-09-08T18:05:45.120Z")

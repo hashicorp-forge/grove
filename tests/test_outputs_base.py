@@ -12,6 +12,8 @@ from grove.outputs import BaseOutput
 # Required as BaseOutput is an ABC, so without defining submit we will not be able to
 # instantiate it to validate methods on the base class.
 class TestOutput(BaseOutput):
+    __test__ = False
+
     def submit(self, *args, **kwargs):
         pass
 

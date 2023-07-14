@@ -17,7 +17,7 @@ class ConnectorMissingException(GroveException):
 
 
 class ConcurrencyException(GroveException):
-    """Indidates that Grove may be running in another location concurrently."""
+    """Indicates that Grove may be running in another location concurrently."""
 
 
 class NotImplementedException(GroveException):
@@ -42,3 +42,7 @@ class AccessException(GroveException):
 
 class DataFormatException(GroveException):
     """Indicates an issue occurred while attempting to process data."""
+
+
+class ProcessorError(GroveException):
+    """Indicates that an error occurred when setting up or calling a processor."""

@@ -69,7 +69,7 @@ class AtlassianEventAuditTestCase(unittest.TestCase):
         )
 
         self.connector.run()
-        self.assertEqual(self.connector._saved, 31)
+        self.assertEqual(self.connector._saved["logs"], 31)
         self.assertEqual(self.connector.pointer, "2022-05-12T19:13:13Z")
 
     @responses.activate
@@ -90,5 +90,5 @@ class AtlassianEventAuditTestCase(unittest.TestCase):
         )
 
         self.connector.run()
-        self.assertEqual(self.connector._saved, 1)
+        self.assertEqual(self.connector._saved["logs"], 1)
         self.assertEqual(self.connector.pointer, "2022-05-12T19:13:13Z")

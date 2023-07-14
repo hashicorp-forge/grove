@@ -30,7 +30,7 @@ class Connector(BaseConnector):
         :return: The value of the 'secret' field from the configuration.
         """
         try:
-            return self.configuration.secret  # type: ignore
+            return self.configuration.secret
         except AttributeError:
             return None
 

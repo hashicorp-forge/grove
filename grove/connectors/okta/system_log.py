@@ -27,7 +27,7 @@ class Connector(BaseConnector):
         :return: The "domain" portion of the connector's configuration.
         """
         try:
-            return self.configuration.domain  # type: ignore
+            return self.configuration.domain
         except AttributeError:
             return "okta.com"
 

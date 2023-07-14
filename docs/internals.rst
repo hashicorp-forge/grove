@@ -15,9 +15,11 @@ Flow
 
 A rough diagram of the overall flow of a Grove run ("collection") can be found below.
 
-.. image:: static/flow.png
-   :alt: Overall flow of a Grove collection
-   :align: center
+.. container:: clear-image
+
+   .. image:: static/flow.png
+      :alt: Overall flow of a Grove collection
+      :align: center
 
 Components
 ----------
@@ -64,9 +66,11 @@ A visual overview of the relationship between built-in Grove backends and their
 base classes can be found below. Although the examples in this image are built-in
 to Grove, they follow the same principals as any other Plugin.
 
-.. image:: static/plugin_structure.png
-   :alt: Grove Module Overview
-   :align: center
+.. container:: clear-image
+
+   .. image:: static/plugin_structure.png
+      :alt: Grove Module Overview
+      :align: center
 
 Configuration
 ^^^^^^^^^^^^^
@@ -212,10 +216,12 @@ If no existing pointer is in the cache, the connector will provide an initial va
 which is appropriate for the application. When Grove next runs, only log entries
 generated since / after this pointer would be collected.
 
-.. image:: static/pointers.png
-   :width: 384
-   :alt: How pointers are used.
-   :align: center
+.. container:: clear-image
+
+   .. image:: static/pointers.png
+      :width: 384
+      :alt: How pointers are used.
+      :align: center
 
 Cache
 -----

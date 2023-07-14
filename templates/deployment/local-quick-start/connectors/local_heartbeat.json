@@ -4,5 +4,8 @@
   "connector": "local_heartbeat",
   "key": "",
   "interval": 5,
-  "count": 5
+  "count": 5,
+  "outputs": {
+    "logs": "raw"
+  }
 }

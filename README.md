@@ -1,6 +1,8 @@
-## Grove
-
-> Grove is not an official HashiCorp project.
+<p align="center">
+    <br /><br />
+    <img src="docs/static/grove-logo-small.png?raw=True" alt="Grove">
+    <br />
+</p>
 
 Grove is a Software as a Service (SaaS) log collection framework, designed to support
 collection of logs from services which do not natively support log streaming.
@@ -23,6 +25,12 @@ important to us! If you have found a potential security issue with Grove, please
 us via email at security@hashicorp.com, rather than filing a GitHub issue.
 
 ### Supported Sources
+
+<p align="center">
+    <br /><br />
+    <img src="docs/static/grove-support.png?raw=True" alt="Grove support overview">
+    <br />
+</p>
 
 Currently the following log sources are supported by Grove out of the box. If a source
 isn't listed here, support can be added by creating a custom connector!

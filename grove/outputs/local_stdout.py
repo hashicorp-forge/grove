@@ -5,7 +5,7 @@
 
 import datetime
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from grove.constants import DATESTAMP_FORMAT, GROVE_METADATA_KEY
 from grove.exceptions import DataFormatException
@@ -20,6 +20,8 @@ class Handler(BaseOutput):
         identity: str,
         operation: str,
         part: int = 0,
+        kind: Optional[str] = "json",
+        descriptor: Optional[str] = "raw",
     ):
         """Print captured data to stdout.
 
@@ -31,6 +33,9 @@ class Handler(BaseOutput):
             contains data for. This is used to indicate that the logs are from the same
             collection, but have been broken into smaller files for downstream
             processing.
+        :param kind: The format of the data being output.
+        :param descriptor: An arbitrary descriptor to identify the data being output.
+
         """
         datestamp = datetime.datetime.utcnow()
 
@@ -38,6 +43,8 @@ class Handler(BaseOutput):
             json.dumps(
                 {
                     "part": part,
+                    "kind": kind,
+                    "descriptor": descriptor,
                     "connector": connector,
                     "identity": identity,
                     "operation": operation,
@@ -48,11 +55,12 @@ class Handler(BaseOutput):
             flush=True,
         )
 
-    def serialize(self, data: List[Any], metadata: Dict[str, Any]) -> bytes:
+    def serialize(self, data: List[Any], metadata: Dict[str, Any] = {}) -> bytes:
         """Serialize data to a standard format (NDJSON).
 
         :param data: A list of log entries to serialize to JSON.
-        :param metadata: Metadata to append to JSON before serialisation.
+        :param metadata: Metadata to append to each log entry before serialization. If
+            not specified no metadata will be added.
 
         :return: Log data serialized as NDJSON.
 

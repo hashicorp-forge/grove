@@ -10,10 +10,10 @@ import json
 import logging
 import os
 from typing import Any, Dict, List, Optional
-from grove.__about__ import __version__
 
 import jmespath
 
+from grove.__about__ import __version__
 from grove.constants import (
     CACHE_KEY_LOCK,
     CACHE_KEY_POINTER,
@@ -33,17 +33,20 @@ from grove.constants import (
     LOCK_DATE_FORMAT,
     PLUGIN_GROUP_CACHE,
     PLUGIN_GROUP_OUTPUT,
+    PLUGIN_GROUP_PROCESSOR,
     REVERSE_CHRONOLOGICAL,
 )
 from grove.exceptions import (
     AccessException,
     ConcurrencyException,
+    ConfigurationException,
     DataFormatException,
     GroveException,
     NotFoundException,
+    ProcessorError,
 )
-from grove.helpers import plugin
-from grove.models import ConnectorConfig
+from grove.helpers import parsing, plugin
+from grove.models import ConnectorConfig, OutputStream
 
 
 class BaseConnector:
@@ -78,14 +81,31 @@ class BaseConnector:
         }
 
         # Let the caller handle exceptions from failure to load handlers directly.
-        self._output = plugin.load_handler(
-            os.environ.get(ENV_GROVE_OUTPUT_HANDLER, DEFAULT_OUTPUT_HANDLER),
-            PLUGIN_GROUP_OUTPUT,
-        )
         self._cache = plugin.load_handler(
             os.environ.get(ENV_GROVE_CACHE_HANDLER, DEFAULT_CACHE_HANDLER),
             PLUGIN_GROUP_CACHE,
         )
+        self._output = plugin.load_handler(
+            os.environ.get(ENV_GROVE_OUTPUT_HANDLER, DEFAULT_OUTPUT_HANDLER),
+            PLUGIN_GROUP_OUTPUT,
+        )
+        self._output.setup()
+
+        # Processors are only setup once for each connector instance.
+        self._processors = {}
+
+        for processor in self.configuration.processors:
+            try:
+                self._processors[processor.name] = plugin.load_handler(
+                    processor.processor,
+                    PLUGIN_GROUP_PROCESSOR,
+                    processor,
+                )
+            except ConfigurationException as err:
+                raise ProcessorError(
+                    f"Failed to initialise processor '{processor.name}' "
+                    f"({processor.processor}). {err}",
+                )
 
         # The time that our current lock expires, if we have one.
         self._lock_expiry: Optional[datetime.datetime] = None
@@ -97,7 +117,7 @@ class BaseConnector:
         except ValueError as err:
             self.logger.warning(
                 f"Lock duration ('{ENV_GROVE_LOCK_DURATION}') must be a number.",
-                extra={"exception": err},
+                extra={"exception": err, **self.log_context},
             )
 
         # Determines if the start of a 'window' has been passed during a collection.
@@ -107,12 +127,15 @@ class BaseConnector:
         self._window_start = str()
         self._window_end = str()
 
-        # Tracks the total number of saved log entries.
-        self._saved = 0
-
         # Paginated / chunked data needs an incrementing identifier to keep things
         # orderly.
         self._part = 0
+
+        # Track the number of output logs by the configured output destination stream.
+        # This allows statistics to be generated on deduplication, splitting, etc.
+        self._saved = {}
+        for descriptor, _ in self.configuration.outputs.items():
+            self._saved[descriptor] = 0
 
         # Tracks hashes of unique log entries, keyed by their pointer value.
         self._hashes: Dict[str, set[str]] = {}
@@ -145,7 +168,7 @@ class BaseConnector:
             self.collect()
         except GroveException as err:
             self.logger.error(
-                "Connector was unable to collect logs.",
+                "Connector was unable to complete collection successfully.",
                 extra={"exception": err, **self.log_context},
             )
             self.unlock()
@@ -163,9 +186,10 @@ class BaseConnector:
 
     def _run_chronological(self):
         """Performs chronological specific post collection operations."""
+        # TODO: Move to processor.
         try:
             self.logger.debug(
-                "Saving deduplication hashes to cache",
+                "Saving deduplication hashes to cache.",
                 extra=self.log_context,
             )
             self.save_hashes()
@@ -193,7 +217,7 @@ class BaseConnector:
             return
         except NotFoundException:
             self.logger.debug(
-                "Skipping pointer swap and clean-up as there is no next-pointer",
+                "Skipping pointer swap and clean-up as there is no next-pointer.",
                 extra={**self.log_context},
             )
             return
@@ -224,6 +248,7 @@ class BaseConnector:
             )
             return
 
+        # TODO: Move to processor.
         try:
             self.logger.debug(
                 "Saving deduplication hashes to cache",
@@ -242,16 +267,81 @@ class BaseConnector:
         """Provides a stub for a connector to initiate a collection."""
         pass
 
-    def save(self, candidates: List[Any]):
-        """Saves log candidates, and updates the pointer in the cache.
+    def process_and_write(self, entries: List[Any]):
+        """Write log entries them to the configured output handler.
 
-        :param candidates: List of log candidates to save.
-
-        :raises GroveException: The LOG_ORDER defined by the Connector is not valid.
-
-        :return: A count of entries saved.
+        :param entries: List of log entries to process.
         """
-        entries = self.deduplicate_by_hash(candidates)
+        # Allow failures to bubble all the way up and fail the run. If processing fails
+        # we want to defer collection, to allow retry later. We always pass a copy of
+        # the entries to prevent accidental overwriting of the collected raw data by
+        # a processor.
+        processed = self.process(entries)
+
+        for descriptor, stream in self.configuration.outputs.items():
+            # Ensure the output uses the correct stream.
+            to_save = entries
+            if stream == OutputStream.processed:
+                to_save = processed
+
+            number_of_entries = len(to_save)
+            if number_of_entries < 1:
+                self.logger.info(
+                    "No log entries to output for stream, skipping.",
+                    extra={
+                        "stream": stream,
+                        "descriptor": descriptor,
+                        **self.log_context,
+                    },
+                )
+                continue
+
+            try:
+                self._output.submit(
+                    data=self._output.serialize(
+                        data=to_save,
+                        metadata=self.metadata(),
+                    ),
+                    part=self._part,
+                    operation=self.operation,
+                    connector=self.NAME,
+                    identity=self.identity,
+                    descriptor=descriptor,
+                )
+
+                # Update counters.
+                self._saved[descriptor] += number_of_entries
+
+                self.logger.info(
+                    "Log submitted successfully to output.",
+                    extra={
+                        "part": self._part,
+                        "stream": stream,
+                        "descriptor": descriptor,
+                        "entries": number_of_entries,
+                        **self.log_context,
+                    },
+                )
+            except AccessException as err:
+                self.logger.error(
+                    "Failed to write logs to output, cannot continue.",
+                    extra={
+                        "part": self._part,
+                        "exception": err,
+                        "stream": stream,
+                        "descriptor": descriptor,
+                        **self.log_context,
+                    },
+                )
+                raise
+
+    def save(self, entries: List[Any]):
+        """Saves log entries, and updates the pointer in the cache.
+
+        :param entries: List of log entries to save.
+        """
+        # TODO: Move deduplication into a processor.
+        entries = self.deduplicate_by_hash(entries)
 
         if len(entries) < 1:
             self.logger.warning(
@@ -262,54 +352,34 @@ class BaseConnector:
         # Always refresh our lock while saving. This allows us to grab a new lock for
         # every page of data to try and prevent our lock expiring before we've performed
         # a full collection.
+        #
+        # Unlock is not called here, as it's performed by the caller.
         self.lock()
 
         if self.LOG_ORDER == CHRONOLOGICAL:
-            return self._save_chronological(entries)
+            self._save_chronological(entries)
 
         if self.LOG_ORDER == REVERSE_CHRONOLOGICAL:
-            return self._save_reverse_chronological(entries)
+            self._save_reverse_chronological(entries)
 
-        # Fall through for anything not supported / incorrectly specified.
-        raise GroveException(f"Connector LOG_ORDER '{self.LOG_ORDER}' is not valid.")
+        self.finalize()
 
-    def _save_chronological(self, candidates: List[Any]):
+    def _save_chronological(self, entries: List[Any]):
         """Saves log entries when retrieved logs are in chronological order.
 
-        :param candidates: List of log entries to save.
+        :param entries: List of log entries to save.
         """
-        newest = jmespath.search(self.POINTER_PATH, candidates[-1])
-
+        # Pointers are extracted prior to processing as processing may modify the
+        # structure, or remove entries entirely.
+        newest = jmespath.search(self.POINTER_PATH, entries[-1])
         if newest is None:
-            self.logger.error(
-                "Pointer path was not found in returned logs, cannot continue.",
-                extra={"pointer_path": self.POINTER_PATH, **self.log_context},
+            raise GroveException(
+                f"Pointer path ({self.POINTER_PATH}) was not found in returned logs."
             )
-            return
 
-        # Generate metadata for the candidate log entries, and save to the output
-        # handler.
-        try:
-            self._output.submit(
-                data=self._output.serialize(
-                    data=candidates,
-                    metadata=self.metadata(),
-                ),
-                part=self._part,
-                operation=self.operation,
-                connector=self.NAME,
-                identity=self.identity,
-            )
-            self.logger.info(
-                "Log submitted successfully to output.",
-                extra={"part": self._part, **self.log_context},
-            )
-        except AccessException as err:
-            self.logger.error(
-                "Failed to write logs to output, cannot continue.",
-                extra={"exception": err, **self.log_context},
-            )
-            return
+        # Exceptions are allowed to bubble up here to ensure connectors exit on error,
+        # rather than silently dropping batches of log entries.
+        self.process_and_write(entries)
 
         # Once uploaded, then update the pointer. NOTE: There is an opportunity for
         # issues to occur between the output and pointer update which would lead to
@@ -325,11 +395,10 @@ class BaseConnector:
                 "Failed to save pointer to cache, cannot continue.",
                 extra={"exception": err, **self.log_context},
             )
-            return
+            raise
 
-        # Get ready for the next block of candidate log entries (if required).
+        # Get ready for the next batch of candidate log entries (if required).
         self._part += 1
-        self._saved += len(candidates)
 
     def _save_reverse_chronological(self, candidates: List[Any]):  # noqa: C901
         """Save log entries when logs are in reverse chronological order.
@@ -348,11 +417,9 @@ class BaseConnector:
         newest = jmespath.search(self.POINTER_PATH, candidates[0])
 
         if oldest is None or newest is None:
-            self.logger.error(
-                "Pointer path was not found in logs entry, cannot continue.",
-                extra={"pointer_path": self.POINTER_PATH, **self.log_context},
+            raise GroveException(
+                f"Pointer path ({self.POINTER_PATH}) was not found in returned logs."
             )
-            return
 
         # If a window start is in the cache then a previous collection is incomplete.
         # We'll skip entries until we find our window, and then only collect entries
@@ -371,11 +438,9 @@ class BaseConnector:
                 current_pointer = jmespath.search(self.POINTER_PATH, entry)
 
                 if current_pointer is None:
-                    self.logger.error(
-                        "Pointer path was not found in logs entry, cannot continue.",
-                        extra={"pointer_path": self.POINTER_PATH, **self.log_context},
+                    raise GroveException(
+                        f"Pointer path ({self.POINTER_PATH}) not found in log entry."
                     )
-                    return
 
                 # We need to track FROM the window end, inclusive, to ensure that we
                 # don't miss any logs. This is required in cases where the timestamp
@@ -409,32 +474,12 @@ class BaseConnector:
         if len(entries) < 1:
             return
 
-        # Generate metadata for the entries, and save to the output handler.
-        try:
-            self._output.submit(
-                data=self._output.serialize(
-                    data=entries,
-                    metadata=self.metadata(),
-                ),
-                part=self._part,
-                operation=self.operation,
-                connector=self.NAME,
-                identity=self.identity,
-            )
-            self.logger.info(
-                "Log submitted successfully to output.",
-                extra={"part": self._part, **self.log_context},
-            )
-        except AccessException as err:
-            self.logger.error(
-                "Failed to write logs to output, cannot continue.",
-                extra={"exception": err, **self.log_context},
-            )
-            return
+        # Exceptions are allowed to bubble up here to ensure connectors exit on error,
+        # rather than silently dropping batches of log entries.
+        self.process_and_write(entries)
 
         # Get ready for the next block of entries (if required).
         self._part += 1
-        self._saved += len(entries)
 
         # Save the new window geometry to cache but only AFTER data is saved, and only
         # save the window start when it's updated.
@@ -566,7 +611,7 @@ class BaseConnector:
 
         return entries
 
-    def deduplicate_by_pointer(self, candidates: List[Any]):
+    def deduplicate_by_pointer(self, entries: List[Any]):
         """Deduplicate log entries by pointer values.
 
         Deduplicates records which occur before or after a pointer on the current
@@ -578,27 +623,27 @@ class BaseConnector:
         For example, some provider's only allow filtering on a date (YYYY-MM-DD) while
         returning log entries with timestamps that have millisecond precision.
 
-        :param candidates: A list of log entries to deduplicate.
+        :param entries: A list of log entries to deduplicate.
 
         :return: A deduplicated list of log entries.
         """
         if self.LOG_ORDER == CHRONOLOGICAL:
-            return self._deduplicate_by_pointer_chronological(candidates)
+            return self._deduplicate_by_pointer_chronological(entries)
 
         if self.LOG_ORDER == REVERSE_CHRONOLOGICAL:
-            return self._deduplicate_by_pointer_reverse_chronological(candidates)
+            return self._deduplicate_by_pointer_reverse_chronological(entries)
 
-    def _deduplicate_by_pointer_chronological(self, candidates: List[Any]):
+    def _deduplicate_by_pointer_chronological(self, entries: List[Any]):
         """Deduplicates chronological log entries by their pointer.
 
-        :param candidates: A list of log entries to deduplicate.
+        :param entries: A list of log entries to deduplicate.
 
         :return: A deduplicated list of log entries.
         """
-        entries = []
+        results = []
         pointer_passed = False
 
-        for candidate in candidates:
+        for candidate in entries:
             candidate_pointer = str(jmespath.search(self.POINTER_PATH, candidate))
 
             if candidate_pointer == self.pointer:
@@ -606,28 +651,28 @@ class BaseConnector:
 
             # Only track chronological records on and after the pointer.
             if pointer_passed:
-                entries.append(candidate)
+                results.append(candidate)
 
         # If we never encountered the pointer, don't filter the records at all. This may
         # cause some duplicates if the pointer is on a subsequent page, but we always
         # prefer duplicates in these cases.
         if not pointer_passed:
-            entries = candidates
+            results = entries
 
-        return entries
+        return results
 
-    def _deduplicate_by_pointer_reverse_chronological(self, candidates: List[Any]):
+    def _deduplicate_by_pointer_reverse_chronological(self, entries: List[Any]):
         """Deduplicates reverse chronological log entries by their pointer.
 
-        :param candidates: A list of log entries to deduplicate.
+        :param entries: A list of log entries to deduplicate.
 
         :return: A deduplicated list of log entries.
         """
-        entries = []
+        results = []
         pointer_found = False
         pointer_passed = False
 
-        for candidate in candidates:
+        for candidate in entries:
             candidate_pointer = jmespath.search(self.POINTER_PATH, candidate)
 
             if candidate_pointer == self.pointer:
@@ -638,15 +683,65 @@ class BaseConnector:
                 break
 
             if not pointer_passed:
-                entries.append(candidate)
+                results.append(candidate)
 
         # If we never encountered the pointer, don't filter the records at all. This may
         # cause some duplicates if the pointer is on a subsequent page, but we always
         # prefer duplicates in these cases.
         if not pointer_passed:
-            entries = candidates
+            results = entries
 
-        return entries
+        return results
+
+    def process(self, entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Process log entries prior to saving.
+
+        :param entries: A list of log entries to process.
+
+        :return: A processed list of log entries.
+        """
+        # Shortcut where there are no processors configured.
+        if len(self._processors) < 1:
+            return []
+
+        # As processors can modify the number of entries, we need to loop over them
+        # multiple times.
+        processed = parsing.quick_copy(entries)
+
+        for name, processor in self._processors.items():
+            for index, _ in enumerate(processed):
+                try:
+                    processed[index:index] = processor.process(processed.pop(index))
+                except Exception as err:
+                    raise ProcessorError(
+                        f"Processor '{name}' ({processor}) failed during "
+                        f" processing. {err}"
+                    )
+
+        return processed
+
+    def finalize(self):
+        """Performs final steps after each save operation has complete."""
+
+        # Finalize all processors.
+        for name, processor in self._processors.items():
+            # Once again this exception handler is exceptionally (!) broad, to ensure
+            # that any unhandled exception, including from downstream libraries, are
+            # caught and handled consistently (except for BaseException derived).
+            try:
+                processor.finalize()
+            except Exception as err:
+                # As this runs after saving data and pointers, all we can really do is
+                # log this and continue.
+                self.logger.error(
+                    "Processor failed during finalization.",
+                    extra={
+                        "identity": name,
+                        "processor": processor,
+                        "exception": err,
+                        **self.log_context,
+                    },
+                )
 
     @property
     def hashes(self) -> Dict[str, set[str]]:
@@ -661,7 +756,10 @@ class BaseConnector:
         try:
             self._hashes[self.pointer] = set(
                 json.loads(
-                    self._cache.get(self.cache_key(CACHE_KEY_SEEN), self.operation)
+                    self._cache.get(
+                        self.cache_key(CACHE_KEY_SEEN),
+                        self.operation,
+                    )
                 )
             )
         except (TypeError, json.decoder.JSONDecodeError) as err:
@@ -945,4 +1043,5 @@ class BaseConnector:
             )
 
         # Bye-bye lock.
+        self._lock_expiry = None
         self._lock_expiry = None

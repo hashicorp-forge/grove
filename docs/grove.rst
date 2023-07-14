@@ -19,6 +19,7 @@ Subpackages
    grove.helpers
    grove.outputs
    grove.secrets
+   grove.processors
 
 Submodules
 ----------

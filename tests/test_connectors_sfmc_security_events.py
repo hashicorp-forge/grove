@@ -69,7 +69,7 @@ class SFMCAuditTestCase(unittest.TestCase):
         )
 
         self.connector.run()
-        self.assertEqual(self.connector._saved, 2)
+        self.assertEqual(self.connector._saved["logs"], 2)
         self.assertEqual(self.connector.pointer, "2019-01-02T12:00:00.00")
 
     @responses.activate
@@ -90,5 +90,5 @@ class SFMCAuditTestCase(unittest.TestCase):
         )
 
         self.connector.run()
-        self.assertEqual(self.connector._saved, 7)
+        self.assertEqual(self.connector._saved["logs"], 7)
         self.assertEqual(self.connector.pointer, "2019-01-07T12:00:00.00")

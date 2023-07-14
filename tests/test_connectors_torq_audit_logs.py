@@ -92,7 +92,7 @@ class TorqAuditLogsTestCase(unittest.TestCase):
         )
 
         self.connector.run()
-        self.assertEqual(self.connector._saved, 4)
+        self.assertEqual(self.connector._saved["logs"], 4)
         # it's reverse chronological so the earlier timestamp should be recorded
         self.assertEqual(self.connector.pointer, "2022-06-27T11:35:10.681687Z")
 
@@ -134,5 +134,5 @@ class TorqAuditLogsTestCase(unittest.TestCase):
         )
 
         self.connector.run()
-        self.assertEqual(self.connector._saved, 1)
+        self.assertEqual(self.connector._saved["logs"], 1)
         self.assertEqual(self.connector.pointer, "2022-06-07T11:35:11.681687Z")

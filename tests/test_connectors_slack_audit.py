@@ -102,7 +102,7 @@ class SlackAuditTestCase(unittest.TestCase):
         )
 
         self.connector.run()
-        self.assertEqual(self.connector._saved, 2)
+        self.assertEqual(self.connector._saved["logs"], 2)
         self.assertEqual(self.connector.pointer, "1521214344")
 
     @responses.activate
@@ -122,5 +122,5 @@ class SlackAuditTestCase(unittest.TestCase):
         )
 
         self.connector.run()
-        self.assertEqual(self.connector._saved, 19)
+        self.assertEqual(self.connector._saved["logs"], 19)
         self.assertEqual(self.connector.pointer, "1521214944")

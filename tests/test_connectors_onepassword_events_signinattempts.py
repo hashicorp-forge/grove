@@ -90,7 +90,7 @@ class OnePasswordSigninEventTestCase(unittest.TestCase):
 
         # Ensure only a single value is returned, and the pointer is properly set.
         self.connector.run()
-        self.assertEqual(self.connector._saved, 2)
+        self.assertEqual(self.connector._saved["logs"], 2)
         self.assertEqual(self.connector.pointer, "2021-03-01T16:42:50-03:00")
 
     @responses.activate
@@ -130,5 +130,5 @@ class OnePasswordSigninEventTestCase(unittest.TestCase):
 
         # Ensure only a single value is returned, and the pointer is properly set.
         self.connector.run()
-        self.assertEqual(self.connector._saved, 2)
+        self.assertEqual(self.connector._saved["logs"], 2)
         self.assertEqual(self.connector.pointer, "2021-03-01T16:42:50-03:00")

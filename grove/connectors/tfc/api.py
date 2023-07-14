@@ -80,7 +80,7 @@ class Client:
     ) -> AuditLogEntries:
         """Fetches a list of audit logs which match the provided filters.
 
-        :param since: The ISO8601 format of the most recent event to include (inclusive).
+        :param since: The ISO8601 date of the most recent event to include (inclusive).
         :param cursor: The page to fetch. If omitted, endpoint returns first page.
         :param page_size: Number of audit events per page. Defaults to 1000.
 

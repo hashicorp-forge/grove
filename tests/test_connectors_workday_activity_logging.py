@@ -194,7 +194,7 @@ class WorkdayActivityLogging(unittest.TestCase):
         # Check the pointer matches the latest execution_time value, and that the
         # expected number of logs were returned.
         self.connector.run()
-        self.assertEqual(self.connector._saved, 113)
+        self.assertEqual(self.connector._saved["logs"], 113)
         self.assertEqual(self.connector.pointer, "2021-10-12T23:50:09.752Z")
 
     @responses.activate
@@ -234,7 +234,7 @@ class WorkdayActivityLogging(unittest.TestCase):
 
         # Ensure only a single value is returned, and the pointer is properly set.
         self.connector.run()
-        self.assertEqual(self.connector._saved, 13)
+        self.assertEqual(self.connector._saved["logs"], 13)
         self.assertEqual(self.connector.pointer, "2021-10-12T23:50:09.752Z")
 
     @responses.activate
@@ -272,4 +272,4 @@ class WorkdayActivityLogging(unittest.TestCase):
             ),
         )
         self.connector.run()
-        self.assertEqual(self.connector._saved, 0)
+        self.assertEqual(self.connector._saved["logs"], 0)

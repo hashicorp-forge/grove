@@ -20,6 +20,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: pip install --upgrade pip setuptools wheel tox
-      - run: python setup.py install # required for e2e tests
+      - run: pip install . # required for e2e tests
       - run: make lint
       - run: tox

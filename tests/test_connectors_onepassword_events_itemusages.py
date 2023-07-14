@@ -90,7 +90,7 @@ class OnePasswordItemUsageEventTestCase(unittest.TestCase):
 
         # Ensure only a single value is returned, and the pointer is properly set.
         self.connector.run()
-        self.assertEqual(self.connector._saved, 3)
+        self.assertEqual(self.connector._saved["logs"], 3)
         self.assertEqual(self.connector.pointer, "2020-06-11T16:42:55-03:00")
 
     @responses.activate
@@ -130,5 +130,5 @@ class OnePasswordItemUsageEventTestCase(unittest.TestCase):
 
         # Ensure only a single value is returned, and the pointer is properly set.
         self.connector.run()
-        self.assertEqual(self.connector._saved, 2)
+        self.assertEqual(self.connector._saved["logs"], 2)
         self.assertEqual(self.connector.pointer, "2020-06-11T16:52:55-03:00")
