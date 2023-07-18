@@ -42,7 +42,7 @@ cookiecutter ./
 In order to work with this template the following dependencies should be installed in
 your development environment:
 
-* [Python >= 3.8](https://www.python.org/downloads/release/python-380/)
+* [Python >= 3.9](https://www.python.org/downloads/release/python-390/)
 * [`cookiecutter`](https://github.com/cookiecutter/cookiecutter)
 
 Once Python is installed `cookiecutter` may be installed using `pip`:

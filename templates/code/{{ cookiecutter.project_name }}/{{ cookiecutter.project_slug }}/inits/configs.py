@@ -3,10 +3,11 @@
 import logging
 from typing import Optional
 
+from pydantic import BaseSettings, Field, ValidationError
+
 from grove.configs import BaseConfig
 from grove.exceptions import ConfigurationException
 from grove.helpers import parsing
-from pydantic import BaseSettings, Field, ValidationError
 
 
 class Configuration(BaseSettings):
