@@ -15,8 +15,7 @@ classifiers = [
     "Natural Language :: English",
 ]
 dependencies = [
-    # "grove>=1.0.0,<2.0",
-    "grove==1.0.0rc1",
+    "grove>=1.0.0,<2.0",
 ]
 
 [project.optional-dependencies]
