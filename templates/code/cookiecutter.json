@@ -1,5 +1,5 @@
 {
-    "project_type": ["outputs", "caches", "secrets", "configs", "connectors"],
+    "project_type": ["outputs", "caches", "secrets", "configs", "processors", "connectors"],
     "project_description": "A short description about this project.",
     "provider_name": "company name",
     "provider_product": "application name",

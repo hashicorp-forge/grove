@@ -1,23 +1,18 @@
 {
-    "python.formatting.provider": "black",
     "python.linting.enabled": true,
-    "python.linting.flake8Enabled": true,
-    "python.linting.flake8Args": [
-        "--config setup.cfg"
-    ],
-    "python.linting.mypyEnabled": true,
-    "python.linting.mypyArgs": [
-        "--config-file setup.cfg"
-    ],
-    "isort.args": [
-        "-sp setup.cfg"
-    ],
-    "python.linting.pylintEnabled": false,
+    "python.formatting.provider": "none",
     "[python]": {
+        "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
-            "source.organizeImports": true
+            "source.organizeImports": true,
         },
-        "editor.tabSize": 4,
+        "editor.defaultFormatter": "ms-python.black-formatter",
+    },
+    "editor.rulers": [
+        88
+    ],
+    "[terraform]": {
+        "editor.tabSize": 2,
         "editor.formatOnSave": true
     },
     "[shellscript]": {
@@ -29,9 +24,4 @@
         "editor.tabSize": 2,
         "editor.autoIndent": "advanced"
     },
-    "python.testing.pytestArgs": [
-        "tests"
-    ],
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
 }

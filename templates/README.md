@@ -12,6 +12,7 @@ Connector and plugin templates are built using [Cookiecutter](https://github.com
 which are provided to speed-up the creation of new Python which provide support for new
 services.
 
-If newly created plugins are intended to be public, newly created plugins should be
-published by their authors to PyPi directly. **The Grove project cannot accept**
-**pull-requests for the addition of new plugins and connectors into this repository.**
+If newly created plugins are intended to be public, newly created plugins can be
+published by their authors to PyPi directly. Plugins and connectors intended to be
+contributed back to the Grove project directly - where possible - cannot be created
+using this Cookiecutter.

@@ -1,0 +1,122 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "{{ cookiecutter.project_name }}"
+readme = "README.md"
+description = "{{ cookiecutter.project_description }}"
+requires-python = ">=3.9"
+version = "0.0.1"
+authors = [{name = "{{ cookiecutter.full_name }}"}]
+license = {text = "MPL-2.0"}
+classifiers = [
+    "Programming Language :: Python :: 3.9",
+    "Natural Language :: English",
+]
+dependencies = [
+    "grove>=1.0.0,<2.0",
+]
+
+[project.optional-dependencies]
+tests = [
+    "black",
+    "coverage",
+    "ruff",
+    "types-setuptools",
+    "isort",
+    "mypy",
+    "pip-tools",
+    "mock",
+    "pytest",
+    "pytest-cov",
+    "responses",
+    "tox",
+    "types-requests",
+]
+
+[tool.setuptools.packages.find]
+include = ["{{ cookiecutter.project_slug }}"]
+
+{% if cookiecutter.project_type == "connectors" -%}
+[project.entry-points."grove.connectors"]
+{{ cookiecutter.provider_name }}_{{ cookiecutter.provider_product }}_example_logs = "{{ cookiecutter.project_slug }}.example_logs:Connector"
+{%- else %}
+[project.entry-points."grove.{{ cookiecutter.project_type }}"]
+{{ cookiecutter.provider_slug }} = "{{ cookiecutter.project_slug }}:Handler"
+{%- endif %}
+
+[tool.mypy]
+files = [
+    "./{{ cookiecutter.project_slug }}/**/*.py",
+    "./tests/**/*.py"
+]
+disable_error_code = "attr-defined"
+allow_redefinition = false
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_untyped_calls = false
+ignore_errors = false
+ignore_missing_imports = true
+implicit_reexport = false
+local_partial_types = true
+strict_optional = true
+strict_equality = true
+no_implicit_optional = true
+warn_no_return = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+warn_unreachable = true
+
+[tool.isort]
+multi_line_output = 3
+profile = "black"
+
+[tool.pytest.ini_options]
+junit_family = "xunit2"
+norecursedirs = ".*"
+self-contained-html = true
+testpaths = [
+    "tests"
+]
+addopts = """
+    --strict
+    --tb=auto
+    --cov-report=term-missing:skip-covered
+    --cov-branch
+    -p no:doctest
+    -p no:warnings
+    -s
+"""
+
+[tool.tox]
+legacy_tox_ini = """
+    [tox]
+    envlist = linters,py3
+
+    [testenv]
+    pip_version = pip
+    extras = tests
+    commands = pytest -c pyproject.toml {posargs}
+    srcs = {{ cookiecutter.project_slug }}
+
+    [testenv:linters]
+    basepython = python3
+    usedevelop = true
+    commands =
+        {[testenv:ruff]commands}
+        {[testenv:mypy]commands}
+
+    [testenv:ruff]
+    basepython = python3
+    skip_install = true
+    commands =
+        ruff check {[testenv]srcs}
+
+    [testenv:mypy]
+    basepython3 = python3
+    skip_install = true
+    commands =
+        - mypy --config-file pyproject.toml {[testenv]srcs}
+"""
