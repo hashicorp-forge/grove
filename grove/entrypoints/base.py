@@ -4,6 +4,7 @@
 """Provides functions used between entrypoints."""
 
 import os
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List
 
@@ -77,7 +78,11 @@ def entrypoint(context: Dict[str, Any]):
 
     :param context: Contextual information relating to the current runtime.
     """
-    logger = Logger("grove", logger_formatter=GroveFormatter(context))
+    logger = Logger(
+        "grove",
+        logger_formatter=GroveFormatter(context),
+        stream=sys.stderr,
+    )
     logger.info("Grove started")
 
     # Attempt to load connector configuration, failure to do so is not recoverable.

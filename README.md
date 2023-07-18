@@ -1,7 +1,7 @@
 <p align="center">
     <br /><br />
     <img src="docs/static/grove-logo-small.png?raw=True" alt="Grove">
-    <br />
+    <br /><br />
 </p>
 
 Grove is a Software as a Service (SaaS) log collection framework, designed to support
