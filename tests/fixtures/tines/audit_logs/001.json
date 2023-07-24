@@ -1,0 +1,27 @@
+{
+    "audit_logs": [
+      {
+        "created_at": "2023-07-21T14:21:30Z",
+        "operation_name": "UserCredentialDestruction",
+        "id": 1488526,
+        "inputs": {
+          "credentialId": 3013
+        },
+        "request_ip": "192.0.2.1",
+        "request_user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0",
+        "tenant_id": 5044,
+        "updated_at": "2023-07-21T14:21:30Z",
+        "user_email": "user@example.org",
+        "user_id": 7642,
+        "user_name": "Example User"
+      }
+    ],
+    "meta": {
+      "current_page": "https://my-tenant.tines.com/api/v1/audit_logs?per_page=1&page=1",
+      "previous_page": null,
+      "next_page": "https://my-tenant.tines.com/api/v1/audit_logs?per_page=1&page=2",
+      "per_page": 1,
+      "pages": 2,
+      "count": 2
+    }
+  }

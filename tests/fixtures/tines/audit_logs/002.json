@@ -1,0 +1,62 @@
+{
+    "audit_logs": [
+      {
+        "created_at": "2023-07-21T14:00:30Z",
+        "operation_name": "UserCredentialSave",
+        "id": 1488227,
+        "inputs": {
+          "inputs": {
+            "name": "Example",
+            "mode": "TEXT",
+            "value": "REDACTED",
+            "description": "",
+            "jwtPayload": "REDACTED",
+            "jwtPrivateKey": "REDACTED",
+            "jwtAutoGenerateTimeClaims": "REDACTED",
+            "jwtAlgorithm": "REDACTED",
+            "jwtHs256Secret": "REDACTED",
+            "oauthGrantType": "REDACTED",
+            "oauthClientId": "REDACTED",
+            "oauthScope": "REDACTED",
+            "oauthClientSecret": "REDACTED",
+            "oauthUrl": "REDACTED",
+            "awsAuthenticationType": "REDACTED",
+            "oauthTokenUrl": "REDACTED",
+            "oauthPkceCodeChallengeMethod": "REDACTED",
+            "awsAccessKey": "REDACTED",
+            "awsSecretKey": "REDACTED",
+            "awsAssumedRoleArn": "REDACTED",
+            "awsAssumedRoleExternalId": "REDACTED",
+            "httpRequestLocationOfToken": "REDACTED",
+            "httpRequestTtl": "REDACTED",
+            "httpRequestOptions": "REDACTED",
+            "mtlsClientCertificate": "REDACTED",
+            "mtlsClientPrivateKey": "REDACTED",
+            "mtlsRootCertificate": "REDACTED",
+            "readAccess": "TEAM",
+            "allowedHosts": "REDACTED",
+            "icon": "REDACTED",
+            "emoji": "REDACTED",
+            "preserveNewlineCharacters": "REDACTED",
+            "teamId": 12723,
+            "folderId": 332
+          }
+        },
+        "request_ip": "192.0.2.1",
+        "request_user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0",
+        "tenant_id": 5044,
+        "updated_at": "2023-07-21T14:00:30Z",
+        "user_email": "user@example.org",
+        "user_id": 7642,
+        "user_name": "Example User"
+      }
+    ],
+    "meta": {
+      "current_page": "https://my-tenant.tines.com/api/v1/audit_logs?per_page=1&page=2",
+      "previous_page": "https://my-tenant.tines.com/api/v1/audit_logs?per_page=1&page=1",
+      "next_page": null,
+      "per_page": 1,
+      "pages": 2,
+      "count": 2
+    }
+  }

@@ -1,0 +1,43 @@
+{
+    "audit_logs": [
+      {
+        "created_at": "2023-07-21T10:32:37Z",
+        "operation_name": "AuthenticationTokenCreation",
+        "id": 1484335,
+        "inputs": {
+          "inputs": {
+            "name": "Grove",
+            "isServiceToken": false
+          }
+        },
+        "request_ip": "192.0.2.1",
+        "request_user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0",
+        "tenant_id": 5044,
+        "updated_at": "2023-07-21T10:32:37Z",
+        "user_email": "user@example.org",
+        "user_id": 7642,
+        "user_name": "Peter Adkins"
+      },
+      {
+        "created_at": "2023-07-21T10:31:57Z",
+        "operation_name": "Login",
+        "id": 1484317,
+        "inputs": null,
+        "request_ip": "192.0.2.1",
+        "request_user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0",
+        "tenant_id": 5044,
+        "updated_at": "2023-07-21T10:31:57Z",
+        "user_email": "user@example.org",
+        "user_id": 7642,
+        "user_name": " "
+      }
+    ],
+    "meta": {
+      "current_page": "https://my-tenant.tines.com/api/v1/audit_logs?per_page=2&page=4",
+      "previous_page": null,
+      "next_page": null,
+      "per_page": 2,
+      "pages": 1,
+      "count": 2
+    }
+  }

@@ -1,0 +1,6 @@
+{
+    "key": "API_TOKEN_HERE",
+    "identity": "TENANT_ID_HERE",
+    "name": "tines-audit-logs-example",
+    "connector": "tines_audit_logs"
+}
