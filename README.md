@@ -32,11 +32,10 @@ us via email at security@hashicorp.com, rather than filing a GitHub issue.
 
 <p align="center">
     <br /><br />
-    <img src="docs/static/grove-support.png?raw=True" alt="Grove support overview">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/static/grove-support.png?raw=True">
-      <source media="(prefers-color-scheme: light)" srcset="docs/static/grove-support-light.png?raw=True">
-      <img src="docs/static/grove-support-light.png?raw=True" alt="Overview of supported services, also listed below" >
+      <source media="(prefers-color-scheme: dark)" srcset="docs/static/grove-support-light.png?raw=True">
+      <source media="(prefers-color-scheme: light)" srcset="docs/static/grove-support.png?raw=True">
+      <img src="docs/static/grove-support.png?raw=True" alt="Overview of supported services, also listed below" >
     </picture>
     <br />
 </p>
