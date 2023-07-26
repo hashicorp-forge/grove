@@ -39,21 +39,22 @@ class Handler(BaseOutput):
         """
         datestamp = datetime.datetime.utcnow()
 
-        print(
-            json.dumps(
-                {
-                    "part": part,
-                    "kind": kind,
-                    "descriptor": descriptor,
-                    "connector": connector,
-                    "identity": identity,
-                    "operation": operation,
-                    "datestamp": datestamp.strftime(DATESTAMP_FORMAT),
-                    "message": json.loads(data.decode("utf-8")),
-                }
-            ),
-            flush=True,
-        )
+        for entry in data.decode("utf-8").splitlines():
+            print(
+                json.dumps(
+                    {
+                        "part": part,
+                        "kind": kind,
+                        "descriptor": descriptor,
+                        "connector": connector,
+                        "identity": identity,
+                        "operation": operation,
+                        "datestamp": datestamp.strftime(DATESTAMP_FORMAT),
+                        "message": json.loads(entry),
+                    }
+                ),
+                flush=True,
+            )
 
     def serialize(self, data: List[Any], metadata: Dict[str, Any] = {}) -> bytes:
         """Serialize data to a standard format (NDJSON).
