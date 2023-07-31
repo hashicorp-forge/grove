@@ -102,8 +102,8 @@ class Client:
                 response.raise_for_status()
                 break
             except requests.exceptions.RequestException as err:
-                # 403s are used with a header to indicate rate-limit exceeded.
-                if getattr(err.response, "status_code", None) != 403:
+                # 403s OR 429s are used with a header to indicate rate-limit exceeded.
+                if int(getattr(err.response, "status_code", 0)) not in [403, 429]:
                     raise RequestFailedException(err)
 
                 if err.response.headers.get("X-RateLimit-Remaining") != "0":
