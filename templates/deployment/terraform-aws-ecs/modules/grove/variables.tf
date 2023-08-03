@@ -7,10 +7,15 @@ variable "name" {
   default     = "grove"
 }
 
-variable "image_tag" {
+variable "container_image_tag" {
   type        = string
   description = "Grove tag associated with the docker image to deploy."
   default     = "latest"
+}
+
+variable "output_bucket_name" {
+  type        = string
+  description = "The name of the S3 bucket to create for logs to be output to."
 }
 
 variable "cpu" {

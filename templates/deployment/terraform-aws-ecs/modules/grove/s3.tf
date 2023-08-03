@@ -3,12 +3,7 @@
 
 # Create the bucket for Grove to output collected logs to.
 resource "aws_s3_bucket" "logs" {
-  bucket = "${var.name}-output"
-}
-
-resource "aws_s3_bucket_acl" "logs_bucket_acl" {
-  bucket = aws_s3_bucket.logs.id
-  acl    = "private"
+  bucket = var.output_bucket_name
 }
 
 resource "aws_s3_bucket_versioning" "artifact_bucket_versioning" {

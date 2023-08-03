@@ -155,3 +155,4 @@ cython_debug/
 .terraform.lock.hcl
 *.tfstate
 *.tfstate.backup
+*.lock.info
