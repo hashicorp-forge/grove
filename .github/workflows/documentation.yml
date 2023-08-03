@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: A released documentation version to redeploy (tag).
+        description: A documentation version to deploy (refs/tags/... or commit).
         required: true
         type: string
 
@@ -28,7 +28,7 @@ jobs:
       - name: Checkout specified version
         uses: actions/checkout@v3
         with:
-          ref: refs/tags/${{ inputs.version }}
+          ref: ${{ inputs.version }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
