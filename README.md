@@ -1,9 +1,9 @@
 <p align="center">
     <br /><br />
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/static/grove-logo-small-light.png?raw=True">
-      <source media="(prefers-color-scheme: light)" srcset="docs/static/grove-logo-small.png?raw=True">
-      <img src="docs/static/grove-logo-small.png?raw=True" alt="Grove logo">
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hashicorp-forge/grove/main/docs/static/grove-logo-small-light.png?raw=True">
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/hashicorp-forge/grove/main/docs/static/grove-logo-small.png?raw=True">
+      <img src="https://raw.githubusercontent.com/hashicorp-forge/grove/main/docs/static/grove-logo-small.png?raw=True" alt="Grove logo">
     </picture>
     <br /><br />
 </p>
@@ -33,9 +33,9 @@ us via email at security@hashicorp.com, rather than filing a GitHub issue.
 <p align="center">
     <br /><br />
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/static/grove-support-light.png?raw=True">
-      <source media="(prefers-color-scheme: light)" srcset="docs/static/grove-support.png?raw=True">
-      <img src="docs/static/grove-support.png?raw=True" alt="Overview of supported services, also listed below" >
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hashicorp-forge/grove/main/docs/static/grove-support-light.png?raw=True">
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/hashicorp-forge/grove/main/docs/static/grove-support.png?raw=True">
+      <img src="https://raw.githubusercontent.com/hashicorp-forge/grove/main/docs/static/grove-support.png?raw=True" alt="Overview of supported services, also listed below" >
     </picture>
     <br />
 </p>
