@@ -12,6 +12,7 @@ resource "aws_ssm_parameter" "connector_documents" {
 
 # Deploy Grove into ECS Fargate.
 module "grove" {
-  depends_on = [aws_ssm_parameter.connector_documents]
-  source     = "./modules/grove"
+  source              = "./modules/grove"
+  container_image_tag = var.container_image_tag
+  output_bucket_name  = var.output_bucket_name
 }

@@ -3,6 +3,11 @@
 
 data "aws_region" "current" {}
 
+# Create a repository for container images.
+resource "aws_ecr_repository" "grove" {
+  name = "grove"
+}
+
 # Deploy an ECS Fargate cluster for Grove to run in.
 resource "aws_ecs_cluster" "grove" {
   name = "${var.name}-cluster"
@@ -35,7 +40,7 @@ resource "aws_ecs_task_definition" "grove" {
   container_definitions = jsonencode([
     {
       name      = "${var.name}-container"
-      image     = var.image
+      image     = "${aws_ecr_repository.grove.repository_url}:${var.container_image_tag}"
       essential = true
 
       # Configuration is set through environment variables.
@@ -53,7 +58,7 @@ resource "aws_ecs_task_definition" "grove" {
 
         # Configuration handler configuration.
         { name = "GROVE_CONFIG_HANDLER", value = "aws_ssm" },
-        { name = "GROVE_CONFIG_AWS_SSM_ASSUME_ROLE_ARN", value = data.aws_region.current.name },
+        { name = "GROVE_CONFIG_AWS_SSM_SSM_REGION", value = data.aws_region.current.name },
       ]
 
       # Used for operational logs from Fargate, NOT collected log data.
