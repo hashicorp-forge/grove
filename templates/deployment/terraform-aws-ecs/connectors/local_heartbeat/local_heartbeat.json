@@ -1,6 +1,6 @@
 {
   "name": "local_heartbeat",
   "connector": "local_heartbeat",
-  "identity": "b603c5cd-16f5-4a80-bf03-7e2289a046e7",
+  "identity": "deployment_demo",
   "key": "local_heartbeat"
 }

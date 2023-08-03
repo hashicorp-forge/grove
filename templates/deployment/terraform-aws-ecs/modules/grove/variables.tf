@@ -7,10 +7,10 @@ variable "name" {
   default     = "grove"
 }
 
-variable "image" {
+variable "image_tag" {
   type        = string
-  description = "Grove docker image to deploy"
-  default     = "hashicorp/grove:latest"
+  description = "Grove tag associated with the docker image to deploy."
+  default     = "latest"
 }
 
 variable "cpu" {
@@ -50,7 +50,7 @@ variable "log_level" {
 variable "schedule" {
   type        = string
   description = "The CloudWatch schedule to invoke the Grove on"
-  default     = "rate(15 minutes)"
+  default     = "rate(10 minutes)"
 }
 
 variable "log_retention_in_days" {

@@ -3,6 +3,11 @@
 
 data "aws_region" "current" {}
 
+# Create a repository for container images.
+resource "aws_ecr_repository" "grove" {
+  name = "grove"
+}
+
 # Deploy an ECS Fargate cluster for Grove to run in.
 resource "aws_ecs_cluster" "grove" {
   name = "${var.name}-cluster"
@@ -35,7 +40,7 @@ resource "aws_ecs_task_definition" "grove" {
   container_definitions = jsonencode([
     {
       name      = "${var.name}-container"
-      image     = var.image
+      image     = "${aws_ecr_repository.grove.repository_url}:${var.image_tag}"
       essential = true
 
       # Configuration is set through environment variables.
