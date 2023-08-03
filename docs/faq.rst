@@ -106,21 +106,29 @@ duplication of log entries is still possible under certain edge cases.
 "I built a new connector, can I open a pull-request?"
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-First off, thank you for helping to extend and make Grove better!
+Grove may be able to accept pull-requests for merging new connectors into Grove.
+However, the Grove project may not be able to accept pull-requests for connectors which
+require licensing or paid subscription access.
 
-Unfortunately, Grove is not able to accept pull-requests for merging new connectors and
-plugins into Grove directly. If you'd like to share a new connector or plugin with the
-community, please publish this directly to `PyPI`_ or as a release in your source
-control management (SCM) system - such as `Github`_.
+If you are unsure, please open a Github issue and we'll let you know!
+
+If you'd like to share a new connector or plugin directly with the community, please
+publish this directly to `PyPI`_ or as a release in your source control management
+(SCM) system - such as `Github`_.  Publishing extensions in this way allows users in the
+community to :code:`pip install` this new extension and reference it as part their
+deployment.
 
 Please ensure to follow the naming conventions described in the provided templates and
 the development section of this documentation to allow these to be discoverable.
-
-Publishing extensions in this way allows users in the community to :code:`pip install`
-this new extension and reference it as part their deployment.
 
 
 "I built a new plugin, can I open a pull-request?"
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Please see :ref:`"I built a new connector, can I open a pull-request?" <pull-request>`.
+Grove may be able to accept pull-requests for plugins which add or improve support
+for new backends and processors. However, the Grove project may not be able to accept
+plugins which have a significant number of required dependencies, or are for non-free
+backends which we are unable to test or maintain (generally due to lack of licensing,
+or access to the software).
+
+If you are unsure, please open a Github issue and we'll let you know!
