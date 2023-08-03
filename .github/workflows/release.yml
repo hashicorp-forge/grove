@@ -32,7 +32,7 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: python -m pip install --upgrade pip setuptools wheel twine
+        run: python -m pip install --upgrade pip setuptools wheel twine build
 
       - name: Build package
         run: python -m build
@@ -59,7 +59,7 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: python -m pip install --upgrade pip setuptools wheel twine
+        run: python -m pip install --upgrade pip setuptools wheel twine build
 
       - name: Install development tools
         run: pip install .[tests]
