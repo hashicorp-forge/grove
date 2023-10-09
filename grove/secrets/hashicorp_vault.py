@@ -197,7 +197,7 @@ class Handler(BaseSecret):
 
         for candidate in paths:
             secret = jmespath.search(candidate, secrets)
-            if type(secret) is str:
+            if isinstance(secret, str):
                 return secret
 
         raise AccessException(

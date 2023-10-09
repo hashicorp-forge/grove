@@ -119,7 +119,7 @@ def update_path(
 
         # By default, combine the new value with the existing value(s) - making sure to
         # handle dictionaries as well as lists.
-        if key in candidate and type(candidate[key]) == list:
+        if key in candidate and isinstance(candidate[key], list):
             candidate[key].append(value)
         else:
             candidate = {**candidate, key: value}
