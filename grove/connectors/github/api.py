@@ -111,24 +111,27 @@ class Client:
 
                 # Retry on rate-limit, but only if requested.
                 self.logger.warning("Rate-limit was exceeded during request")
-                if self.retry:
-                    time_current = int(
-                        datetime.datetime.now(datetime.timezone.utc).strftime("%s")
-                    )
-                    time_ratelimit_reset = int(
-                        err.response.headers.get("X-RateLimit-Reset", time_current)
-                    )
-
-                    # If there was no X-RateLimit-Reset header, or the time is in
-                    # the past, just wait for a second before retry.
-                    if time_ratelimit_reset > time_ratelimit_reset:
-                        time.sleep(time_ratelimit_reset - time_current)
-                    else:
-                        time.sleep(1)
-
-                    continue
-                else:
+                if not self.retry:
                     raise RateLimitException(err)
+
+                time_current = int(
+                    datetime.datetime.now(datetime.timezone.utc).strftime("%s")
+                )
+                time_ratelimit_reset = int(
+                    err.response.headers.get("X-RateLimit-Reset", time_current)
+                )
+                time_wait = time_ratelimit_reset - time_current
+
+                # If the rate-limit retry is greater than a few of minutes, just bail as
+                # we'll pick back up at the next execution.
+                if time_wait >= 180:
+                    raise RateLimitException(err)
+
+                # Only wait for a second if the retry time was unset or in the past.
+                if time_wait > 0:
+                    time.sleep(time_wait)
+                else:
+                    time.sleep(1)
 
         return HTTPResponse(headers=response.headers, body=response.json())
 

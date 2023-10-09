@@ -45,10 +45,7 @@ class AtlassianEventAuditTestCase(unittest.TestCase):
             status=200,
             content_type="application/json",
             body=bytes(
-                open(
-                    os.path.join(self.dir, "fixtures/atlassian/event_audit/001.json"),
-                    "r",
-                ).read(),
+                open(os.path.join(self.dir, "fixtures/atlassian/event_audit/001.json"), "r").read(), # noqa: E501
                 "utf-8",
             ),
         )
@@ -60,10 +57,7 @@ class AtlassianEventAuditTestCase(unittest.TestCase):
             status=200,
             content_type="application/json",
             body=bytes(
-                open(
-                    os.path.join(self.dir, "fixtures/atlassian/event_audit/002.json"),
-                    "r",
-                ).read(),
+                open(os.path.join(self.dir, "fixtures/atlassian/event_audit/002.json"), "r").read(), # noqa: E501
                 "utf-8",
             ),
         )
@@ -92,3 +86,37 @@ class AtlassianEventAuditTestCase(unittest.TestCase):
         self.connector.run()
         self.assertEqual(self.connector._saved["logs"], 1)
         self.assertEqual(self.connector.pointer, "2022-05-12T19:13:13Z")
+
+    @responses.activate
+    def test_client_rate_limit_429(self):
+        """Ensure ratelimit waiting is working as expected."""
+        # Rate limit the first request.
+        responses.add(
+            responses.GET,
+            re.compile(r"https://.*"),
+            status=429,
+            content_type="application/json",
+            body=bytes(),
+            headers={
+                "X-Ratelimit-Remaining": "0",
+                "X-Ratelimit-Reset": "0",  # Unix-time, so definitely in the past :)
+            },
+        )
+
+        # Succeed on the second.
+        responses.add(
+            responses.GET,
+            re.compile(r"https://.*"),
+            status=200,
+            content_type="application/json",
+            body=bytes(
+                open(os.path.join(self.dir, "fixtures/atlassian/event_audit/002.json"), "r").read(), # noqa: E501
+                "utf-8",
+            ),
+        )
+
+        # Ensure we sleep appropriately on rate-limit. This takes advantage of the retry
+        # logic sleeping for one second if the ratelimit-reset header is in the past.
+        with patch("time.sleep", return_value=None) as mock_sleep:
+            self.connector.run()
+            mock_sleep.assert_called_with(1)
