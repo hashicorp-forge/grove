@@ -106,6 +106,7 @@ local_file = "grove.secrets.local_file:Handler"
 [project.entry-points."grove.processors"]
 extract_paths = "grove.processors.extract_paths:Handler"
 filter_paths = "grove.processors.filter_paths:Handler"
+filter_entries = "grove.processors.filter_entries:Handler"
 split_path = "grove.processors.split_path:Handler"
 
 [tool.mypy]
