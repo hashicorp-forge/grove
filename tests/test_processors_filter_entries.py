@@ -4,7 +4,6 @@
 """Implements unit tests for the entry filtering processor."""
 
 import json
-import logging
 import os
 import unittest
 from unittest.mock import patch
