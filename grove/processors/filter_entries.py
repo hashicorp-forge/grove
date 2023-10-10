@@ -3,9 +3,9 @@
 
 """Grove processor to filter (delete) entire log entries based JMESPath queries.
 
-This processor is intended to allow dropping of log entries if a certain set of criteria
-is not met. This may be used to assist in reducing outputting noisy log entries where
-a given vendor does not provide filtering.
+This processor is intended to allow dropping of log entries when a set of criteria is
+met. This may be used to assist in reducing outputting noisy log entries where a given
+vendor does not provide a mechanism for filtering events.
 """
 
 import jmespath
@@ -29,8 +29,7 @@ class Handler(BaseProcessor):
         """Expresses the configuration and associated validators for the processor."""
 
         # Filters defines a list of JMESPath queries to be evaluated against each log
-        # entry in order. If ANY of the queries match the log entry when, then the
-        # log entry the entry will be dropped.
+        # entry in order.
         filters: List[str]
 
     def process(self, entry: Dict[str, Any]) -> List[Dict[str, Any]]:
