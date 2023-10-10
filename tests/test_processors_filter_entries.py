@@ -4,6 +4,7 @@
 """Implements unit tests for the entry filtering processor."""
 
 import json
+import logging
 import os
 import unittest
 from unittest.mock import patch
@@ -39,10 +40,9 @@ class ProcessorPathFilterTestCase(unittest.TestCase):
             open(os.path.join(self.dir, "fixtures/github/git/001.json"), "r")
         )
 
-        # Firstly, ensure two records exist to begin with.
-        self.assertEqual(len(entries), 2)
+        # Firstly, ensure four records exist to begin with.
+        self.assertEqual(len(entries), 4)
 
-        # Process all entries.
         records = []
         for entry in entries:
             records.extend(self.processor.process(entry))
