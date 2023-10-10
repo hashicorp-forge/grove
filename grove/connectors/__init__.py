@@ -704,19 +704,29 @@ class BaseConnector:
         if len(self._processors) < 1:
             return []
 
-        # As processors can modify the number of entries, we need to loop over them
-        # multiple times.
+        # As processors can modify the number of entries we need to do a few operations
+        # here to handle additions and removals between iterations.
         processed = parsing.quick_copy(entries)
 
         for name, processor in self._processors.items():
-            for index, _ in enumerate(processed):
+            index = 0
+            processed_size = len(processed)
+
+            while index < processed_size:
                 try:
                     processed[index:index] = processor.process(processed.pop(index))
                 except Exception as err:
                     raise ProcessorError(
-                        f"Processor '{name}' ({processor}) failed during "
-                        f" processing. {err}"
+                        f"Fatal error in processor '{name}' ({processor}). {err}"
                     )
+
+                # Adjust the loop index based on whether we've added or removed items.
+                current_size = len(processed)
+
+                if current_size < processed_size:
+                    processed_size = current_size
+                else:
+                    index += 1
 
         return processed
 
