@@ -6,10 +6,12 @@
 import os
 import re
 import unittest
+from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import responses
 
+from grove.connectors.atlassian.api import API_DATE_FORMAT
 from grove.connectors.atlassian.audit_events import Connector
 from grove.models import ConnectorConfig
 from tests import mocks
@@ -90,6 +92,9 @@ class AtlassianEventAuditTestCase(unittest.TestCase):
     @responses.activate
     def test_client_rate_limit_429(self):
         """Ensure ratelimit waiting is working as expected."""
+        now = datetime.utcnow()
+        later = now + timedelta(minutes=1)
+
         # Rate limit the first request.
         responses.add(
             responses.GET,
@@ -98,8 +103,7 @@ class AtlassianEventAuditTestCase(unittest.TestCase):
             content_type="application/json",
             body=bytes(),
             headers={
-                "X-Ratelimit-Remaining": "0",
-                "X-Ratelimit-Reset": "0",  # Unix-time, so definitely in the past :)
+                "X-Ratelimit-Reset": f"{later.strftime(API_DATE_FORMAT)}Z",
             },
         )
 
@@ -119,4 +123,4 @@ class AtlassianEventAuditTestCase(unittest.TestCase):
         # logic sleeping for one second if the ratelimit-reset header is in the past.
         with patch("time.sleep", return_value=None) as mock_sleep:
             self.connector.run()
-            mock_sleep.assert_called_with(1)
+            mock_sleep.assert_called_once()
