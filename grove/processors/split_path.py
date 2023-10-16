@@ -63,7 +63,9 @@ class Handler(BaseProcessor):
         processed = []
         children = jmespath.search(self.configuration.source, entry)
 
-        if not children or len(children) <= 1:
+        # To ensure we don't accidentally try and split a string or dictionary we need
+        # to make sure that the type of the found children - if any - is correct.
+        if not children or not isinstance(children, list) or len(children) < 1:
             return [entry]
 
         for child in children:

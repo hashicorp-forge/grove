@@ -156,3 +156,6 @@ cython_debug/
 *.tfstate
 *.tfstate.backup
 *.lock.info
+
+# Debugger configuration.
+.vscode/launch.json

@@ -722,11 +722,10 @@ class BaseConnector:
 
                 # Adjust the loop index based on whether we've added or removed items.
                 current_size = len(processed)
-
-                if current_size < processed_size:
-                    processed_size = current_size
-                else:
+                if current_size >= processed_size:
                     index += 1
+
+                processed_size = current_size
 
         return processed
 
