@@ -76,7 +76,7 @@ class Handler(BaseProcessor):
         if candidate is None:
             return [entry]
 
-        if isinstance(children, list):
+        if isinstance(candidate, list):
             children = candidate
         else:
             children = [candidate]
@@ -91,7 +91,7 @@ class Handler(BaseProcessor):
             value = None
             for path in self.configuration.values:
                 value = jmespath.search(path, child)
-                if value:
+                if value is not None:
                     break
 
             if value is None:

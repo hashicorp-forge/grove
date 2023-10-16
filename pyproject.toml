@@ -108,7 +108,7 @@ extract_paths = "grove.processors.extract_paths:Handler"
 filter_paths = "grove.processors.filter_paths:Handler"
 filter_entries = "grove.processors.filter_entries:Handler"
 split_path = "grove.processors.split_path:Handler"
-zip_path = "grove.processors.zip_path:Handler"
+zip_paths = "grove.processors.zip_paths:Handler"
 
 [tool.mypy]
 files = [
