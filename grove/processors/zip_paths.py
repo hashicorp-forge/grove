@@ -22,7 +22,6 @@ of "name", and uses the value from the "value" field:
     "parameters": {
         "owner": "a-user@example.org",
         "visibility": "private"
-   
     }
 
 Making this data considerably easier to work with during creation of indexes, and
