@@ -1,0 +1,32 @@
+{
+    "connector": "gsuite_activities",
+    "identity": "SERVICE_ACCOUNT_EMAIL",
+    "key": "BASE64_ENCODED_SERVICE_ACCOUNT_JSON",
+    "encoding": {
+        "key": "base64"
+    },
+    "delay": 60,
+    "name": "gsuite-flattened-drive-activities-example",
+    "operation": "drive",
+    "processors": [
+        {
+            "name": "One event per log entry",
+            "processor": "split_path",
+            "source": "events"
+        },
+        {
+            "name": "Flatten and zip event parameters",
+            "processor": "zip_paths",
+            "source": "events.parameters",
+            "key": "name",
+            "values": [
+                "value",
+                "boolValue",
+                "multiValue"
+            ]
+        }
+    ],
+    "outputs": {
+        "logs": "processed"
+    }
+}

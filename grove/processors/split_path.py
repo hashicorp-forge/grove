@@ -6,6 +6,30 @@
 This processor is intended to allow "fanning-out" a single log entry which contains
 several related operations into distinct log entries per item. The remainder of the
 log entry outside of the split path will not be modified.
+
+It is important to note that the list of elements which is fanned-out will be converted
+into a dictionary, rather than a list.
+
+As an example, in following sample:
+
+    {
+        "events": [
+            {"name": "First", "value": 1},
+            {"name": "Second", "value": 2},
+        ]
+    }
+
+After splitting based on "events", two records would be generated, which contain the
+following:
+
+    {
+        "events": {"name": "First", "value": 1},
+    }
+
+    {
+        "events": {"name": "Second", "value": 2},
+    }
+
 """
 
 from typing import Any, Dict, List
@@ -39,7 +63,9 @@ class Handler(BaseProcessor):
         processed = []
         children = jmespath.search(self.configuration.source, entry)
 
-        if len(children) <= 1:
+        # To ensure we don't accidentally try and split a string or dictionary we need
+        # to make sure that the type of the found children - if any - is correct.
+        if not children or not isinstance(children, list) or len(children) < 1:
             return [entry]
 
         for child in children:
@@ -47,7 +73,7 @@ class Handler(BaseProcessor):
                 parsing.update_path(
                     parsing.quick_copy(entry),
                     parsing.quote_aware_split(self.configuration.source),
-                    [child],
+                    child,
                     replace=True,
                 )
             )

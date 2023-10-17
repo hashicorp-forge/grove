@@ -35,16 +35,22 @@ class ProcessorPathMapperTestCase(unittest.TestCase):
         # Load and process the fixture.
         entries = json.load(
             open(
-                os.path.join(self.dir, "fixtures/gsuite/activities/001.json"),
+                os.path.join(self.dir, "fixtures/gsuite/activities/003.json"),
                 "r",
             )
         )
 
-        # Confirm that the initial log entry has two entries.
-        self.assertEqual(len(entries["items"]), 1)
+        # Strip the outer items list from the input logs, as Grove will have stripped
+        # this already.
+        entries = entries.get("items", [])
 
-        # Process a single log entry.
-        records = self.processor.process(entries["items"][0])
+        # Confirm that the initial log entry has one entry.
+        self.assertEqual(len(entries), 1)
 
-        # Confirm that two records resulted.
-        self.assertEqual(len(records), 2)
+        # Process the entries.
+        records = []
+        for entry in entries:
+            records.extend(self.processor.process(entry))
+
+        # Confirm that five records resulted after splitting.
+        self.assertEqual(len(records), 5)
