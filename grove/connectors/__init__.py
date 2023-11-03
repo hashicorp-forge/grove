@@ -70,13 +70,14 @@ class BaseConnector:
         # operation can be set in the configuration to instruct grove to only collect
         # those types of log data.
         self.key = self.configuration.key
+        self.kind = self.__class__.__module__
         self.identity = self.configuration.identity
         self.operation = self.configuration.operation
 
         # Define contextual log data to be appended to all log messages.
         self.log_context = {
             "operation": self.operation,
-            "connector": self.__class__.__module__,
+            "connector": self.kind,
             "identity": self.identity,
         }
 
@@ -159,7 +160,7 @@ class BaseConnector:
             self.lock()
         except ConcurrencyException as err:
             self.logger.warning(
-                "Connector may already be running in another location.",
+                f"Connector '{self.kind}' may already be running in another location.",
                 extra={"exception": err, **self.log_context},
             )
 
@@ -168,7 +169,7 @@ class BaseConnector:
             self.collect()
         except GroveException as err:
             self.logger.error(
-                "Connector was unable to complete collection successfully.",
+                f"Connector '{self.kind}' could not complete collection successfully.",
                 extra={"exception": err, **self.log_context},
             )
             self.unlock()
@@ -195,7 +196,7 @@ class BaseConnector:
             self.save_hashes()
         except AccessException as err:
             self.logger.error(
-                "Failed to save hashes to cache.",
+                f"Connector '{self.kind}' Failed to save hashes to cache.",
                 extra={"exception": err, **self.log_context},
             )
             return
@@ -211,7 +212,7 @@ class BaseConnector:
             )
         except AccessException as err:
             self.logger.error(
-                "Connector failed to save pointer, cannot continue.",
+                f"Connector '{self.kind}' failed to save pointer, cannot continue.",
                 extra={"exception": err, **self.log_context},
             )
             return
@@ -243,7 +244,7 @@ class BaseConnector:
             )
         except AccessException as err:
             self.logger.error(
-                "Failed to clean up windows and next pointer from cache.",
+                f"Connector '{self.kind}' failed to clean up windows and next pointer from cache.",  # noqa: E501
                 extra={"exception": err, **self.log_context},
             )
             return
@@ -257,7 +258,7 @@ class BaseConnector:
             self.save_hashes()
         except AccessException as err:
             self.logger.error(
-                "Failed to save hashes to cache.",
+                f"Connector '{self.kind}' failed to save hashes to cache.",
                 extra={"exception": err, **self.log_context},
             )
             return
@@ -324,7 +325,7 @@ class BaseConnector:
                 )
             except AccessException as err:
                 self.logger.error(
-                    "Failed to write logs to output, cannot continue.",
+                    "Connector '{self.kind}' failed to write logs to output, cannot continue.",  # noqa: E501
                     extra={
                         "part": self._part,
                         "exception": err,
@@ -392,7 +393,7 @@ class BaseConnector:
             )
         except AccessException as err:
             self.logger.error(
-                "Failed to save pointer to cache, cannot continue.",
+                f"Connector '{self.kind}' failed to save pointer to cache, cannot continue.",  # noqa: E501
                 extra={"exception": err, **self.log_context},
             )
             raise
@@ -743,7 +744,7 @@ class BaseConnector:
                 # As this runs after saving data and pointers, all we can really do is
                 # log this and continue.
                 self.logger.error(
-                    "Processor failed during finalization.",
+                    f"Connector '{self.kind}' processor failed during finalization.",
                     extra={
                         "identity": name,
                         "processor": processor,
