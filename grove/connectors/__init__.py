@@ -325,7 +325,7 @@ class BaseConnector:
                 )
             except AccessException as err:
                 self.logger.error(
-                    "Connector '{self.kind}' failed to write logs to output, cannot continue.",  # noqa: E501
+                    f"Connector '{self.kind}' failed to write logs to output, cannot continue.",  # noqa: E501
                     extra={
                         "part": self._part,
                         "exception": err,
