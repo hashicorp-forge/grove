@@ -109,7 +109,7 @@ class Client:
                 if getattr(err.response, "status_code", None) != 429:
                     raise RequestFailedException(err)
 
-                if err.response.headers.get("X-RateLimit-Remaining") != "0":
+                if err.response.headers.get("X-Rate-Limit-Remaining") != "0":
                     raise RequestFailedException(err)
 
                 # Retry on rate-limit, but only if requested.

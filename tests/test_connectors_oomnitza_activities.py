@@ -36,6 +36,7 @@ class OomnitzaAuditTestCase(unittest.TestCase):
         )
 
     @responses.activate
+    @patch("grove.connectors.oomnitza.api.API_PAGE_SIZE", 200)
     def test_collect_pagination(self):
         """Ensure pagination is working as expected."""
         responses.add(

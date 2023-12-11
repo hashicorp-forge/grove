@@ -12,7 +12,7 @@ from grove.exceptions import RequestFailedException
 from grove.types import AuditLogEntries, HTTPResponse
 
 API_BASE_URI = "https://{identity}.oomnitza.com"
-API_PAGE_SIZE = 200
+API_PAGE_SIZE = 2000
 
 
 class Client:
