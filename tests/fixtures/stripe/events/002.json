@@ -39,10 +39,10 @@
               "Address_City": "Any Town",
               "Address_Country": "US",
               "Address_Line1": "123 Fake Street",
-              "Address_PostalCode": "75791",
+              "Address_PostalCode": "12345",
               "Address_State": "TX",
-              "billing_account_id": "546779ca-d622-2276-2207-40fc12773c61",
-              "organization_id": "63c601b9-1a8c-22bb-2210-22bc55fb6ef9"
+              "billing_account_id": "123779ca-d622-2276-2207-40fc12773c61",
+              "organization_id": "123601b9-1a8c-22bb-2210-22bc55fb6ef9"
             },
             "name": "Purchasing 1",
             "next_invoice_sequence": 1,
@@ -50,7 +50,7 @@
             "preferred_locales": [],
             "shipping": {
               "address": {
-                "city": "North Tyler",
+                "city": "Any Town",
                 "country": "US",
                 "line1": "123 Fake Street",
                 "line2": "",

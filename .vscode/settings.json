@@ -24,5 +24,13 @@
         "editor.tabSize": 2,
         "editor.autoIndent": "advanced"
     },
-    "python.defaultInterpreterPath": "/Users/spencer/Projects/Abuse/GroveConnectorWork/venv_groveconnector/bin/python",
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./tests",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
 }

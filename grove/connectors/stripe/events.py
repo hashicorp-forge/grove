@@ -18,36 +18,38 @@ class Connector(BaseConnector):
     def collect(self):
         """Collects all events from the Stripe Events API.
 
-        This will first check whether there are any pointers cached to indicate previous
-        collections. If not, the last week of data will be collected.
+        Stripe's list API methods use cursor-based pagination with a unique ID value
+        for each event.
         """
 
-        client = StripeClient(self.key)  # set as env variable
-        paging = False
+        client = StripeClient(self.key)
+
+        params = {
+            "type": self.operation,
+            "limit": 100,
+        }
+        entries = None
 
         try:
             _ = self.pointer
         except NotFoundException:
-            self.pointer = str()
+            # Stripe does not use a timestamp for filtering, so this will collect as
+            # many results as Stripe is willing to give us during the first collection.
+            self.pointer = ""
 
         # Page over data using the cursor, saving returned data page by page.
         while True:
-            params = {
-                "type": self.operation,
-                "limit": 100,
-            }
+
             if self.pointer:
                 params["starting_after"] = self.pointer
 
-            if paging:
-                entries = entries.next_page()
-            else:
+            if not entries:
                 entries = client.events.list(params=params)
 
             # Save this batch of log entries.
-            self.save(entries.list())
+            self.save(list(entries.list()))
 
-            # Check if we need to continue paging.
-            paging = entries.has_more
-            if not paging:
+            # If the API doesn't return more data then we're finished with
+            # this collection.
+            if not entries.has_more:
                 break
