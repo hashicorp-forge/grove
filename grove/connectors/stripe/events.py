@@ -19,11 +19,10 @@ class Connector(BaseConnector):
         """Collects all events from the Stripe Events API.
 
         Stripe's list API methods use cursor-based pagination with a unique ID value
-        for each event.
+        for each event. The Stripe API allows up to 100 read operations per second,
+        which is set as the limit in the params object below.
         """
-
         client = StripeClient(self.key)
-
         params = {
             "type": self.operation,
             "limit": 100,
@@ -39,17 +38,21 @@ class Connector(BaseConnector):
 
         # Page over data using the cursor, saving returned data page by page.
         while True:
-
+            # If this has not run before, just collect all information Stripe will give
+            # us which is 30-days by default.
             if self.pointer:
                 params["starting_after"] = self.pointer
 
+            # Pagination is handled a little differently for Stripe due to their SDK,
+            # where we call a next_page rather than tracking a cursor.
             if not entries:
-                entries = client.events.list(params=params)
+                entries = client.events.list(params=params)  # type:ignore
+            else:
+                entries = entries.next_page()  # type:ignore
 
             # Save this batch of log entries.
-            self.save(list(entries.list()))
+            self.save(entries.data)
 
-            # If the API doesn't return more data then we're finished with
-            # this collection.
+            # If Stripe doesn't tell us we have more data, we're complete.
             if not entries.has_more:
                 break
