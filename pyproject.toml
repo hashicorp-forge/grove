@@ -43,7 +43,7 @@ tests = [
     "tox",
     "sphinx",
     "furo",
-    "moto[s3,ssm]",
+    "moto[s3,ssm]>=4.0,<5.0",
     "types-requests",
 ]
 
