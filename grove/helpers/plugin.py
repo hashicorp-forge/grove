@@ -20,7 +20,13 @@ def lookup_handler(name: str, group: str) -> EntryPoint:
 
     :raises ConfigurationException: The specified handler could not be located.
     """
-    for candidate in entry_points().select(group=group):
+    # Handle differences between importlib in Python 3.9, 3.10, and Python 3.12.
+    try:
+        entrypoints = entry_points().select(group=group)
+    except AttributeError:
+        entrypoints = entry_points().get(group, ())  # type: ignore
+
+    for candidate in entrypoints:
         if candidate.name == name:
             return candidate
 

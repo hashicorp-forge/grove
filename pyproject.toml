@@ -24,7 +24,6 @@ dependencies = [
     "twilio>=7.15,<8.0",
     "pydantic>=1.10,<2.0",
     "jmespath>=1.0.0,<2.0",
-    "importlib_metadata>=6.0,<7.0",
 ]
 
 [project.optional-dependencies]
