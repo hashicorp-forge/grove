@@ -20,13 +20,13 @@ def lookup_handler(name: str, group: str) -> EntryPoint:
 
     :raises ConfigurationException: The specified handler could not be located.
     """
-    # The 'group' kwarg for entry_points was added in Python 3.10, in order to support
-    # older versions of Python 3 we will not be using this feature. Additionally, using
-    # get() will raise deprecation warnings to use select() instead. However, select()
-    # was also added in Python 3.10, which would break backwards compatibility...
-    eps = entry_points()
+    # Handle differences between importlib in Python 3.9, 3.10, and Python 3.12.
+    try:
+        entrypoints = entry_points().select(group=group)
+    except AttributeError:
+        entrypoints = entry_points().get(group, ())  # type: ignore
 
-    for candidate in eps.get(group, []):
+    for candidate in entrypoints:
         if candidate.name == name:
             return candidate
 
