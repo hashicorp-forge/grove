@@ -117,7 +117,7 @@ files = [
     "./grove/**/*.py",
     "./tests/**/*.py"
 ]
-disable_error_code = "attr-defined, union-attr"
+disable_error_code = "attr-defined, union-attr, unused-ignore"
 allow_redefinition = false
 check_untyped_defs = true
 disallow_any_generics = true

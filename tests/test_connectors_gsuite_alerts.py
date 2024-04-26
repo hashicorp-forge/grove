@@ -5,8 +5,9 @@
 
 import os
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
+from google.auth.credentials import Credentials
 from googleapiclient.http import HttpMockSequence
 
 from grove.connectors.gsuite.alerts import Connector
@@ -39,11 +40,15 @@ class GSuiteAlertsTestCase(unittest.TestCase):
             },
         )
 
-    @patch("google.oauth2.service_account.Credentials.from_service_account_info")
     @patch("googleapiclient.discovery.build")
+    @patch("grove.connectors.gsuite.alerts.Connector.get_credentials")
     @patch("grove.connectors.gsuite.alerts.Connector.get_http_transport")
-    def test_collect_pagination(self, mock_transport, mock_request, mock_auth):
+    def test_collect_pagination(self, mock_transport, mock_auth, mock_request):
         """Ensure collection works as expected."""
+        credentials = Mock(spec=Credentials)
+        credentials.universe_domain = "googleapis.com"
+        mock_auth.return_value = credentials
+
         mock_transport.return_value = MockSequence(
             [
                 (
