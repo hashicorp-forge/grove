@@ -57,6 +57,7 @@ isn't listed here, support can be added by creating a custom connector!
 * SalesForce Marketing Cloud audit event logs
 * SalesForce Marketing Cloud security event logs
 * Slack audit logs
+* Stripe events
 * Tines audit logs
 * Terraform Cloud audit trails
 * Torq activity logs
