@@ -1,0 +1,7 @@
+{
+    "key": "BEARER_TOKEN_HERE",
+    "identity": "ORGANIZATION_ID_HERE",
+    "name": "stripe-events-example",
+    "connector": "stripe_events",
+    "operation": "*"
+}

@@ -1,0 +1,71 @@
+{
+    "object": "list",
+    "data": [
+      {
+        "id": "evt_1OonDcGsC9LSOJDcarfWbL08",
+        "object": "event",
+        "api_version": "2020-08-27",
+        "created": 1709127043,
+        "data": {
+          "object": {
+            "id": "cus_XXXXXXXXXXXXXX",
+            "object": "customer",
+            "address": {
+              "city": "Any Town",
+              "country": "US",
+              "line1": "123 Fake Street",
+              "line2": "",
+              "postal_code": "12345",
+              "state": "TX"
+            },
+            "balance": 0,
+            "created": 1709127043,
+            "currency": null,
+            "default_currency": null,
+            "default_source": null,
+            "delinquent": false,
+            "description": "Billing Account Description",
+            "discount": null,
+            "email": "test@example.com",
+            "invoice_prefix": "XXXXXXX",
+            "invoice_settings": {
+              "custom_fields": null,
+              "default_payment_method": "pm_XXXXXXXXXXX",
+              "footer": null,
+              "rendering_options": null
+            },
+            "livemode": true,
+            "metadata": {
+              "Address_City": "Any Town",
+              "Address_Country": "US",
+              "Address_Line1": "123 Fake Street",
+              "Address_PostalCode": "12345",
+              "Address_State": "TX",
+              "billing_account_id": "123779ca-d622-2276-2207-40fc12773c61",
+              "organization_id": "123601b9-1a8c-22bb-2210-22bc55fb6ef9"
+            },
+            "name": "Purchasing 1",
+            "next_invoice_sequence": 1,
+            "phone": null,
+            "preferred_locales": [],
+            "shipping": {
+              "address": {
+                "city": "Any Town",
+                "country": "US",
+                "line1": "123 Fake Street",
+                "line2": "",
+                "postal_code": "12345",
+                "state": "TX"
+              },
+              "name": "Purchasing 1",
+              "phone": null
+            },
+            "tax_exempt": "exempt",
+            "test_clock": null
+          }
+        }
+      }
+    ],
+    "has_more": true,
+    "url": "/v1/events"
+  }
