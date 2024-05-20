@@ -68,6 +68,7 @@ class Connector(BaseConnector):
 
         # Page over all alerts since the last pointer.
         more_requests = True
+        page_size = 1000
 
         with build("alertcenter", "v1beta1", http=http) as service:
             while more_requests:
@@ -82,19 +83,18 @@ class Connector(BaseConnector):
                         extra={"cursor": cursor},
                     )
                     request = service.alerts().list(
-                        orderBy="createTime asc", pageToken=cursor
+                        orderBy="createTime asc",
+                        pageSize=page_size,
+                        pageToken=cursor,
                     )
                 else:
-                    # Google's APIs return timestamps with microseconds, as a result the
-                    # potential for two records to occur at the same time and one be
-                    # missed is EXTREMELY low. As a result, we'll use > rather than >=
-                    # here.
                     self.logger.debug(
                         "Using createTime from pointer",
                         extra={"pointer": self.pointer},
                     )
                     request = service.alerts().list(
                         orderBy="createTime asc",
+                        pageSize=page_size,
                         filter=f'createTime > "{self.pointer}"',
                     )
 
