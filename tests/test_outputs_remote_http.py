@@ -28,7 +28,7 @@ class RemoteHTTPOutputTestCase(unittest.TestCase):
     def test_setup(self):
         """Ensures headers are correctly set."""
         EXPECTED_HEADERS = {
-            "Content-Type": "test/fixture",
+            "content-type": "test/fixture",
             "Example": "My-Example",
         }
 
