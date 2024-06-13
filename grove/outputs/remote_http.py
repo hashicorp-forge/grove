@@ -65,7 +65,7 @@ class Handler(BaseOutput):
             "Content-Type": "application/x-ndjson",
         }
 
-        # Construct the headers from the configured pipe delimeted values.
+        # Construct the headers from the configured pipe delimited values.
         if self.config.headers:
             for header in self.config.headers.split("|"):
                 key = header.split(":")[0]
