@@ -95,6 +95,7 @@ local_memory = "grove.caches.local_memory:Handler"
 aws_s3 = "grove.outputs.aws_s3:Handler"
 local_file = "grove.outputs.local_file:Handler"
 local_stdout = "grove.outputs.local_stdout:Handler"
+remote_http = "grove.outputs.remote_http:Handler"
 
 [project.entry-points."grove.configs"]
 aws_ssm = "grove.configs.aws_ssm:Handler"

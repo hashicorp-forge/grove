@@ -109,7 +109,12 @@ def update_path(
     # Set the value on the last recursion.
     if len(path) < 1:
         if value is None:
-            del candidate[key]
+            try:
+                del candidate[key]
+            except KeyError:
+                # We don't need to do anything if the key doesn't exist.
+                pass
+
             return candidate
 
         # If replace is set, don't combine the new value with the existing.
