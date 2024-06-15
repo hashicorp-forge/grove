@@ -26,3 +26,4 @@ jobs:
       - run: pip install . # required for e2e tests
       - run: make lint
       - run: tox
+      - run: docker build . --file Dockerfile -t grove
