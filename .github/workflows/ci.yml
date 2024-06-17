@@ -26,4 +26,10 @@ jobs:
       - run: pip install . # required for e2e tests
       - run: make lint
       - run: tox
-      - run: docker build . --file Dockerfile -t grove
+
+      # Although this won't execute on macOS, the Docker build should be the same
+      # across all OS. In future we may wish to ensure this runs on macOS, but
+      # for the time being ensuring the build completes on any system should be
+      # enough to confirm the Docker image is working.
+      - if: matrix.os != 'macos-latest'
+        run: docker build . --file Dockerfile -t grove
