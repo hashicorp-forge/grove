@@ -1,7 +1,7 @@
 # Copyright (c) HashiCorp, Inc.
 # SPDX-License-Identifier: MPL-2.0
 
-FROM python:3.9
+FROM python:3.9-slim
 
 WORKDIR /
 COPY templates/deployment/local-quick-start/test_entrypoint.sh /test_entrypoint.sh
