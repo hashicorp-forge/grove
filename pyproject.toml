@@ -61,6 +61,7 @@ aws_lambda = "grove.entrypoints.aws_lambda:entrypoint"
 local_process = "grove.entrypoints.local_process:entrypoint"
 
 [project.entry-points."grove.connectors"]
+fleetdm_vulnerability_logs = "grove.connectors.fleetdm.vulnerability_logs:Connector"
 atlassian_audit_events = "grove.connectors.atlassian.audit_events:Connector"
 github_audit_log = "grove.connectors.github.audit_log:Connector"
 gsuite_activities = "grove.connectors.gsuite.activities:Connector"
@@ -86,6 +87,7 @@ workday_activity_logging = "grove.connectors.workday.activity_logging:Connector"
 zoom_activities = "grove.connectors.zoom.activities:Connector"
 zoom_operationlogs = "grove.connectors.zoom.operationlogs:Connector"
 oomnitza_activities = "grove.connectors.oomnitza.activities:Connector"
+
 
 [project.entry-points."grove.caches"]
 aws_dynamodb = "grove.caches.aws_dynamodb:Handler"

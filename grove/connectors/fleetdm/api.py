@@ -13,7 +13,7 @@ import requests
 from grove.exceptions import RateLimitException, RequestFailedException
 from grove.types import AuditLogEntries, HTTPResponse
 
-API_BASE_URI = "https://{API_URI}"
+API_BASE_URI = "https://panel.int.fleetdm.hashicorp.services"
 
 
 class Client:
@@ -21,7 +21,7 @@ class Client:
         self,
         token: Optional[str] = None,
         retry: Optional[bool] = True,
-        API_URI: str =  None,
+        api_uri: Optional[str] =  None,
     ):
         """Setup a new FleetDM Vulnerability API client.
 
@@ -72,38 +72,38 @@ class Client:
 
     def get_hosts(
         self,
-        cursor: Optional[int] = None,                                     # query 	Page number of the results to fetch.
-        per_page: Optional[int] = 100,                                 # query 	Results per page.
+        cursor: Optional[str] = None,                                     # query 	Page number of the results to fetch.
+        per_page: Optional[str] = "100",                                 # query 	Results per page.
         order_key: Optional[str] = None,                                    # query 	What to order results by. Can be any column in the hosts table.
         after: Optional[str] = None,                                        # query 	The value to get results after. This needs order_key defined, as that's the column that would be used. Note: Use page instead of after
         order_direction: Optional[str] = None,                              # query 	Requires order_key. The direction of the order given the order key. Options include 'asc' and 'desc'. Default is 'asc'.
         status: Optional[str] = None,                                       # query 	Indicates the status of the hosts to return. Can either be 'new', 'online', 'offline', 'mia' or 'missing'.
         query: Optional[str] = None,                                        # query 	Search          # query keywords. Searchable fields include hostname, hardware_serial, uuid, ipv4 and the hosts' email addresses (only searched if the          # query looks like an email address, i.e. contains an '@', no space, etc.).
         additional_info_filters: Optional[str] = None,                      # query 	A comma-delimited list of fields to include in each host's additional object.
-        team_id: Optional[int] = None,                                  # query 	Available in Fleet Premium. Filters to only include hosts in the specified team. Use 0 to filter by hosts assigned to "No team".
-        policy_id: Optional[int] = None,                                # query 	The ID of the policy to filter hosts by.
+        team_id: Optional[str] = None,                                  # query 	Available in Fleet Premium. Filters to only include hosts in the specified team. Use 0 to filter by hosts assigned to "No team".
+        policy_id: Optional[str] = None,                                # query 	The ID of the policy to filter hosts by.
         policy_response: Optional[str] = None,                              # query 	Requires policy_id. Valid options are 'passing' or 'failing'.
-        software_version_id: Optional[int] = None,                      # query 	The ID of the software version to filter hosts by.
-        software_title_id: Optional[int] = None,                        # query 	The ID of the software title to filter hosts by.
+        software_version_id: Optional[str] = None,                      # query 	The ID of the software version to filter hosts by.
+        software_title_id: Optional[str] = None,                        # query 	The ID of the software title to filter hosts by.
         software_status: Optional[str] = None,                              # query 	The status of the software install to filter hosts by.
-        os_version_id: Optional[int] = None,                            # query 	The ID of the operating system version to filter hosts by.
+        os_version_id: Optional[str] = None,                            # query 	The ID of the operating system version to filter hosts by.
         os_name: Optional[str] = None,                                      # query 	The name of the operating system to filter hosts by. os_version must also be specified with os_name
         os_version: Optional[str] = None,                                   # query 	The version of the operating system to filter hosts by. os_name must also be specified with os_version
         vulnerability: Optional[str] = None,                                # query 	The cve to filter hosts by (including "cve-" prefix, case-insensitive).
         device_mapping: Optional[str] = None,                               # query 	Indicates whether device_mapping should be included for each host. See "Get host's Google Chrome profiles for more information about this feature.
-        mdm_id: Optional[int] = None,                                   # query 	The ID of the mobile device management (MDM) solution to filter hosts by (that is, filter hosts that use a specific MDM provider and URL).
+        mdm_id: Optional[str] = None,                                   # query 	The ID of the mobile device management (MDM) solution to filter hosts by (that is, filter hosts that use a specific MDM provider and URL).
         mdm_name: Optional[str] = None,                                     # query 	The name of the mobile device management (MDM) solution to filter hosts by (that is, filter hosts that use a specific MDM provider).
         mdm_enrollment_status: Optional[str] = None,                        # query 	The mobile device management (MDM) enrollment status to filter hosts by. Valid options are 'manual', 'automatic', 'enrolled', 'pending', or 'unenrolled'.
         macos_settings: Optional[str] = None,                               # query 	Filters the hosts by the status of the mobile device management (MDM) profiles applied to hosts. Valid options are 'verified', 'verifying', 'pending', or 'failed'. Note: If this filter is used in Fleet Premium without a team ID filter, the results include only hosts that are not assigned to any team.
-        munki_issue_id: Optional[int] = None,                           # query 	The ID of the munki issue (a Munki-reported error or warning message) to filter hosts by (that is, filter hosts that are affected by that corresponding error or warning message).
-        low_disk_space: Optional[int] = None,                           # query 	Available in Fleet Premium. Filters the hosts to only include hosts with less GB of disk space available than this value. Must be a number between 1-100.
-        disable_failing_policies: Optional[bool] = None,                 # query 	If true, hosts will return failing policies as 0 regardless of whether there are any that failed for the host. This is meant to be used when increased performance is needed in exchange for the extra information.
+        munki_issue_id: Optional[str] = None,                           # query 	The ID of the munki issue (a Munki-reported error or warning message) to filter hosts by (that is, filter hosts that are affected by that corresponding error or warning message).
+        low_disk_space: Optional[str] = None,                           # query 	Available in Fleet Premium. Filters the hosts to only include hosts with less GB of disk space available than this value. Must be a number between 1-100.
+        disable_failing_policies: Optional[str] = None,                 # query 	If true, hosts will return failing policies as 0 regardless of whether there are any that failed for the host. This is meant to be used when increased performance is needed in exchange for the extra information.
         macos_settings_disk_encryption: Optional[str] = None,               # query 	Filters the hosts by the status of the macOS disk encryption MDM profile on the host. Valid options are 'verified', 'verifying', 'action_required', 'enforcing', 'failed', or 'removing_enforcement'.
         bootstrap_package: Optional[str] = None,                            # query 	Available in Fleet Premium. Filters the hosts by the status of the MDM bootstrap package on the host. Valid options are 'installed', 'pending', or 'failed'.
         os_settings: Optional[str] = None,                                  # query 	Filters the hosts by the status of the operating system settings applied to the hosts. Valid options are 'verified', 'verifying', 'pending', or 'failed'. Note: If this filter is used in Fleet Premium without a team ID filter, the results include only hosts that are not assigned to any team.
         os_settings_disk_encryption: Optional[str] = None,                  # query 	Filters the hosts by the status of the disk encryption setting applied to the hosts. Valid options are 'verified', 'verifying', 'action_required', 'enforcing', 'failed', or 'removing_enforcement'. Note: If this filter is used in Fleet Premium without a team ID filter, the results include only hosts that are not assigned to any team.
-        populate_software: Optional[bool] = None,                        # query 	If true, the response will include a list of installed software for each host, including vulnerability data.
-        populate_policies: Optional[bool] = None,                        # query 	If true, the response will include policy data for each host.
+        populate_software: Optional[str] = None,                        # query 	If true, the response will include a list of installed software for each host, including vulnerability data.
+        populate_policies: Optional[str] = None,                        # query 	If true, the response will include policy data for each host.
     ) -> AuditLogEntries:
         """Fetches a list of audit logs which match the provided filters.
         :return: AuditLogEntries object containing a pagination cursor, and log entries.
@@ -151,7 +151,7 @@ class Client:
         # FleetDM returns an empty hosts array if there's no more pages of results,
         # so swap this for None in this case to avoid having to rely on "falsy" conditions.
         cursor = result.body.get("hosts", {})
-        if cursor == {}:
+        if not cursor:
             cursor = None
 
         # Return the cursor and the results to allow the caller to page as required.
