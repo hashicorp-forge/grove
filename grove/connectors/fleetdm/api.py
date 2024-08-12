@@ -6,7 +6,7 @@
 
 import logging
 import time
-from typing import Dict, Optional
+from typing import Optional, dict
 
 import jmespath
 import requests
@@ -20,7 +20,7 @@ class Client:
         self,
         token: Optional[str] = None,
         retry: Optional[bool] = True,
-        params: Optional[Dict] = None,
+        params: Optional[dict] = None,
         jmespath_queries: Optional[str] = None,
         api_uri: Optional[str] = None,
     ):
@@ -79,10 +79,10 @@ class Client:
 
     def get_hosts(
         self,
-        cursor: Optional[str] = None,
-        params: Optional[dict] = None,                                     # get parameters json dict from https://fleetdm.com/docs/rest-api/rest-api#list-hosts
-        jmespath_queries: Optional[str] = None,
-        api_uri: Optional[str] = None,
+        params: dict,                                     # get parameters json dict from https://fleetdm.com/docs/rest-api/rest-api#list-hosts
+        jmespath_queries: str,
+        api_uri: str,
+        cursor: Optional[int],
     ) -> AuditLogEntries:
         jmespath_queries = jmespath_queries
         
@@ -108,12 +108,12 @@ class Client:
             filteredResults.append(jmespath.search(jmespath_queries,host))
 
         # FleetDM returns an empty hosts array if there's no more pages of results,
-        # so swap this for None in this case to avoid having to rely on "falsy" conditions.
+        # so swap this for an empty string
         # Otherwise, increment the page and continue
-        if int(len(result.body.get("hosts"))) == 0:
+        if int(len(dict(result.body.get("hosts")))) == 0:
             cursor = None
-        else:
-            cursor = str(int(cursor) + 1)
+        elif cursor is not None:
+            cursor = int(cursor) + 1
 
         # Return the cursor and the results to allow the caller to page as required.
         return AuditLogEntries(cursor=cursor, entries=filteredResults)
