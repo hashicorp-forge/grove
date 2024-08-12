@@ -14,15 +14,12 @@ import requests
 from grove.exceptions import RateLimitException, RequestFailedException
 from grove.types import AuditLogEntries, HTTPResponse
 
-API_BASE_URI = "https://panel.int.fleetdm.hashicorp.services"
-
 
 class Client:
     def __init__(
         self,
         token: Optional[str] = None,
         retry: Optional[bool] = True,
-        api_uri: Optional[str] =  None,
         params: Optional[dict] = None,
     ):
         """Setup a new FleetDM Vulnerability API client.
@@ -81,41 +78,39 @@ class Client:
         self,
         cursor: Optional[str] = None,
         params: Optional[dict] = None,                                     # get parameters json dict from https://fleetdm.com/docs/rest-api/rest-api#list-hosts
+        jmespath_queries: Optional[str] = None,
+        api_uri: Optional[str] = None,
     ) -> AuditLogEntries:
         jmespath_queries = jmespath_queries
         
         """Fetches a list of audit logs which match the provided filters.
         :return: AuditLogEntries object containing a pagination cursor, and log entries.
         """
-#        print(params)
-#        p = json.loads(params)
-#        p["page"] = str(cursor)
+
+        params["page"] = str(cursor)
 
         # See psf/requests issue #2651 for why we can happily pass in None values and
         # not have the request key added to the URI.
         result = self._get(
-            f"{API_BASE_URI}/api/v1/fleet/hosts",
+            f"{api_uri}/api/v1/fleet/hosts",
             params,
         )
+
+        # The default response for a Fleet Hosts call including software returns a large
+        # volume - much more than required. We define a jmespath query string to filter
+        # the response from the API down to just the fields we need. The default if none
+        # is set is "*" which returns the whole API response
         filteredResults = []
-
-
         for host in result.body.get("hosts"):
-            filteredHost = []
-            for query in jmespath_queries:
-                filteredHost.append(jmespath.search(query,host))
-            filteredResults.append(filteredHost)
-
-        print(filteredResults)
+            filteredResults.append(jmespath.search(jmespath_queries,host))
 
         # FleetDM returns an empty hosts array if there's no more pages of results,
         # so swap this for None in this case to avoid having to rely on "falsy" conditions.
-        newCursor = result.body.get("hosts", {})
-        if not cursor:
+        # Otherwise, increment the page and continue
+        if int(len(result.body.get("hosts"))) == 0:
             cursor = None
         else:
             cursor = str(int(cursor) + 1)
 
         # Return the cursor and the results to allow the caller to page as required.
-#        return AuditLogEntries(cursor=cursor, entries=result.body.get("entries", []))
         return AuditLogEntries(cursor=cursor, entries=filteredResults)
