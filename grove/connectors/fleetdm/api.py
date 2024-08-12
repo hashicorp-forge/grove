@@ -21,6 +21,8 @@ class Client:
         token: Optional[str] = None,
         retry: Optional[bool] = True,
         params: Optional[dict] = None,
+        jmespath_queries: Optional[str] = None,
+        api_uri: Optional[str] = None,
     ):
         """Setup a new FleetDM Vulnerability API client.
 
@@ -35,7 +37,8 @@ class Client:
             "Authorization": f"Bearer {token}",
         }
         self.params = params
-
+        self.jmespath_queries = jmespath_queries
+        self.api_uri = api_uri
 
             
     def _get(
