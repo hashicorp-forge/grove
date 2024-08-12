@@ -6,7 +6,7 @@
 
 import logging
 import time
-from typing import Optional
+from typing import Dict, Optional
 
 import jmespath
 import requests
@@ -20,7 +20,7 @@ class Client:
         self,
         token: Optional[str] = None,
         retry: Optional[bool] = True,
-        params: Optional[dict] = None,
+        params: Optional[Dict] = None,
         jmespath_queries: Optional[str] = None,
         api_uri: Optional[str] = None,
     ):
