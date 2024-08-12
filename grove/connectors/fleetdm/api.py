@@ -4,12 +4,11 @@
 """FleetDM Vulnerability API client.
 """
 
-import json
 import logging
-import pprint
 import time
 from typing import Dict, Optional
 
+import jmespath
 import requests
 
 from grove.exceptions import RateLimitException, RequestFailedException
@@ -24,7 +23,7 @@ class Client:
         token: Optional[str] = None,
         retry: Optional[bool] = True,
         api_uri: Optional[str] =  None,
-        params: Optional[str] = "{}"
+        params: Optional[dict] = None,
     ):
         """Setup a new FleetDM Vulnerability API client.
 
@@ -38,11 +37,14 @@ class Client:
             "Accept": "application/json",
             "Authorization": f"Bearer {token}",
         }
+        self.params = params
 
+
+            
     def _get(
         self,
         url: str,
-        params: Optional[Dict[str, Optional[str]]] = None,
+        params: dict,
     ) -> HTTPResponse:
         """A GET wrapper to handle retries for the caller.
 
@@ -73,14 +75,15 @@ class Client:
                         raise RateLimitException(err)
 
                 raise RequestFailedException(err)
-        print(response.json())
         return HTTPResponse(headers=response.headers, body=response.json())
 
     def get_hosts(
         self,
         cursor: Optional[str] = None,
-        params: Optional[str] = {},                                     # get parameters json dict from https://fleetdm.com/docs/rest-api/rest-api#list-hosts
+        params: Optional[dict] = None,                                     # get parameters json dict from https://fleetdm.com/docs/rest-api/rest-api#list-hosts
     ) -> AuditLogEntries:
+        jmespath_queries = jmespath_queries
+        
         """Fetches a list of audit logs which match the provided filters.
         :return: AuditLogEntries object containing a pagination cursor, and log entries.
         """
@@ -92,8 +95,18 @@ class Client:
         # not have the request key added to the URI.
         result = self._get(
             f"{API_BASE_URI}/api/v1/fleet/hosts",
-            json.dumps(params),
+            params,
         )
+        filteredResults = []
+
+
+        for host in result.body.get("hosts"):
+            filteredHost = []
+            for query in jmespath_queries:
+                filteredHost.append(jmespath.search(query,host))
+            filteredResults.append(filteredHost)
+
+        print(filteredResults)
 
         # FleetDM returns an empty hosts array if there's no more pages of results,
         # so swap this for None in this case to avoid having to rely on "falsy" conditions.
@@ -104,4 +117,5 @@ class Client:
             cursor = str(int(cursor) + 1)
 
         # Return the cursor and the results to allow the caller to page as required.
-        return AuditLogEntries(cursor=cursor, entries=result.body.get("entries", []))
+#        return AuditLogEntries(cursor=cursor, entries=result.body.get("entries", []))
+        return AuditLogEntries(cursor=cursor, entries=filteredResults)
