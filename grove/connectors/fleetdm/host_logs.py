@@ -3,7 +3,7 @@
 
 """FleetDM Vulnerability connector for Grove."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from grove.connectors import BaseConnector
 from grove.connectors.fleetdm.api import Client
@@ -11,8 +11,8 @@ from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
-    NAME = "fleetdm_vulnerability_logs"
-    POINTER_PATH = "updated_at"
+    NAME = "fleetdm_host_logs"
+    POINTER_PATH = "software_updated_at"
 
 
     @property
@@ -97,23 +97,18 @@ class Connector(BaseConnector):
             jmespath_queries=self.jmespath_queries,
             api_uri=self.api_uri
             )
-        
-
-        # We do a full load of hosts on each run as there's no good way to determine if
-        # vulns have been added to the system even if the host itself has not updated since
-        # last time. Nonetheless, Grove requires a pointer to be set, so set the
-        # pointer to a week ago.
+        # We load hosts as they've had their software inventory updated. Grove requires
+        # a default pointer to be set, so set the pointer to a week ago.
+        # We start at the datetime set by the pointer and loop forward in time until the present
         try:
-            _ = self.pointer
+            cursor = str(datetime.fromisoformat(self.pointer))
         except NotFoundException:
-            self.pointer = (datetime.utcnow() - timedelta(days=7)).strftime("%s")
-
-        cursor = 0
-
+            cursor = str(datetime.now(timezone.utc) - timedelta(days=7))
+        self.pointer = cursor
         # Page over data using the cursor, saving returned data page by page.
         while True:
+            print(cursor)
             log = client.get_hosts(cursor=cursor,params=self.params,jmespath_queries=self.jmespath_queries,api_uri=self.api_uri)
-
             # Save this batch of log entries.
             self.save(log.entries)
 
@@ -121,4 +116,4 @@ class Connector(BaseConnector):
             if log.cursor is None:
                 break
             else:
-                cursor = int(log.cursor)
+                cursor = str(log.cursor)
