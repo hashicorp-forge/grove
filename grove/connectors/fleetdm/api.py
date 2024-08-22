@@ -83,7 +83,7 @@ class Client:
         params: Dict[str, Any],
         jmespath_queries: str,
         api_uri: str,
-        cursor: str | None,
+        cursor: Optional[str],
     ) -> AuditLogEntries:
         """Fetches a list of hosts which match the provided filters.
         :param params: get parameters json dict from https://fleetdm.com/docs/rest-api/rest-api#list-hosts
@@ -130,7 +130,7 @@ class Client:
         params: Dict[str, Any],                                     # get parameters json dict from https://fleetdm.com/docs/rest-api/rest-api#list-hosts
         jmespath_queries: str,
         api_uri: str,
-        cursor: int | None,
+        cursor: Optional[int],
         pointer: datetime
     ) -> AuditLogEntries:
         jmespath_queries = jmespath_queries
