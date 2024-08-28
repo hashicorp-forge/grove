@@ -153,7 +153,7 @@ class Client:
         # FleetDM returns an empty software array if there's no more pages of results,
         # so swap this for a None object
         # Otherwise, increment the page and continue
-        if int(len((result.body.get("software",[])))) == 0:
+        if len(result.body.get("software",[])) == 0:
             cursor = None
         elif cursor is not None:
             cursor = int(cursor) + 1
