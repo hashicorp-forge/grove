@@ -8,7 +8,10 @@ import json
 import logging
 from typing import Any, Dict
 
-from aws_lambda_powertools.logging.formatter import RESERVED_LOG_ATTRS, JsonFormatter
+from aws_lambda_powertools.logging.formatter import (  # type: ignore
+    RESERVED_LOG_ATTRS,
+    JsonFormatter,
+)
 
 
 class GroveFormatter(JsonFormatter):
