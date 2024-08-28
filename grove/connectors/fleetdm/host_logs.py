@@ -107,7 +107,6 @@ class Connector(BaseConnector):
         self.pointer = cursor
         # Page over data using the cursor, saving returned data page by page.
         while True:
-            print(cursor)
             log = client.get_hosts(cursor=cursor,params=self.params,jmespath_queries=self.jmespath_queries,api_uri=self.api_uri)
             # Save this batch of log entries.
             self.save(log.entries)
