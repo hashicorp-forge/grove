@@ -109,7 +109,7 @@ class Client:
         # FleetDM returns an empty hosts array if there's no more pages of results,
         # so swap this for a None object
         # Otherwise, grab the last seen update date/time to use in the next page of dates
-        if int(len((result.body.get("hosts",[])))) == 0:
+        if len(result.body.get("hosts", [])) == 0:
             cursor = None
         elif cursor is not None:
             # The default response for a Fleet Hosts call including software returns a large
