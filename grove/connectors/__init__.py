@@ -73,6 +73,7 @@ class BaseConnector:
         self.kind = self.__class__.__module__
         self.identity = self.configuration.identity
         self.operation = self.configuration.operation
+        self.interval = self.configuration.interval
 
         # Define contextual log data to be appended to all log messages.
         self.log_context = {

@@ -10,7 +10,7 @@ from typing import Dict, List
 
 from pydantic import BaseModel, Extra, Field, root_validator, validator
 
-from grove.constants import OPERATION_DEFAULT
+from grove.constants import DEFAULT_INTERVAL, DEFAULT_OPERATION
 from grove.exceptions import DataFormatException
 
 
@@ -100,7 +100,10 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
 
     # Operations allow connectors and users to filter which 'type' of events to collect
     # from API endpoints which allow filtering records to return.
-    operation: str = Field(OPERATION_DEFAULT)
+    operation: str = Field(DEFAULT_OPERATION)
+
+    # Interval to execute connector if running is a daemon.
+    interval: int = Field(DEFAULT_INTERVAL)
 
     # Processors allow processing of data during collection.
     processors: List[ProcessorConfig] = Field([])

@@ -14,9 +14,6 @@ CACHE_KEY_POINTER_PREV = "pointer_previous"
 CACHE_KEY_WINDOW_START = "window_start"
 CACHE_KEY_WINDOW_END = "window_end"
 
-# The default operation name to use where none is specified.
-OPERATION_DEFAULT = "all"
-
 # The common datestamp format to use for all date operations.
 DATESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 LOCK_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -36,6 +33,7 @@ ENV_GROVE_SECRET_HANDLER = "GROVE_SECRET_HANDLER"  # noqa: S105
 ENV_GROVE_TELEMETRY_URI = "GROVE_TELEMETRY_URI"
 ENV_GROVE_WORKER_COUNT = "GROVE_WORKER_COUNT"
 ENV_GROVE_LOCK_DURATION = "GROVE_LOCK_DURATION"
+ENV_GROVE_CONFIG_REFRESH = "GROVE_CONFIG_REFRESH"
 
 # Plugin groups (setuptools entrypoints).
 PLUGIN_GROUP_CACHE = "grove.caches"
@@ -53,3 +51,12 @@ DEFAULT_CONFIG_HANDLER = "local_file"
 # Maximum number of connectors to execute concurrently.
 DEFAULT_WORKER_COUNT = 50
 DEFAULT_LOCK_DURATION = 300  # seconds.
+
+# The default operation name to use where none is specified.
+DEFAULT_OPERATION = "all"
+
+# The default interval, in seconds, to use between connector executions in daemon mode.
+DEFAULT_INTERVAL = 300
+
+# The default interval, in seconds, to refresh connector configuration from the backend.
+DEFAULT_CONFIG_REFRESH = 300
