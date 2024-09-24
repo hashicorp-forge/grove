@@ -62,7 +62,6 @@ local_process = "grove.entrypoints.local_process:entrypoint"
 
 [project.entry-points."grove.connectors"]
 fleetdm_host_logs = "grove.connectors.fleetdm.host_logs:Connector"
-fleetdm_software_logs = "grove.connectors.fleetdm.software_logs:Connector"
 atlassian_audit_events = "grove.connectors.atlassian.audit_events:Connector"
 github_audit_log = "grove.connectors.github.audit_log:Connector"
 gsuite_activities = "grove.connectors.gsuite.activities:Connector"
