@@ -121,7 +121,12 @@ class Client:
             # to filter the response from the API down to just the fields we need. The
             # default if none is set is "*" which returns the whole API response
             for host in result.body.get("hosts"):
-                filteredResults.append(jmespath.search(jmespath_queries, host))
+                filter_host = jmespath.search(jmespath_queries, host)
+                for software in filter_host.get("software"):
+                    for k in filter_host.keys():
+                        if k != "software":
+                            software[k] = filter_host.get(k)
+                    filteredResults.append(software)
                 cursor = host.get("software_updated_at")
 
         # Return the cursor of the last processed date and the results to allow the
