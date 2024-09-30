@@ -52,7 +52,7 @@ class Handler(BaseCache):
 
         # Wrap validation errors to keep them in the Grove exception hierarchy.
         try:
-            self.config = Configuration()
+            self.config = Configuration()  # type: ignore
         except ValidationError as err:
             raise ConfigurationException(parsing.validation_error(err))
 
@@ -66,10 +66,12 @@ class Handler(BaseCache):
 
         :return: Value from the cache.
         """
-        path = os.file.join(self.config.path, CACHE_PATH.format(pk=pk, sk=sk))
+        path = os.path.join(self.config.path, CACHE_PATH.format(pk=pk, sk=sk))
         value = None
 
         try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+
             with open(path, "r") as hndl:
                 value = hndl.read()
         except FileNotFoundError:
@@ -78,15 +80,7 @@ class Handler(BaseCache):
             # care of this for us.
             pass
         except OSError as err:
-            raise AccessException(
-                "Unable to read cache entry.",
-                extra={
-                    "pk": pk,
-                    "sk": sk,
-                    "path": path,
-                    "exception": err,
-                },
-            )
+            raise AccessException(f"Unable to read cache entry from {path}. {err}")
 
         if value is None:
             self.logger.info("No value found in cache", extra={"pk": pk, "sk": sk})
@@ -115,7 +109,8 @@ class Handler(BaseCache):
         :raises ValueError: An incompatible set of parameters were provided.
         :raises DataFormatException: The provided constraint was not satisfied.
         """
-        path = os.file.join(self.config.path, CACHE_PATH.format(pk=pk, sk=sk))
+        current = None
+        path = os.path.join(self.config.path, CACHE_PATH.format(pk=pk, sk=sk))
 
         if constraint is not None and not_set:
             raise ValueError("A value cannot both have a constraint AND not be set.")
@@ -124,7 +119,7 @@ class Handler(BaseCache):
         # NOT already be set.
         try:
             current = self.get(pk, sk)
-        except FileNotFoundError:
+        except NotFoundException:
             pass
 
         if current and not_set:
@@ -136,19 +131,13 @@ class Handler(BaseCache):
 
         # Finally, set the value.
         try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+
             with open(path, "w") as hndl:
                 hndl.truncate()
                 hndl.write(value)
         except OSError as err:
-            raise AccessException(
-                "Unable to write cache entry.",
-                extra={
-                    "pk": pk,
-                    "sk": sk,
-                    "path": path,
-                    "exception": err,
-                },
-            )
+            raise AccessException(f"Unable to write cache entry to {path}. {err}")
 
     def delete(self, pk: str, sk: str, constraint: Optional[str] = None):
         """Deletes an entry from local file backed cache that has the given key.
@@ -162,11 +151,11 @@ class Handler(BaseCache):
         """
         # To enforce constraints, we first need the current value - if any.
         current = None
-        path = os.file.join(self.config.path, CACHE_PATH.format(pk=pk, sk=sk))
+        path = os.path.join(self.config.path, CACHE_PATH.format(pk=pk, sk=sk))
 
         try:
             current = self.get(pk, sk)
-        except FileNotFoundError:
+        except NotFoundException:
             pass
 
         # Next check if the constraint is met.
@@ -178,12 +167,4 @@ class Handler(BaseCache):
         except FileNotFoundError:
             pass
         except OSError as err:
-            raise AccessException(
-                "Unable to delete cache entry.",
-                extra={
-                    "pk": pk,
-                    "sk": sk,
-                    "path": path,
-                    "exception": err,
-                },
-            )
+            raise AccessException(f"Unable to delete cache entry from {path}. {err}")
