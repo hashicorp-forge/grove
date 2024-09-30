@@ -92,6 +92,7 @@ oomnitza_activities = "grove.connectors.oomnitza.activities:Connector"
 [project.entry-points."grove.caches"]
 aws_dynamodb = "grove.caches.aws_dynamodb:Handler"
 local_memory = "grove.caches.local_memory:Handler"
+local_file = "grove.caches.local_file:Handler"
 
 [project.entry-points."grove.outputs"]
 aws_s3 = "grove.outputs.aws_s3:Handler"
