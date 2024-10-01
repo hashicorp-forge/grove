@@ -9,7 +9,7 @@ COPY grove grove/
 COPY pyproject.toml .
 
 # Install Grove from sources, and clean-up.
-RUN pip install --no-cache-dir /tmp/grove
-RUN rm -rf /tmp/grove
+RUN pip install --no-cache-dir /tmp/grove && \
+    rm -rf /tmp/grove
 
 ENTRYPOINT ["grove"]
