@@ -9,7 +9,7 @@ import snowflake.connector
 
 from grove.connectors.snowflake.common import SnowflakeConnector
 from grove.constants import CHRONOLOGICAL
-from grove.exceptions import AccessException, NotFoundException
+from grove.exceptions import AccessException, NotFoundException, RequestFailedException
 
 # Define the paramaterised Snowflake query to use to fetch session history records.
 SNOWFLAKE_QUERY_SESSION_HISTORY = """
@@ -53,7 +53,10 @@ class Connector(SnowflakeConnector):
 
         # Fetch the data, and write out the records in batches.
         cursor = client.cursor(snowflake.connector.DictCursor)
-        cursor.execute(SNOWFLAKE_QUERY_SESSION_HISTORY, {"pointer": self.pointer})
+        try:
+            cursor.execute(SNOWFLAKE_QUERY_SESSION_HISTORY, {"pointer": self.pointer})
+        except snowflake.connector.errors.ProgrammingError as err:
+            raise RequestFailedException(f"Failed to execute Snowflake query. {err}")
 
         records = []
         for row in cursor:
