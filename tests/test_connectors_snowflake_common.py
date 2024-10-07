@@ -8,6 +8,9 @@ import os
 import unittest
 from unittest.mock import patch
 
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+
 from grove.connectors.snowflake.common import SnowflakeConnector
 from grove.exceptions import ConfigurationException
 from grove.models import ConnectorConfig
@@ -24,8 +27,15 @@ class SnowflakeAuditTestCase(unittest.TestCase):
 
     def test_load_unencrypted_key(self):
         """Ensures unencrypted private key loading is working as expected."""
-        # Unencrypted.
-        key = os.path.join(self.dir, "fixtures/snowflake/pkcs8.b64")
+        private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=4096,
+        )
+        private_key_pem = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
 
         # The unencrypted key should load without error.
         candidate = SnowflakeConnector(
@@ -33,7 +43,7 @@ class SnowflakeAuditTestCase(unittest.TestCase):
                 identity="1FEEDFEED1",
                 name="test",
                 connector="test",
-                key=open(key, "rb").read(),
+                key=base64.b64encode(private_key_pem),
                 encoding={
                     "key": "base64",
                 },
@@ -47,8 +57,15 @@ class SnowflakeAuditTestCase(unittest.TestCase):
 
     def test_load_encrypted_key(self):
         """Ensures encrypted private key loading is working as expected."""
-        # Encrypted with passphrase 'example'.
-        key = os.path.join(self.dir, "fixtures/snowflake/pkcs8_enc.b64")
+        private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=4096,
+        )
+        private_key_pem = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.BestAvailableEncryption(b"example"),
+        )
 
         # The encrypted key should fail to load without a passphrase.
         candidate = SnowflakeConnector(
@@ -56,7 +73,7 @@ class SnowflakeAuditTestCase(unittest.TestCase):
                 identity="1FEEDFEED1",
                 name="test",
                 connector="test",
-                key=open(key, "rb").read(),
+                key=base64.b64encode(private_key_pem),
                 encoding={
                     "key": "base64",
                 },
