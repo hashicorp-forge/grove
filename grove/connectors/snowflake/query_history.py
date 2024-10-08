@@ -18,7 +18,7 @@ SNOWFLAKE_QUERY_QUERY_HISTORY = """
          ROLE_NAME,
          START_TIME,
          END_TIME
-    FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
+    FROM QUERY_HISTORY
    WHERE START_TIME > %(pointer)s
 ORDER BY START_TIME ASC;
  """
@@ -47,7 +47,9 @@ class Connector(SnowflakeConnector):
             client = snowflake.connector.connect(
                 role=self.role,
                 user=self.identity,
+                schema=self.schema,
                 account=self.account,
+                database=self.database,
                 warehouse=self.warehouse,
                 private_key=private_key,
                 timezone="UTC",

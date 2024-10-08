@@ -14,7 +14,7 @@ from grove.exceptions import AccessException, NotFoundException, RequestFailedEx
 # Define the paramaterised Snowflake query to use to fetch login history records.
 SNOWFLAKE_QUERY_LOGIN_HISTORY = """
   SELECT *
-    FROM SNOWFLAKE.ACCOUNT_USAGE.LOGIN_HISTORY
+    FROM LOGIN_HISTORY
    WHERE EVENT_TIMESTAMP >  %(pointer)s
 ORDER BY EVENT_TIMESTAMP ASC;
  """
@@ -43,7 +43,9 @@ class Connector(SnowflakeConnector):
             client = snowflake.connector.connect(
                 role=self.role,
                 user=self.identity,
+                schema=self.schema,
                 account=self.account,
+                database=self.database,
                 warehouse=self.warehouse,
                 private_key=private_key,
                 timezone="UTC",
