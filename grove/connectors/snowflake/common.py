@@ -51,14 +51,14 @@ class SnowflakeConnector(BaseConnector):
         This is used to control the maximum number of records which will be retrieved
         before they are flushed to the output handler.
 
-        The default is 500.
+        The default is 1000.
 
         :return: The "batch_size" portion of the connector's configuration.
         """
         try:
             candidate = self.configuration.batch_size
         except AttributeError:
-            return 500
+            return 1000
 
         try:
             candidate = int(candidate)
@@ -114,3 +114,32 @@ class SnowflakeConnector(BaseConnector):
             return self.configuration.passphrase
         except AttributeError:
             return None
+
+    @property
+    def schema(self) -> Optional[str]:
+        """Fetches the optional schema name from the configuration.
+
+        The default is "SNOWFLAKE".
+
+        :return: The "schema" portion of the connector's configuration.
+        """
+        try:
+            # The trailing underscore is due to a limitation in Pydantic < 2.0 where
+            # 'schema' is an internal field. We automatically remap these internal
+            # fields with a trailing underscore while we migrate to Pydantic >= 2.0
+            return self.configuration.schema_
+        except AttributeError:
+            return "SNOWFLAKE"
+
+    @property
+    def database(self) -> Optional[str]:
+        """Fetches the optional database name from the configuration.
+
+        The default is "ADMIN".
+
+        :return: The "database" portion of the connector's configuration.
+        """
+        try:
+            return self.configuration.database
+        except AttributeError:
+            return "ADMIN"

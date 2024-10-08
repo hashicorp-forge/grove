@@ -49,6 +49,7 @@ Currently the following log sources are supported by Grove out of the box. If a 
 isn't listed here, support can be added by creating a custom connector!
 
 * Atlassian audit events (e.g. Confluence, Jira)
+* FleetDM host logs
 * GitHub audit logs
 * GSuite alerts
 * GSuite activity logs
@@ -62,6 +63,9 @@ isn't listed here, support can be added by creating a custom connector!
 * SalesForce Marketing Cloud audit event logs
 * SalesForce Marketing Cloud security event logs
 * Slack audit logs
+* Snowflake login history
+* Snowflake query history
+* Snowflake session history
 * Stripe events
 * Tines audit logs
 * Terraform Cloud audit trails

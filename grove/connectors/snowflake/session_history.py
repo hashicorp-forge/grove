@@ -14,7 +14,7 @@ from grove.exceptions import AccessException, NotFoundException, RequestFailedEx
 # Define the paramaterised Snowflake query to use to fetch session history records.
 SNOWFLAKE_QUERY_SESSION_HISTORY = """
   SELECT *
-    FROM SNOWFLAKE.ACCOUNT_USAGE.SESSIONS
+    FROM SESSIONS
    WHERE CREATED_ON >  %(pointer)s
 ORDER BY CREATED_ON ASC;
  """
@@ -43,7 +43,9 @@ class Connector(SnowflakeConnector):
             client = snowflake.connector.connect(
                 role=self.role,
                 user=self.identity,
+                schema=self.schema,
                 account=self.account,
+                database=self.database,
                 warehouse=self.warehouse,
                 private_key=private_key,
                 timezone="UTC",

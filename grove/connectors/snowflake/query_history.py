@@ -18,7 +18,7 @@ SNOWFLAKE_QUERY_QUERY_HISTORY = """
          ROLE_NAME,
          START_TIME,
          END_TIME
-    FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
+    FROM QUERY_HISTORY
    WHERE START_TIME > %(pointer)s
 ORDER BY START_TIME ASC;
  """
@@ -32,11 +32,12 @@ class Connector(SnowflakeConnector):
     def collect(self):
         """Collects query history records from Snowflake."""
 
-        # If no pointer is stored then start from 24-hours ago - due to volume.
+        # If no pointer is stored then start from 1 hour ago. We use a small value here
+        # due to volume.
         try:
             _ = self.pointer
         except NotFoundException:
-            self.pointer = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+            self.pointer = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
 
         # Decode the private key from the loaded PEM format PKCS#8 data.
         private_key = self._load_private_key()
@@ -47,7 +48,9 @@ class Connector(SnowflakeConnector):
             client = snowflake.connector.connect(
                 role=self.role,
                 user=self.identity,
+                schema=self.schema,
                 account=self.account,
+                database=self.database,
                 warehouse=self.warehouse,
                 private_key=private_key,
                 timezone="UTC",
