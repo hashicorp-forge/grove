@@ -124,7 +124,10 @@ class SnowflakeConnector(BaseConnector):
         :return: The "schema" portion of the connector's configuration.
         """
         try:
-            return self.configuration.schema
+            # The trailing underscore is due to a limitation in Pydantic < 2.0 where
+            # 'schema' is an internal field. We automatically remap these internal
+            # fields with a trailing underscore while we migrate to Pydantic >= 2.0
+            return self.configuration.schema_
         except AttributeError:
             return "SNOWFLAKE"
 
