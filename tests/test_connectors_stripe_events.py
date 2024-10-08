@@ -68,7 +68,7 @@ class StripeEventsTestCase(unittest.TestCase):
 
         self.connector.run()
         self.assertEqual(self.connector._saved["logs"], 2)
-        self.assertEqual(self.connector.pointer, "evt_1OonDcGsC9LSOJDcarfWbL08")
+        self.assertEqual(self.connector.pointer, "1728005905")
 
     @responses.activate
     def test_collect_no_pagination(self):
@@ -88,4 +88,4 @@ class StripeEventsTestCase(unittest.TestCase):
 
         self.connector.run()
         self.assertEqual(self.connector._saved["logs"], 1)
-        self.assertEqual(self.connector.pointer, "evt_1OonDcGsC9LSOJDcarfWbL10")
+        self.assertEqual(self.connector.pointer, "1727897773")
