@@ -540,7 +540,7 @@ class BaseConnector:
 
         :return: A hash of a log entry.
         """
-        content = bytes(json.dumps(entry, separators=(",", ":")), "utf-8")
+        content = bytes(json.dumps(entry, separators=(",", ":"), default=str), "utf-8")
 
         return hashlib.md5(content).hexdigest()
 
