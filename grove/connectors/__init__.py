@@ -15,6 +15,7 @@ import jmespath
 
 from grove.__about__ import __version__
 from grove.constants import (
+    CACHE_KEY_LAST,
     CACHE_KEY_LOCK,
     CACHE_KEY_POINTER,
     CACHE_KEY_POINTER_NEXT,
@@ -148,6 +149,35 @@ class BaseConnector:
         self._pointer = str()
         self._pointer_next = str()
         self._pointer_previous = str()
+
+    def due(self) -> bool:
+        """Checks whether a collection is (over)due.
+
+        :return: True if a run is due, False if not required.
+        """
+        # If no last run is set, then always run.
+        try:
+            last = self.last
+        except NotFoundException:
+            self.logger.debug(
+                f"Connector '{self.kind}' does not have a last run time set.",
+                extra=self.log_context,
+            )
+            return True
+
+        # Check if the interval between last run and now has passed.
+        delta = (datetime.datetime.now(datetime.timezone.utc) - last).seconds
+        self.logger.debug(
+            f"Connector '{self.kind}' last ran {delta} seconds ago, run interval is "
+            f"{self.interval} seconds.",
+            extra=self.log_context,
+        )
+
+        if delta >= self.interval:
+            return True
+
+        # Default to run not required.
+        return False
 
     def run(self):
         """Connector entrypoint, called by the scheduler.
@@ -753,6 +783,35 @@ class BaseConnector:
                         **self.log_context,
                     },
                 )
+
+    @property
+    def last(self) -> datetime.datetime:
+        """Returns the time of the last collection.
+
+        This will return a datetime object which may be from a failure or a successful
+        collection. If a collection fails, we will still wait until the next collection
+        interval before trying again.
+
+        :return: A datetime object representing the last collection.
+        """
+        # Intentionally allow exceptions to bubble up so the caller can catch if the
+        # value is not in the cache.
+        value = datetime.datetime.fromisoformat(
+            self._cache.get(self.cache_key(CACHE_KEY_LAST), self.operation),
+        )
+        return value
+
+    @last.setter
+    def last(self, value: datetime.datetime):
+        """Sets and saves the last collection time in cache.
+
+        :param value: The value to save as the last collection time.
+        """
+        self._cache.set(
+            self.cache_key(CACHE_KEY_LAST),
+            self.operation,
+            value.strftime(DATESTAMP_FORMAT),
+        )
 
     @property
     def hashes(self) -> Dict[str, set[str]]:

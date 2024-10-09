@@ -3,11 +3,12 @@
 
 """Implements tests for the Base connector."""
 
+import datetime
 import unittest
 from unittest.mock import patch
 
 from grove.connectors import BaseConnector
-from grove.constants import REVERSE_CHRONOLOGICAL
+from grove.constants import DATESTAMP_FORMAT, REVERSE_CHRONOLOGICAL
 from grove.exceptions import NotFoundException
 from grove.models import ConnectorConfig
 from tests import mocks
@@ -94,6 +95,43 @@ class BaseConnectorTestCase(unittest.TestCase):
             },
         )
         self.assertEqual(connector.key, "ABCDEF")
+
+    def test_due(self):
+        """Ensures the due method, used by the scheduler, is working as expected."""
+        connector = BaseConnector(
+            config=ConnectorConfig(
+                key="test",
+                name="test",
+                identity="1FEEDFEED1",
+                interval=100,
+                connector="example_one",
+            ),
+            context={
+                "runtime": "test_harness",
+                "runtime_id": "NA",
+            },
+        )
+
+        # Ensure we report a run is due if there is no 'last' in cache.
+        self.assertTrue(connector.due())
+
+        # Ensure we report a run is not required if run interval has not passed.
+        now = datetime.datetime.now(datetime.timezone.utc)
+
+        connector._cache.set(
+            pk="last_run.base.06dc0fd3c08a2bc6a33f5460da9fea10",
+            sk="all",
+            value=now.strftime(DATESTAMP_FORMAT),
+        )
+        self.assertFalse(connector.due())
+
+        # Ensure we report a run is required if run interval has passed.
+        connector._cache.set(
+            pk="last_run.base.06dc0fd3c08a2bc6a33f5460da9fea10",
+            sk="all",
+            value=(now - datetime.timedelta(seconds=100)).strftime(DATESTAMP_FORMAT),
+        )
+        self.assertTrue(connector.due())
 
     @patch("grove.helpers.plugin.load_handler", mocks.load_handler)
     def test_recover_from_incomplete(self):

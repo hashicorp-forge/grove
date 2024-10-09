@@ -4,6 +4,7 @@
 """Constants used throughout Grove."""
 
 # The prefix for all pointers in the cache.
+CACHE_KEY_LAST = "last_run"
 CACHE_KEY_LOCK = "execution_lock"
 CACHE_KEY_SEEN = "deduplication"
 CACHE_KEY_POINTER = "pointer"
