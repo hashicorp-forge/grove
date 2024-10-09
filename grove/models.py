@@ -6,11 +6,11 @@
 import base64
 import binascii
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Extra, Field, root_validator, validator
 
-from grove.constants import DEFAULT_INTERVAL, DEFAULT_OPERATION
+from grove.constants import DEFAULT_OPERATION
 from grove.exceptions import DataFormatException
 
 
@@ -103,7 +103,7 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
     operation: str = Field(DEFAULT_OPERATION)
 
     # Interval to execute connector if running is a daemon.
-    interval: int = Field(DEFAULT_INTERVAL)
+    interval: Optional[int]
 
     # Processors allow processing of data during collection.
     processors: List[ProcessorConfig] = Field([])

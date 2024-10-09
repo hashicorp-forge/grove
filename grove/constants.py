@@ -56,8 +56,5 @@ DEFAULT_LOCK_DURATION = 300  # seconds.
 # The default operation name to use where none is specified.
 DEFAULT_OPERATION = "all"
 
-# The default interval, in seconds, to use between connector executions in daemon mode.
-DEFAULT_INTERVAL = 300
-
 # The default interval, in seconds, to refresh connector configuration from the backend.
 DEFAULT_CONFIG_REFRESH = 300

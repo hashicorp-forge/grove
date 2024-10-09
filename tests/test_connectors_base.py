@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 from grove.connectors import BaseConnector
 from grove.constants import DATESTAMP_FORMAT, REVERSE_CHRONOLOGICAL
-from grove.exceptions import NotFoundException
+from grove.exceptions import ConfigurationException, NotFoundException
 from grove.models import ConnectorConfig
 from tests import mocks
 
@@ -132,6 +132,16 @@ class BaseConnectorTestCase(unittest.TestCase):
             value=(now - datetime.timedelta(seconds=100)).strftime(DATESTAMP_FORMAT),
         )
         self.assertTrue(connector.due())
+
+        # Ensure a configuration exception is raised if no interval is set.
+        connector.configuration.interval = None
+        with self.assertRaises(ConfigurationException):
+            connector.due()
+
+        # Ensure a configuration exception is raised if an invalid interval is set.
+        connector.configuration.interval = "a"
+        with self.assertRaises(ConfigurationException):
+            connector.due()
 
     @patch("grove.helpers.plugin.load_handler", mocks.load_handler)
     def test_recover_from_incomplete(self):

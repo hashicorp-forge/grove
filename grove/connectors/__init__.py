@@ -155,6 +155,19 @@ class BaseConnector:
 
         :return: True if a run is due, False if not required.
         """
+        # First check that an interval is set. In daemon mode, an interval is always
+        # required - as otherwise, we don't know how frequently to run the connector.
+        try:
+            _ = int(getattr(self.configuration, "interval"))
+        except AttributeError:
+            raise ConfigurationException(
+                f"Connector '{self.kind}' does not have an interval configured."
+            )
+        except (ValueError, TypeError) as err:
+            raise ConfigurationException(
+                f"Connector '{self.kind}' has an invalid interval set. {err}"
+            )
+
         # If no last run is set, then always run.
         try:
             last = self.last
