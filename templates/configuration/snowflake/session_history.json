@@ -1,0 +1,13 @@
+{
+    "key": "BASE64_ENCODED_PKCS8_PRIVATE_KEY",
+    "identity": "SERVICE_ACCOUNT_USER",
+    "account": "SNOWFLAKE_ACCOUNT_NAME",
+    "warehouse": "SNOWFLAKE_WAREHOUSE_NAME",
+    "role": "SNOWFLAKE_ROLE_NAME",
+    "passphrase": "PKCS8_PRIVATE_KEY_PASSPHRASE",
+    "name": "snowflake-session-history",
+    "connector": "snowflake_session_history",
+    "encoding": {
+        "key": "base64"
+    }
+}

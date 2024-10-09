@@ -54,6 +54,7 @@
     "meta": {
       "current_page": "https://my-tenant.tines.com/api/v1/audit_logs?per_page=1&page=2",
       "previous_page": "https://my-tenant.tines.com/api/v1/audit_logs?per_page=1&page=1",
+      "next_page_number": null,
       "next_page": null,
       "per_page": 1,
       "pages": 2,

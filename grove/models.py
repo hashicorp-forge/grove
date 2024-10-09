@@ -146,6 +146,19 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
         Other encoding schemes may be supported in future, but for now only base64 is
         supported.
         """
+        # This is a horrible hack to allow fields with names that mask Pydantic
+        # internals. This can be removed once Grove is updated to use Pydantic >= 2.
+        INTERNAL_FIELDS = ["schema"]
+
+        for field in INTERNAL_FIELDS:
+            value = values.get(field, None)
+            if value is None:
+                continue
+
+            # Remap the field name to contain a trailing underscore.
+            values[f"{field}_"] = value
+            del values[field]
+
         for field, encoding in values.get("encoding", {}).items():
             # If the secret is externally stored decoding will be performed after the
             # secret has been retrieved. Right now, this field should not exist as it

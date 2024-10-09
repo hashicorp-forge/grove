@@ -36,6 +36,7 @@
       "current_page": "https://my-tenant.tines.com/api/v1/audit_logs?per_page=2&page=4",
       "previous_page": null,
       "next_page": null,
+      "next_page_number": null,
       "per_page": 2,
       "pages": 1,
       "count": 2

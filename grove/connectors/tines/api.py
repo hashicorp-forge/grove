@@ -112,6 +112,6 @@ class Client:
 
         # Return the cursor and the results to allow the caller to page as required.
         return AuditLogEntries(
-            cursor=jmespath.search("meta.next_page", result.body),
+            cursor=jmespath.search("meta.next_page_number", result.body),
             entries=jmespath.search("audit_logs", result.body),
         )
