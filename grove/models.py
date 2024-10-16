@@ -102,8 +102,8 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
     # from API endpoints which allow filtering records to return.
     operation: str = Field(DEFAULT_OPERATION)
 
-    # Interval to execute connector if running is a daemon.
-    interval: Optional[int]
+    # Frequency to execute connector if running is a daemon.
+    frequency: Optional[int]
 
     # Processors allow processing of data during collection.
     processors: List[ProcessorConfig] = Field([])

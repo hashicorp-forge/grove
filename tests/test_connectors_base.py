@@ -103,7 +103,7 @@ class BaseConnectorTestCase(unittest.TestCase):
                 key="test",
                 name="test",
                 identity="1FEEDFEED1",
-                interval=100,
+                frequency=100,
                 connector="example_one",
             ),
             context={
@@ -115,7 +115,7 @@ class BaseConnectorTestCase(unittest.TestCase):
         # Ensure we report a run is due if there is no 'last' in cache.
         self.assertTrue(connector.due())
 
-        # Ensure we report a run is not required if run interval has not passed.
+        # Ensure we report a run is not required if run frequency has not passed.
         now = datetime.datetime.now(datetime.timezone.utc)
 
         connector._cache.set(
@@ -125,7 +125,7 @@ class BaseConnectorTestCase(unittest.TestCase):
         )
         self.assertFalse(connector.due())
 
-        # Ensure we report a run is required if run interval has passed.
+        # Ensure we report a run is required if run frequency has passed.
         connector._cache.set(
             pk="last_run.base.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
@@ -133,13 +133,13 @@ class BaseConnectorTestCase(unittest.TestCase):
         )
         self.assertTrue(connector.due())
 
-        # Ensure a configuration exception is raised if no interval is set.
-        connector.configuration.interval = None
+        # Ensure a configuration exception is raised if no frequency is set.
+        connector.configuration.frequency = None
         with self.assertRaises(ConfigurationException):
             connector.due()
 
-        # Ensure a configuration exception is raised if an invalid interval is set.
-        connector.configuration.interval = "a"
+        # Ensure a configuration exception is raised if an invalid frequency is set.
+        connector.configuration.frequency = "a"
         with self.assertRaises(ConfigurationException):
             connector.due()
 

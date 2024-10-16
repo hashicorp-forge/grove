@@ -74,7 +74,7 @@ class BaseConnector:
         self.kind = self.__class__.__module__
         self.identity = self.configuration.identity
         self.operation = self.configuration.operation
-        self.interval = self.configuration.interval
+        self.frequency = self.configuration.frequency
 
         # Define contextual log data to be appended to all log messages.
         self.log_context = {
@@ -155,17 +155,17 @@ class BaseConnector:
 
         :return: True if a run is due, False if not required.
         """
-        # First check that an interval is set. In daemon mode, an interval is always
+        # First check that an frequency is set. In daemon mode, an frequency is always
         # required - as otherwise, we don't know how frequently to run the connector.
         try:
-            _ = int(getattr(self.configuration, "interval"))
+            _ = int(getattr(self.configuration, "frequency"))
         except AttributeError:
             raise ConfigurationException(
-                f"Connector '{self.kind}' does not have an interval configured."
+                f"Connector '{self.kind}' does not have an frequency configured."
             )
         except (ValueError, TypeError) as err:
             raise ConfigurationException(
-                f"Connector '{self.kind}' has an invalid interval set. {err}"
+                f"Connector '{self.kind}' has an invalid frequency set. {err}"
             )
 
         # If no last run is set, then always run.
@@ -178,15 +178,15 @@ class BaseConnector:
             )
             return True
 
-        # Check if the interval between last run and now has passed.
+        # Check if the frequency between last run and now has passed.
         delta = (datetime.datetime.now(datetime.timezone.utc) - last).seconds
         self.logger.debug(
-            f"Connector '{self.kind}' last ran {delta} seconds ago, run interval is "
-            f"{self.interval} seconds.",
+            f"Connector '{self.kind}' last ran {delta} seconds ago, run frequency is "
+            f"{self.frequency} seconds.",
             extra=self.log_context,
         )
 
-        if delta >= self.interval:
+        if delta >= self.frequency:
             return True
 
         # Default to run not required.
@@ -803,7 +803,7 @@ class BaseConnector:
 
         This will return a datetime object which may be from a failure or a successful
         collection. If a collection fails, we will still wait until the next collection
-        interval before trying again.
+        is due before trying again.
 
         :return: A datetime object representing the last collection.
         """

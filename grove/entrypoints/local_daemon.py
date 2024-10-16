@@ -67,13 +67,15 @@ def entrypoint():
     )
     logger.info("Grove started")
 
-    # Get the configuration refresh interval.
+    # Get the configuration refresh frequency.
     try:
         refresh_last = None
-        refresh_interval = int(
+        refresh_frequency = int(
             os.environ.get(ENV_GROVE_CONFIG_REFRESH, DEFAULT_CONFIG_REFRESH)
         )
-        logger.info(f"Configuration will be reloaded every {refresh_interval} seconds.")
+        logger.info(
+            f"Configuration will be reloaded every {refresh_frequency} seconds."
+        )
     except ValueError as err:
         logger.critical(
             f"Configuration refresh ('{ENV_GROVE_CONFIG_REFRESH}') must be a number.",
@@ -100,7 +102,7 @@ def entrypoint():
         if refresh_last:
             refresh_delta = (datetime.datetime.now() - refresh_last).seconds
 
-        if not refresh_delta or refresh_delta >= refresh_interval:
+        if not refresh_delta or refresh_delta >= refresh_frequency:
             try:
                 configurations = base.configure()
                 refresh_last = datetime.datetime.now()
