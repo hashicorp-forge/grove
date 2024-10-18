@@ -37,7 +37,9 @@ def dispatch(config: ConnectorConfig, context: Dict[str, str]):
     """
     handler = plugin.lookup_handler(config.connector, PLUGIN_GROUP_CONNECTOR).load()
     instance = handler(config, context)
-    instance.run()
+
+    if not instance.due():
+        instance.run()
 
 
 def configure() -> List[ConnectorConfig]:

@@ -58,3 +58,6 @@ DEFAULT_OPERATION = "all"
 
 # The default interval, in seconds, to refresh connector configuration from the backend.
 DEFAULT_CONFIG_REFRESH = 300
+
+# Run connectors every 10 minutes by default.
+DEFAULT_CONFIG_FREQUENCY = 600

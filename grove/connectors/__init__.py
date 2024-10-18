@@ -158,11 +158,7 @@ class BaseConnector:
         # First check that an frequency is set. In daemon mode, an frequency is always
         # required - as otherwise, we don't know how frequently to run the connector.
         try:
-            _ = int(getattr(self.configuration, "frequency"))
-        except AttributeError:
-            raise ConfigurationException(
-                f"Connector '{self.kind}' does not have an frequency configured."
-            )
+            _ = int(self.configuration.frequency)
         except (ValueError, TypeError) as err:
             raise ConfigurationException(
                 f"Connector '{self.kind}' has an invalid frequency set. {err}"
@@ -187,6 +183,10 @@ class BaseConnector:
         )
 
         if delta >= self.frequency:
+            self.logger.info(
+                f"Connector '{self.kind}' is due to run, dispatching.",
+                extra=self.log_context,
+            )
             return True
 
         # Default to run not required.
@@ -559,18 +559,10 @@ class BaseConnector:
 
         :return: The constructed cache key.
         """
-        # MD5 may not be cryptographically secure, but it works for our purposes. It's:
-        #
-        #   1) Short.
-        #   2) Has a low chance of (non-deliberate) collisions.
-        #   3) Able to be 'stringified' as hex, the character set of which is compatible
-        #      with backends like DynamoDB.
-        #
         return ".".join(
             [
                 prefix,
-                self.NAME,
-                hashlib.md5(bytes(self.identity, "utf-8")).hexdigest(),  # noqa: S324
+                self.configuration.reference,
             ]
         )
 

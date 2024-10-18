@@ -5,12 +5,19 @@
 
 import base64
 import binascii
+import datetime
+import hashlib
+from concurrent.futures import Future
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Extra, Field, root_validator, validator
+from pydantic import BaseModel, Extra, Field, computed_field, root_validator, validator
 
-from grove.constants import DEFAULT_OPERATION
+from grove.constants import (
+    CACHE_KEY_POINTER,
+    DEFAULT_CONFIG_FREQUENCY,
+    DEFAULT_OPERATION,
+)
 from grove.exceptions import DataFormatException
 
 
@@ -102,8 +109,8 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
     # from API endpoints which allow filtering records to return.
     operation: str = Field(DEFAULT_OPERATION)
 
-    # Frequency to execute connector if running is a daemon.
-    frequency: Optional[int]
+    # Frequency to execute connector if not explicitly configured.
+    frequency: int = Field(DEFAULT_CONFIG_FREQUENCY)
 
     # Processors allow processing of data during collection.
     processors: List[ProcessorConfig] = Field([])
@@ -117,6 +124,28 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
             "processed": OutputStream.processed,
         }
     )
+
+    @computed_field
+    @property
+    def reference(self) -> str:
+        """Attempt to generate a unique reference for this connector instance.
+
+        This is used during creation of cache keys, and other values which should be
+        unique per connector instance.
+        """
+        # MD5 may not be cryptographically secure, but it works for our purposes. It's:
+        #
+        #   1) Short.
+        #   2) Has a low chance of (non-deliberate) collisions.
+        #   3) Able to be 'stringified' as hex, the character set of which is compatible
+        #      with backends like DynamoDB.
+        #
+        return ".".join(
+            [
+                self.connector,
+                hashlib.md5(bytes(self.identity, "utf-8")).hexdigest(),  # noqa: S324
+            ]
+        )
 
     @validator("key")
     def _validate_key_or_secret(cls, value, values, field):  # noqa: B902
@@ -169,3 +198,21 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
             values[field] = decode(values.get(field), encoding)
 
         return values
+
+
+class Run(BaseModel, extra=Extra.forbid):
+    """Defines a model for tracking dispatched / running connectors.
+
+    This is used when running as a daemon, in order to allow local tracking of state
+    and to prevent the need to constantly hit the cache backend during the main
+    event loop.
+    """
+
+    # The future associated with the dispatched thread, or runtime element.
+    future: Optional[Future[Any]] = None
+
+    # The connector configuration for this run.
+    configuration: ConnectorConfig
+
+    # A date-time object representing the last time this was dispatched.
+    last: Optional[datetime.datetime] = None

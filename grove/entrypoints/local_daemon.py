@@ -10,7 +10,7 @@ import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict
+from typing import Dict, List
 
 from aws_lambda_powertools import Logger
 
@@ -23,6 +23,7 @@ from grove.constants import (
 from grove.entrypoints import base
 from grove.exceptions import GroveException
 from grove.logging import GroveFormatter
+from grove.models import Run
 
 
 def runtime_information() -> Dict[str, str]:
@@ -43,10 +44,6 @@ def runtime_information() -> Dict[str, str]:
         "runtime_id": str(os.getpid()),
         "runtime_host": socket.gethostname(),
     }
-
-
-def scheduler(queue: threading.Qu) -> None:
-    """Defines a scheduler which handles submitting configuration to the worker pool."""
 
 
 def entrypoint():
@@ -97,29 +94,70 @@ def entrypoint():
     # workers specified by the worker count.
     logger.info("Spawning thread pool for connectors", extra={"workers": workers})
 
-    while True:
-        # (Re)load the configuration from the configured backend if required.
-        if refresh_last:
-            refresh_delta = (datetime.datetime.now() - refresh_last).seconds
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        runs: Dict[str, Run] = {}
 
-        if not refresh_delta or refresh_delta >= refresh_frequency:
-            try:
-                configurations = base.configure()
-                refresh_last = datetime.datetime.now()
+        while True:
+            # (Re)load the configuration from the configured backend if required.
+            if refresh_last:
+                refresh_delta = (datetime.datetime.now() - refresh_last).seconds
 
-                logger.info("Configuration has been refreshed from the backend.")
-            except GroveException as err:
-                # On failure to refresh, we could continue to run until the next refresh
-                # is due in order to try and be fault tolerant. For now though, if we
-                # fail to refresh, we'll bail. The run-time should reschedule us.
-                logger.critical(
-                    "Failed to load configuration from backend",
-                    extra={"exception": err},
+            if not refresh_delta or refresh_delta >= refresh_frequency:
+                try:
+                    configurations = base.configure()
+                    refresh_last = datetime.datetime.now()
+
+                    logger.info("Configuration has been refreshed from the backend.")
+                except GroveException as err:
+                    # On failure to refresh, we could continue to run until the next
+                    # refresh is due in order to try and be fault tolerant. For now
+                    # though, if we fail to refresh, we'll bail. The run-time should
+                    # reschedule us.
+                    logger.critical(
+                        "Failed to load configuration from backend",
+                        extra={"exception": err},
+                    )
+                    return
+
+            # On the first run of a connector we instantiate and check if a run is due -
+            # which requires a round-trip to the cache backend. For subsequent runs, we
+            # attempt to check if we have a local last dispatch time first in order to
+            # avoid hitting the cache backend every time.
+            for configuration in configurations:
+                now = datetime.datetime.now(datetime.timezone.utc)
+                run = runs.get(
+                    configuration.reference,
+                    Run(configuration=configuration),
                 )
-                return
 
-        # Yield between iterations.
-        time.sleep(1)
+                # Don't use the configuration in the run objects as it may have been
+                # updated and refreshed from the backend.
+                frequency = configuration.frequency
+
+                if run.last is None or (now - run.last) >= frequency:
+                    # When dispatching make sure there isn't an existing future, which
+                    # would indicate a run is still going.
+                    if run.future:
+                        logger.warning(
+                            "Collection is due for connector, but a previous run is "
+                            "still in progress.",
+                            extra={
+                                "name": configuration.name,
+                                "identity": configuration.identity,
+                                "connector": configuration.connector,
+                            },
+                        )
+                        continue
+
+                    # Otherwise, schedule it.
+                    future = pool.submit(base.dispatch, configuration, context)
+                    run.last = now
+                    run.future = future
+
+            # TODO: Check future status.
+
+            # Yield between iterations.
+            time.sleep(1)
 
 
 # Support local development if called as a script.
