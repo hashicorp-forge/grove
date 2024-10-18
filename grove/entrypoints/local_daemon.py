@@ -7,10 +7,9 @@ import datetime
 import os
 import socket
 import sys
-import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict, List
+from concurrent.futures import ThreadPoolExecutor
+from typing import Dict
 
 from aws_lambda_powertools import Logger
 
@@ -137,10 +136,9 @@ def entrypoint():
                 if run.last is None or (now - run.last) >= frequency:
                     # When dispatching make sure there isn't an existing future, which
                     # would indicate a run is still going.
-                    if run.future:
+                    if run.future is None:
                         logger.warning(
-                            "Collection is due for connector, but a previous run is "
-                            "still in progress.",
+                            "Collection due, but a previous run is still in progress",
                             extra={
                                 "name": configuration.name,
                                 "identity": configuration.identity,
@@ -154,7 +152,33 @@ def entrypoint():
                     run.last = now
                     run.future = future
 
-            # TODO: Check future status.
+            # Check the status of all futures.
+            for run in runs:
+                try:
+                    if run.future is None or run.future.running():
+                        continue
+
+                    _ = run.future.result()
+                except GroveException as err:
+                    logger.error(
+                        "Connector exited abnormally.",
+                        extra={
+                            "exception": err,
+                            "configuration": run.configuration.name,
+                            "connector": run.configuration.connector,
+                        },
+                    )
+
+                # Unset the future ready for the next run.
+                run.future = None
+
+                logger.info(
+                    "Connector has exited.",
+                    extra={
+                        "configuration": run.configuration.name,
+                        "connector": run.configuration.connector,
+                    },
+                )
 
             # Yield between iterations.
             time.sleep(1)

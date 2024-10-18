@@ -57,7 +57,7 @@ DEFAULT_LOCK_DURATION = 300  # seconds.
 DEFAULT_OPERATION = "all"
 
 # The default interval, in seconds, to refresh connector configuration from the backend.
-DEFAULT_CONFIG_REFRESH = 300
+DEFAULT_CONFIG_REFRESH = 300  # seconds.
 
 # Run connectors every 10 minutes by default.
-DEFAULT_CONFIG_FREQUENCY = 600
+DEFAULT_CONFIG_FREQUENCY = 600  # seconds.
