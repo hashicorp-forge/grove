@@ -97,7 +97,10 @@ def entrypoint():
         runs: Dict[str, Run] = {}
 
         while True:
+            logger.info("Tick")
+
             # (Re)load the configuration from the configured backend if required.
+            refresh_delta = None
             if refresh_last:
                 refresh_delta = (datetime.datetime.now() - refresh_last).seconds
 
@@ -124,41 +127,44 @@ def entrypoint():
             # avoid hitting the cache backend every time.
             for configuration in configurations:
                 now = datetime.datetime.now(datetime.timezone.utc)
-                run = runs.get(
-                    configuration.reference,
-                    Run(configuration=configuration),
-                )
+                ref = configuration.reference()
+                run = runs.get(ref, Run(configuration=configuration))
 
                 # Don't use the configuration in the run objects as it may have been
                 # updated and refreshed from the backend.
                 frequency = configuration.frequency
 
-                if run.last is None or (now - run.last) >= frequency:
+                if run.last is None or (now - run.last).seconds >= frequency:
                     # When dispatching make sure there isn't an existing future, which
                     # would indicate a run is still going.
-                    if run.future is None:
+                    if run.future is not None:
                         logger.warning(
                             "Collection due, but a previous run is still in progress",
                             extra={
-                                "name": configuration.name,
                                 "identity": configuration.identity,
                                 "connector": configuration.connector,
                             },
                         )
                         continue
 
-                    # Otherwise, schedule it.
+                    # Otherwise, schedule it and track the run.
                     future = pool.submit(base.dispatch, configuration, context)
-                    run.last = now
                     run.future = future
+                    runs[ref] = run
 
             # Check the status of all futures.
-            for run in runs:
+            #
+            # TODO: The more connectors we have, the more time this could take. This
+            # is likely to introduce jitter between runs. Maybe this also needs to be
+            # moved out of the event loop.
+            #
+            for ref, run in runs.items():
                 try:
                     if run.future is None or run.future.running():
                         continue
 
-                    _ = run.future.result()
+                    run.last = run.future.result()
+                    run.future = None
                 except GroveException as err:
                     logger.error(
                         "Connector exited abnormally.",
@@ -168,9 +174,6 @@ def entrypoint():
                             "connector": run.configuration.connector,
                         },
                     )
-
-                # Unset the future ready for the next run.
-                run.future = None
 
                 logger.info(
                     "Connector has exited.",

@@ -11,10 +11,9 @@ from concurrent.futures import Future
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Extra, Field, computed_field, root_validator, validator
+from pydantic import BaseModel, Extra, Field, root_validator, validator
 
 from grove.constants import (
-    CACHE_KEY_POINTER,
     DEFAULT_CONFIG_FREQUENCY,
     DEFAULT_OPERATION,
 )
@@ -125,8 +124,6 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
         }
     )
 
-    @computed_field
-    @property
     def reference(self) -> str:
         """Attempt to generate a unique reference for this connector instance.
 
@@ -209,7 +206,7 @@ class Run(BaseModel, extra=Extra.forbid):
     """
 
     # The future associated with the dispatched thread, or runtime element.
-    future: Optional[Future[Any]] = None
+    future: Optional[Any] = None
 
     # The connector configuration for this run.
     configuration: ConnectorConfig

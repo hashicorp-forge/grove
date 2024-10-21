@@ -3,6 +3,7 @@
 
 """Provides functions used between entrypoints."""
 
+import datetime
 import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -26,7 +27,7 @@ from grove.logging import GroveFormatter
 from grove.models import ConnectorConfig
 
 
-def dispatch(config: ConnectorConfig, context: Dict[str, str]):
+def dispatch(config: ConnectorConfig, context: Dict[str, str]) -> datetime.datetime:
     """Executes a connector, blocking until complete.
 
     This function is intended to be called via a ThreadPoolExecutor to enable concurrent
@@ -34,12 +35,16 @@ def dispatch(config: ConnectorConfig, context: Dict[str, str]):
 
     :param config: A connector configuration object for this connector thread.
     :param context: Contextual information relating to the current runtime.
+
+    :return: The time the connector was scheduled.
     """
     handler = plugin.lookup_handler(config.connector, PLUGIN_GROUP_CONNECTOR).load()
     instance = handler(config, context)
 
-    if not instance.due():
+    if instance.due():
         instance.run()
+
+    return instance.last
 
 
 def configure() -> List[ConnectorConfig]:
@@ -125,7 +130,7 @@ def entrypoint(context: Dict[str, Any]):
             # Last ditch effort to catch any unhandled exceptions to ensure that they're
             # logged out.
             try:
-                future.result()
+                _ = future.result()
             except GroveException as err:
                 logger.error(
                     "Connector exited abnormally.",

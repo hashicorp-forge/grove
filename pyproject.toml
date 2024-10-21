@@ -59,6 +59,7 @@ grove = "grove.entrypoints.local_process:entrypoint"
 
 [project.entry-points."grove.entrypoints"]
 aws_lambda = "grove.entrypoints.aws_lambda:entrypoint"
+local_daemon = "grove.entrypoints.local_daemon:entrypoint"
 local_process = "grove.entrypoints.local_process:entrypoint"
 
 [project.entry-points."grove.connectors"]

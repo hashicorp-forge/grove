@@ -66,6 +66,10 @@ class BaseConnector:
         self.configuration = config
         self.runtime_context = context
 
+        # Track the time our execution started. We use this quite a lot to ensure we
+        # are using a consistent timestamp between executions.
+        self._started = datetime.datetime.now(datetime.timezone.utc)
+
         # 'Operations' are useful for APIs which have MANY different types of data which
         # can be returned but where only a small subset are pertinent. In this case, the
         # operation can be set in the configuration to instruct grove to only collect
@@ -175,7 +179,7 @@ class BaseConnector:
             return True
 
         # Check if the frequency between last run and now has passed.
-        delta = (datetime.datetime.now(datetime.timezone.utc) - last).seconds
+        delta = (self._started - last).seconds
         self.logger.debug(
             f"Connector '{self.kind}' last ran {delta} seconds ago, run frequency is "
             f"{self.frequency} seconds.",
@@ -216,6 +220,7 @@ class BaseConnector:
                 f"Connector '{self.kind}' could not complete collection successfully.",
                 extra={"exception": err, **self.log_context},
             )
+            self.last = self._started
             self.unlock()
             return
 
@@ -227,6 +232,7 @@ class BaseConnector:
             self._run_reverse_chronological()
 
         # TODO: The use of a context manager for lock management would be best.
+        self.last = self._started
         self.unlock()
 
     def _run_chronological(self):
@@ -562,7 +568,7 @@ class BaseConnector:
         return ".".join(
             [
                 prefix,
-                self.configuration.reference,
+                self.configuration.reference(),
             ]
         )
 
@@ -1026,23 +1032,21 @@ class BaseConnector:
         :raises ConcurrencyException: A valid lock is already held, likely the result
             of a concurrent execution of Grove.
         """
-        now = datetime.datetime.utcnow()
-        expiry = now + datetime.timedelta(seconds=self._lock_duration)
+        expiry = self._started + datetime.timedelta(seconds=self._lock_duration)
 
         # If we don't have a lock, acquire one.
         current = self._lock_expiry
 
         if current is None:
             try:
-                current = datetime.datetime.strptime(
-                    self._cache.get(self.cache_key(CACHE_KEY_LOCK), self.operation),
-                    LOCK_DATE_FORMAT,
+                current = datetime.datetime.fromisoformat(
+                    self._cache.get(self.cache_key(CACHE_KEY_LOCK), self.operation)
                 )
             except NotFoundException:
                 pass
 
             # Someone else has the lock.
-            if current is not None and current >= now:
+            if current is not None and current >= self._started:
                 raise ConcurrencyException(
                     f"Valid lock already held and does not expire until {current}"
                 )
@@ -1089,9 +1093,8 @@ class BaseConnector:
 
         # If there's no lock set in the cache, do nothing.
         try:
-            current = datetime.datetime.strptime(
-                self._cache.get(self.cache_key(CACHE_KEY_LOCK), self.operation),
-                LOCK_DATE_FORMAT,
+            current = datetime.datetime.fromisoformat(
+                self._cache.get(self.cache_key(CACHE_KEY_LOCK), self.operation)
             )
         except NotFoundException:
             return
