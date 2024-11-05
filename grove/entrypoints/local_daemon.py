@@ -97,8 +97,6 @@ def entrypoint():
         runs: Dict[str, Run] = {}
 
         while True:
-            logger.info("Tick")
-
             # (Re)load the configuration from the configured backend if required.
             refresh_delta = None
             if refresh_last:
@@ -153,11 +151,6 @@ def entrypoint():
                     runs[ref] = run
 
             # Check the status of all futures.
-            #
-            # TODO: The more connectors we have, the more time this could take. This
-            # is likely to introduce jitter between runs. Maybe this also needs to be
-            # moved out of the event loop.
-            #
             for ref, run in runs.items():
                 try:
                     if run.future is None or run.future.running():
