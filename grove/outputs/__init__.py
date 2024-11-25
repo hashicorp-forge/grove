@@ -54,6 +54,7 @@ class BaseOutput(abc.ABC):
         part: int = 0,
         suffix: Optional[str] = None,
         descriptor: Optional[str] = None,
+        name: Optional[str] = None,
     ):
         """Implements logic require to write collected log data to the given backend.
 
@@ -70,6 +71,8 @@ class BaseOutput(abc.ABC):
         :param descriptor: An optional and arbitrary descriptor associated with the
             log data. This may be used by handlers for construction / specification of
             file paths, URLs, or database tables.
+        :param name: Given name of the connector, as specified in the user's custom
+            configuration.
         """
         pass
 
