@@ -12,7 +12,7 @@ from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
-    NAME = "sfmc_security_events"
+    CONNECTOR = "sfmc_security_events"
     POINTER_PATH = "createdDate"
     LOG_ORDER = CHRONOLOGICAL
 

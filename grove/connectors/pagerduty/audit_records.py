@@ -12,7 +12,7 @@ from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
-    NAME = "pagerduty_audit_records"
+    CONNECTOR = "pagerduty_audit_records"
     POINTER_PATH = "execution_time"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 

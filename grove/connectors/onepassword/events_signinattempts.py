@@ -12,7 +12,7 @@ from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
-    NAME = "onepassword_events_signinattempts"
+    CONNECTOR = "onepassword_events_signinattempts"
     POINTER_PATH = "timestamp"
     LOG_ORDER = CHRONOLOGICAL
 

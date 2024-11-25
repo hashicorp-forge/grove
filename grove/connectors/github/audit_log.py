@@ -14,7 +14,7 @@ DATESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
 class Connector(BaseConnector):
-    NAME = "github_audit_log"
+    CONNECTOR = "github_audit_log"
     LOG_ORDER = CHRONOLOGICAL
 
     # Double quoting is required so that jmespath understands that @timestamp is the
