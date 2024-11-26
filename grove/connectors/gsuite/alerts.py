@@ -26,7 +26,7 @@ SCOPES = ["https://www.googleapis.com/auth/apps.alerts"]
 
 
 class Connector(BaseConnector):
-    NAME = "gsuite_alerts"
+    CONNECTOR = "gsuite_alerts"
     POINTER_PATH = "createTime"
     LOG_ORDER = CHRONOLOGICAL
 

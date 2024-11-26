@@ -21,7 +21,7 @@ ORDER BY CREATED_ON ASC;
 
 
 class Connector(SnowflakeConnector):
-    NAME = "snowflake_session_history"
+    CONNECTOR = "snowflake_session_history"
     POINTER_PATH = "CREATED_ON"
     LOG_ORDER = CHRONOLOGICAL
 

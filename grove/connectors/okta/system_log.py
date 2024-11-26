@@ -12,7 +12,7 @@ from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
-    NAME = "okta_system_log"
+    CONNECTOR = "okta_system_log"
     POINTER_PATH = "published"
     LOG_ORDER = CHRONOLOGICAL
 

@@ -16,7 +16,7 @@ from grove.exceptions import NotFoundException, RequestFailedException
 
 
 class Connector(BaseConnector):
-    NAME = "twilio_messages"
+    CONNECTOR = "twilio_messages"
     POINTER_PATH = "date_sent"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 

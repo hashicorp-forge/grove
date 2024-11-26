@@ -110,7 +110,7 @@ class BaseConnectorTestCase(unittest.TestCase):
                 "runtime_id": "NA",
             },
         )
-        connector.NAME = "test"
+        connector.CONNECTOR = "test"
         connector.POINTER_PATH = "time"
         connector.LOG_ORDER = REVERSE_CHRONOLOGICAL
 

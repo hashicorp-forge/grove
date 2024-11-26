@@ -9,7 +9,7 @@ from grove.types import AuditLogEntries
 
 
 class Connector(BaseConnector):
-    NAME = "{{ cookiecutter.provider_name }}_{{ cookiecutter.provider_product }}_example_logs"
+    CONNECTOR = "{{ cookiecutter.provider_name }}_{{ cookiecutter.provider_product }}_example_logs"
     LOG_ORDER = CHRONOLOGICAL
     POINTER_PATH = "timestamp"
 

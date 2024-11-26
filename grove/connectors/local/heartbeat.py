@@ -14,7 +14,7 @@ DATESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
 class Connector(BaseConnector):
-    NAME = "local_heartbeat"
+    CONNECTOR = "local_heartbeat"
     POINTER_PATH = "timestamp"
     LOG_ORDER = CHRONOLOGICAL
 

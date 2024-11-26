@@ -15,7 +15,7 @@ ISO_TIMESTAMP_FORMAT_NO_MS = "%Y-%m-%dT%H:%M:%S%z"
 
 
 class Connector(BaseConnector):
-    NAME = "atlassian_audit_events"
+    CONNECTOR = "atlassian_audit_events"
     POINTER_PATH = "attributes.time"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 

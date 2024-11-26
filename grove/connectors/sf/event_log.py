@@ -34,7 +34,7 @@ SOQL_EVENTLOGFILE = (
 
 
 class Connector(BaseConnector):
-    NAME = "sf_event_log"
+    CONNECTOR = "sf_event_log"
     POINTER_PATH = "TIMESTAMP_DERIVED"
     LOG_ORDER = CHRONOLOGICAL
 

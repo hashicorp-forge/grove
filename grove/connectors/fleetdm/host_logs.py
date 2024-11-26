@@ -12,7 +12,7 @@ from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
-    NAME = "fleetdm_host_logs"
+    CONNECTOR = "fleetdm_host_logs"
     POINTER_PATH = "software_updated_at"
     LOG_ORDER = CHRONOLOGICAL
 

@@ -14,7 +14,7 @@ from grove.exceptions import NotFoundException, RequestFailedException
 
 
 class Connector(BaseConnector):
-    NAME = "twilio_monitor_events"
+    CONNECTOR = "twilio_monitor_events"
     POINTER_PATH = "event_date"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 

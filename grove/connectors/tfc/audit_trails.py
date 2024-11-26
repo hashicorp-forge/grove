@@ -12,7 +12,7 @@ from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
-    NAME = "tfc_audit_trails"
+    CONNECTOR = "tfc_audit_trails"
     POINTER_PATH = "timestamp"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 

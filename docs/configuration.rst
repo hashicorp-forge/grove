@@ -61,7 +61,7 @@ for a configuration document to be valid:
   * :code:`connector`
 
     * The name of the connector which this configuration document is for. This must
-      match the :code:`NAME` value defined in the connector.
+      match the :code:`CONNECTOR` value defined in the connector.
     * For example, setting this field to :code:`tfc_audit_trails` would instruct Grove
       to use the :meth:`grove.connectors.tfc.audit_trails` connector.
 

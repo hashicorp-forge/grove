@@ -14,7 +14,7 @@ DATESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 class Connector(BaseConnector):
-    NAME = "workday_activity_logging"
+    CONNECTOR = "workday_activity_logging"
     POINTER_PATH = "requestTime"
     LOG_ORDER = CHRONOLOGICAL
 

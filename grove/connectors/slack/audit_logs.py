@@ -12,7 +12,7 @@ from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
-    NAME = "slack_audit_logs"
+    CONNECTOR = "slack_audit_logs"
     POINTER_PATH = "date_create"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 
