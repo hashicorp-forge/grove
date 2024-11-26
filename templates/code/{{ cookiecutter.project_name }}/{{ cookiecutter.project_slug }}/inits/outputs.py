@@ -52,6 +52,7 @@ class Handler(BaseOutput):
         part: int = 0,
         kind: Optional[str] = ".json.gz",
         descriptor: Optional[str] = "logs",
+        name: Optional[str] = None,
     ):
         """Persists captured data to ...
 
