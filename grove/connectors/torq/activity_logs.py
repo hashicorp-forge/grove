@@ -12,7 +12,7 @@ from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
-    NAME = "torq_activity_logs"
+    CONNECTOR = "torq_activity_logs"
     POINTER_PATH = "event.timestamp"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 

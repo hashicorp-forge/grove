@@ -21,7 +21,7 @@ ORDER BY EVENT_TIMESTAMP ASC;
 
 
 class Connector(SnowflakeConnector):
-    NAME = "snowflake_login_history"
+    CONNECTOR = "snowflake_login_history"
     POINTER_PATH = "EVENT_TIMESTAMP"
     LOG_ORDER = CHRONOLOGICAL
 

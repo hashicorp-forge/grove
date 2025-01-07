@@ -25,7 +25,7 @@ ORDER BY START_TIME ASC;
 
 
 class Connector(SnowflakeConnector):
-    NAME = "snowflake_query_history"
+    CONNECTOR = "snowflake_query_history"
     POINTER_PATH = "START_TIME"
     LOG_ORDER = CHRONOLOGICAL
 

@@ -51,7 +51,7 @@ from grove.models import ConnectorConfig, OutputStream
 
 
 class BaseConnector:
-    NAME = "base"
+    CONNECTOR = "base"
     POINTER_PATH = "NOT_SET"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 
@@ -79,6 +79,7 @@ class BaseConnector:
         self.identity = self.configuration.identity
         self.operation = self.configuration.operation
         self.frequency = self.configuration.frequency
+        self.name = self.configuration.name
 
         # Define contextual log data to be appended to all log messages.
         self.log_context = {
@@ -355,9 +356,10 @@ class BaseConnector:
                     ),
                     part=self._part,
                     operation=self.operation,
-                    connector=self.NAME,
+                    connector=self.CONNECTOR,
                     identity=self.identity,
                     descriptor=descriptor,
+                    name=self.name,
                 )
 
                 # Update counters.

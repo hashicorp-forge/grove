@@ -12,7 +12,7 @@ from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
-    NAME = "oomnitza_activities"
+    CONNECTOR = "oomnitza_activities"
     POINTER_PATH = "timestamp"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 

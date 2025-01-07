@@ -13,7 +13,7 @@ from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
-    NAME = "test_only_connector"
+    CONNECTOR = "test_only_connector"
     LOG_ORDER = CHRONOLOGICAL
     POINTER_PATH = "timestamp"
 

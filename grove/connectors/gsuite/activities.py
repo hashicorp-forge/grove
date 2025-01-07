@@ -36,7 +36,7 @@ def as_rfc3339(date: datetime) -> str:
 
 
 class Connector(BaseConnector):
-    NAME = "gsuite_activities"
+    CONNECTOR = "gsuite_activities"
     POINTER_PATH = "id.time"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 

@@ -22,6 +22,7 @@ class Handler(BaseOutput):
         part: int = 0,
         kind: Optional[str] = "json",
         descriptor: Optional[str] = "raw",
+        name: Optional[str] = None,
     ):
         """Print captured data to stdout.
 

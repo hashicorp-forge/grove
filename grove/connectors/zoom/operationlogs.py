@@ -14,7 +14,7 @@ DATESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
 class Connector(BaseConnector):
-    NAME = "zoom_operationlogs"
+    CONNECTOR = "zoom_operationlogs"
     POINTER_PATH = "time"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 

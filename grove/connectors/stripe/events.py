@@ -12,7 +12,7 @@ from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
-    NAME = "stripe_events"
+    CONNECTOR = "stripe_events"
     POINTER_PATH = "created"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 

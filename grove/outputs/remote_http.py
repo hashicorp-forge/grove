@@ -89,6 +89,7 @@ class Handler(BaseOutput):
         part: int = 0,
         kind: Optional[str] = None,
         descriptor: Optional[str] = None,
+        name: Optional[str] = None,
     ):
         """Performs an HTTP POST with the body containing collected logs as NDJSON.
 
