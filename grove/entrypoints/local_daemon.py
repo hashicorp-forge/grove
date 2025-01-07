@@ -135,19 +135,6 @@ def entrypoint():
                     # If there's a valid future on the local run object a run is still
                     # in progress.
                     if run.future is not None:
-                        if run.last is None:
-                            continue
-
-                        logger.warning(
-                            "Collection due, but a previous run is still in progress",
-                            extra={
-                                "identity": configuration.identity,
-                                "connector": configuration.connector,
-                                "operation": configuration.operation,
-                                "since": (now - run.last).seconds,
-                                "last": run.last,
-                            },
-                        )
                         continue
 
                     # Otherwise, schedule it and track the run. If the connector isn't
