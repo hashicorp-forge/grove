@@ -98,11 +98,11 @@ def entrypoint():
 
         while True:
             # (Re)load the configuration from the configured backend if required.
-            refresh_delta = None
+            refresh_since = None
             if refresh_last:
-                refresh_delta = (datetime.datetime.now() - refresh_last).seconds
+                refresh_since = (datetime.datetime.now() - refresh_last).seconds
 
-            if not refresh_delta or refresh_delta >= refresh_frequency:
+            if not refresh_since or refresh_since >= refresh_frequency:
                 try:
                     configurations = base.configure()
                     refresh_last = datetime.datetime.now()
@@ -111,7 +111,7 @@ def entrypoint():
                 except GroveException as err:
                     # On failure to refresh, we could continue to run until the next
                     # refresh is due in order to try and be fault tolerant. For now
-                    # though, if we fail to refresh, we'll bail. The run-time should
+                    # though, if we fail to refresh we'll bail as the run-time should
                     # reschedule us.
                     logger.critical(
                         "Failed to load configuration from backend",
@@ -119,36 +119,49 @@ def entrypoint():
                     )
                     return
 
-            # On the first run of a connector we instantiate and check if a run is due -
-            # which requires a round-trip to the cache backend. For subsequent runs, we
-            # attempt to check if we have a local last dispatch time first in order to
-            # avoid hitting the cache backend every time.
+            # On the first run of a execution we check if a run is due - which requires
+            # a round-trip to the cache backend. For subsequent runs we check if we have
+            # a local last dispatch time to try and avoid hitting the cache every time.
             for configuration in configurations:
                 now = datetime.datetime.now(datetime.timezone.utc)
-                ref = configuration.reference()
+                ref = configuration.reference(suffix=configuration.operation)
                 run = runs.get(ref, Run(configuration=configuration))
 
-                # Don't use the configuration in the run objects as it may have been
-                # updated and refreshed from the backend.
+                # Use the frequency from the configuration, not the local object as it
+                # may have been changed in the configuration.
                 frequency = configuration.frequency
 
                 if run.last is None or (now - run.last).seconds >= frequency:
-                    # When dispatching make sure there isn't an existing future, which
-                    # would indicate a run is still going.
+                    # If there's a valid future on the local run object a run is still
+                    # in progress.
                     if run.future is not None:
+                        if run.last is None:
+                            continue
+
                         logger.warning(
                             "Collection due, but a previous run is still in progress",
                             extra={
                                 "identity": configuration.identity,
                                 "connector": configuration.connector,
+                                "operation": configuration.operation,
+                                "since": (now - run.last).seconds,
+                                "last": run.last,
                             },
                         )
                         continue
 
-                    # Otherwise, schedule it and track the run.
+                    # Otherwise, schedule it and track the run. If the connector isn't
+                    # due to run, if it has run more recently in another location, then
+                    # the local 'last' time will be replaced with the cached value when
+                    # the future returns.
                     future = pool.submit(base.dispatch, configuration, context)
+                    run.last = now
                     run.future = future
                     runs[ref] = run
+
+            # TODO: Run objects for connectors which have their configuration documents
+            # deleted aren't actually removed from the runs dictionary. These won't run
+            # again, but should be cleaned up if removed from the configuration backend.
 
             # Check the status of all futures.
             for ref, run in runs.items():

@@ -1122,4 +1122,3 @@ class BaseConnector:
 
         # Bye-bye lock.
         self._lock_expiry = None
-        self._lock_expiry = None

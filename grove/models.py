@@ -124,11 +124,15 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
         }
     )
 
-    def reference(self) -> str:
+    def reference(self, suffix: str = None) -> str:
         """Attempt to generate a unique reference for this connector instance.
 
         This is used during creation of cache keys, and other values which should be
         unique per connector instance.
+
+        :param suffix: An optional suffix to append to the end of the reference. This is
+            is useful for handling other configuration data to the reference, such as
+            the operation.
         """
         # MD5 may not be cryptographically secure, but it works for our purposes. It's:
         #
@@ -137,12 +141,14 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
         #   3) Able to be 'stringified' as hex, the character set of which is compatible
         #      with backends like DynamoDB.
         #
-        return ".".join(
-            [
-                self.connector,
-                hashlib.md5(bytes(self.identity, "utf-8")).hexdigest(),  # noqa: S324
-            ]
-        )
+        parts = [
+            self.connector,
+            hashlib.md5(bytes(self.identity, "utf-8")).hexdigest(),
+        ]
+        if suffix is not None:
+            parts.append(suffix)
+
+        return ".".join(parts)
 
     @validator("key")
     def _validate_key_or_secret(cls, value, values, field):  # noqa: B902
