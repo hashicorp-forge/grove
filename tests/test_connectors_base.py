@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 
 from grove.connectors import BaseConnector
-from grove.constants import DATESTAMP_FORMAT, REVERSE_CHRONOLOGICAL
+from grove.constants import REVERSE_CHRONOLOGICAL
 from grove.exceptions import ConfigurationException, NotFoundException
 from grove.models import ConnectorConfig
 from tests import mocks
@@ -117,20 +117,11 @@ class BaseConnectorTestCase(unittest.TestCase):
 
         # Ensure we report a run is not required if run frequency has not passed.
         now = datetime.datetime.now(datetime.timezone.utc)
-
-        connector._cache.set(
-            pk="last_run.base.06dc0fd3c08a2bc6a33f5460da9fea10",
-            sk="all",
-            value=now.strftime(DATESTAMP_FORMAT),
-        )
+        connector.last = now
         self.assertFalse(connector.due())
 
         # Ensure we report a run is required if run frequency has passed.
-        connector._cache.set(
-            pk="last_run.base.06dc0fd3c08a2bc6a33f5460da9fea10",
-            sk="all",
-            value=(now - datetime.timedelta(seconds=100)).strftime(DATESTAMP_FORMAT),
-        )
+        connector.last = now - datetime.timedelta(seconds=100)
         self.assertTrue(connector.due())
 
         # Ensure a configuration exception is raised if no frequency is set.
@@ -176,27 +167,27 @@ class BaseConnectorTestCase(unittest.TestCase):
 
         # Setup the cache to match the described failure case.
         connector._cache.set(
-            pk="pointer_next.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="pointer_next.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
             value="2022-11-20T20:31:18.382Z",
         )
         connector._cache.set(
-            pk="window_start.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="window_start.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
             value="2022-11-20T20:31:18.382Z",
         )
         connector._cache.set(
-            pk="pointer_previous.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="pointer_previous.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
             value="2022-11-20T20:30:10.772Z",
         )
         connector._cache.set(
-            pk="window_end.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="window_end.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
             value="2022-11-20T20:30:10.772Z",
         )
         connector._cache.set(
-            pk="pointer.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="pointer.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
             value="2022-11-20T20:31:18.382Z",
         )
@@ -211,15 +202,15 @@ class BaseConnectorTestCase(unittest.TestCase):
         # Clean-up to simulate a fresh run without having to re-create everything in
         # a subsequent test case.
         connector._cache.delete(
-            pk="window_start.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="window_start.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
         )
         connector._cache.delete(
-            pk="window_end.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="window_end.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
         )
         connector._cache.delete(
-            pk="pointer_next.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="pointer_next.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
         )
         connector._window_end = ""

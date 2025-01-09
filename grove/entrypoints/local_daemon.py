@@ -65,7 +65,8 @@ def entrypoint():
 
     # Get the configuration refresh frequency.
     try:
-        refresh_last = None
+        refreshed_at = None
+        since_refresh = None
         refresh_frequency = int(
             os.environ.get(ENV_GROVE_CONFIG_REFRESH, DEFAULT_CONFIG_REFRESH)
         )
@@ -97,15 +98,14 @@ def entrypoint():
         runs: Dict[str, Run] = {}
 
         while True:
-            # (Re)load the configuration from the configured backend if required.
-            refresh_since = None
-            if refresh_last:
-                refresh_since = (datetime.datetime.now() - refresh_last).seconds
+            if refreshed_at:
+                since_refresh = datetime.datetime.now() - refreshed_at  # type:ignore
 
-            if not refresh_since or refresh_since >= refresh_frequency:
+            # (Re)load the configuration from the configured backend if required.
+            if not refreshed_at or since_refresh.seconds >= refresh_frequency:  # type: ignore
                 try:
                     configurations = base.configure()
-                    refresh_last = datetime.datetime.now()
+                    refreshed_at = datetime.datetime.now()
 
                     logger.info("Configuration has been refreshed from the backend.")
                 except GroveException as err:

@@ -7,7 +7,6 @@ import base64
 import binascii
 import datetime
 import hashlib
-from concurrent.futures import Future
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
@@ -124,7 +123,7 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
         }
     )
 
-    def reference(self, suffix: str = None) -> str:
+    def reference(self, suffix: Optional[str] = None) -> str:
         """Attempt to generate a unique reference for this connector instance.
 
         This is used during creation of cache keys, and other values which should be
