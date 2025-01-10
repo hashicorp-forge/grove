@@ -809,9 +809,14 @@ class BaseConnector:
         """
         # Intentionally allow exceptions to bubble up so the caller can catch if the
         # value is not in the cache.
-        value = datetime.datetime.fromisoformat(
+        value = datetime.datetime.strptime(
             self._cache.get(self.cache_key(CACHE_KEY_LAST), self.operation),
+            DATESTAMP_FORMAT,
         )
+
+        # Ensure there is always a timezone present on the parsed datetime object.
+        value = value.replace(tzinfo=datetime.timezone.utc)
+
         return value
 
     @last.setter
@@ -1023,7 +1028,9 @@ class BaseConnector:
     def save_window_end(self):
         """Saves the window end location to cache."""
         self._cache.set(
-            self.cache_key(CACHE_KEY_WINDOW_END), self.operation, self.window_end
+            self.cache_key(CACHE_KEY_WINDOW_END),
+            self.operation,
+            self.window_end,
         )
 
     def lock(self):
@@ -1041,9 +1048,13 @@ class BaseConnector:
 
         if current is None:
             try:
-                current = datetime.datetime.fromisoformat(
-                    self._cache.get(self.cache_key(CACHE_KEY_LOCK), self.operation)
+                current = datetime.datetime.strptime(
+                    self._cache.get(self.cache_key(CACHE_KEY_LOCK), self.operation),
+                    LOCK_DATE_FORMAT,
                 )
+
+                # Ensure there is always a timezone present on the parsed datetime.
+                current = current.replace(tzinfo=datetime.timezone.utc)
             except NotFoundException:
                 pass
 
@@ -1095,11 +1106,16 @@ class BaseConnector:
 
         # If there's no lock set in the cache, do nothing.
         try:
-            current = datetime.datetime.fromisoformat(
-                self._cache.get(self.cache_key(CACHE_KEY_LOCK), self.operation)
+            current = datetime.datetime.strptime(
+                self._cache.get(self.cache_key(CACHE_KEY_LOCK), self.operation),
+                LOCK_DATE_FORMAT,
             )
+
         except NotFoundException:
             return
+
+        # Ensure there is always a timezone present on the parsed datetime object.
+        current = current.replace(tzinfo=datetime.timezone.utc)
 
         # Check if the lock matches what we expect.
         if current != self._lock_expiry:
