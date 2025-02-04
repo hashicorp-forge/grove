@@ -15,6 +15,7 @@ import jmespath
 
 from grove.__about__ import __version__
 from grove.constants import (
+    CACHE_KEY_LAST,
     CACHE_KEY_LOCK,
     CACHE_KEY_POINTER,
     CACHE_KEY_POINTER_NEXT,
@@ -65,6 +66,10 @@ class BaseConnector:
         self.configuration = config
         self.runtime_context = context
 
+        # Track the time our execution started. We use this quite a lot to ensure we
+        # are using a consistent timestamp between executions.
+        self._started = datetime.datetime.now(datetime.timezone.utc)
+
         # 'Operations' are useful for APIs which have MANY different types of data which
         # can be returned but where only a small subset are pertinent. In this case, the
         # operation can be set in the configuration to instruct grove to only collect
@@ -73,6 +78,7 @@ class BaseConnector:
         self.kind = self.__class__.__module__
         self.identity = self.configuration.identity
         self.operation = self.configuration.operation
+        self.frequency = self.configuration.frequency
         self.name = self.configuration.name
 
         # Define contextual log data to be appended to all log messages.
@@ -149,6 +155,48 @@ class BaseConnector:
         self._pointer_next = str()
         self._pointer_previous = str()
 
+    def due(self) -> bool:
+        """Checks whether a collection is (over)due.
+
+        :return: True if a run is due, False if not required.
+        """
+        # First check that an frequency is set. In daemon mode, an frequency is always
+        # required - as otherwise, we don't know how frequently to run the connector.
+        try:
+            _ = int(self.configuration.frequency)
+        except (ValueError, TypeError) as err:
+            raise ConfigurationException(
+                f"Connector '{self.kind}' has an invalid frequency set. {err}"
+            )
+
+        # If no last run is set, then always run.
+        try:
+            last = self.last
+        except NotFoundException:
+            self.logger.debug(
+                f"Connector '{self.kind}' does not have a last run time set.",
+                extra=self.log_context,
+            )
+            return True
+
+        # Check if the frequency between last run and now has passed.
+        delta = (self._started - last).seconds
+        self.logger.debug(
+            f"Connector '{self.kind}' last ran {delta} seconds ago, run frequency is "
+            f"{self.frequency} seconds.",
+            extra=self.log_context,
+        )
+
+        if delta >= self.frequency:
+            self.logger.info(
+                f"Connector '{self.kind}' is due to run, dispatching.",
+                extra=self.log_context,
+            )
+            return True
+
+        # Default to run not required.
+        return False
+
     def run(self):
         """Connector entrypoint, called by the scheduler.
 
@@ -164,6 +212,7 @@ class BaseConnector:
                 f"Connector '{self.kind}' may already be running in another location.",
                 extra={"exception": err, **self.log_context},
             )
+            return
 
         # Perform collection.
         try:
@@ -173,6 +222,7 @@ class BaseConnector:
                 f"Connector '{self.kind}' could not complete collection successfully.",
                 extra={"exception": err, **self.log_context},
             )
+            self.last = self._started
             self.unlock()
             return
 
@@ -184,6 +234,7 @@ class BaseConnector:
             self._run_reverse_chronological()
 
         # TODO: The use of a context manager for lock management would be best.
+        self.last = self._started
         self.unlock()
 
     def _run_chronological(self):
@@ -517,18 +568,10 @@ class BaseConnector:
 
         :return: The constructed cache key.
         """
-        # MD5 may not be cryptographically secure, but it works for our purposes. It's:
-        #
-        #   1) Short.
-        #   2) Has a low chance of (non-deliberate) collisions.
-        #   3) Able to be 'stringified' as hex, the character set of which is compatible
-        #      with backends like DynamoDB.
-        #
         return ".".join(
             [
                 prefix,
-                self.CONNECTOR,
-                hashlib.md5(bytes(self.identity, "utf-8")).hexdigest(),  # noqa: S324
+                self.configuration.reference(),
             ]
         )
 
@@ -756,6 +799,40 @@ class BaseConnector:
                 )
 
     @property
+    def last(self) -> datetime.datetime:
+        """Returns the time of the last collection.
+
+        This will return a datetime object which may be from a failure or a successful
+        collection. If a collection fails, we will still wait until the next collection
+        is due before trying again.
+
+        :return: A datetime object representing the last collection.
+        """
+        # Intentionally allow exceptions to bubble up so the caller can catch if the
+        # value is not in the cache.
+        value = datetime.datetime.strptime(
+            self._cache.get(self.cache_key(CACHE_KEY_LAST), self.operation),
+            DATESTAMP_FORMAT,
+        )
+
+        # Ensure there is always a timezone present on the parsed datetime object.
+        value = value.replace(tzinfo=datetime.timezone.utc)
+
+        return value
+
+    @last.setter
+    def last(self, value: datetime.datetime):
+        """Sets and saves the last collection time in cache.
+
+        :param value: The value to save as the last collection time.
+        """
+        self._cache.set(
+            self.cache_key(CACHE_KEY_LAST),
+            self.operation,
+            value.strftime(DATESTAMP_FORMAT),
+        )
+
+    @property
     def hashes(self) -> Dict[str, set[str]]:
         """Return hashes for the most recently seen log entries.
 
@@ -952,7 +1029,9 @@ class BaseConnector:
     def save_window_end(self):
         """Saves the window end location to cache."""
         self._cache.set(
-            self.cache_key(CACHE_KEY_WINDOW_END), self.operation, self.window_end
+            self.cache_key(CACHE_KEY_WINDOW_END),
+            self.operation,
+            self.window_end,
         )
 
     def lock(self):
@@ -963,8 +1042,7 @@ class BaseConnector:
         :raises ConcurrencyException: A valid lock is already held, likely the result
             of a concurrent execution of Grove.
         """
-        now = datetime.datetime.utcnow()
-        expiry = now + datetime.timedelta(seconds=self._lock_duration)
+        expiry = self._started + datetime.timedelta(seconds=self._lock_duration)
 
         # If we don't have a lock, acquire one.
         current = self._lock_expiry
@@ -975,11 +1053,14 @@ class BaseConnector:
                     self._cache.get(self.cache_key(CACHE_KEY_LOCK), self.operation),
                     LOCK_DATE_FORMAT,
                 )
+
+                # Ensure there is always a timezone present on the parsed datetime.
+                current = current.replace(tzinfo=datetime.timezone.utc)
             except NotFoundException:
                 pass
 
             # Someone else has the lock.
-            if current is not None and current >= now:
+            if current is not None and current >= self._started:
                 raise ConcurrencyException(
                     f"Valid lock already held and does not expire until {current}"
                 )
@@ -1030,8 +1111,12 @@ class BaseConnector:
                 self._cache.get(self.cache_key(CACHE_KEY_LOCK), self.operation),
                 LOCK_DATE_FORMAT,
             )
+
         except NotFoundException:
             return
+
+        # Ensure there is always a timezone present on the parsed datetime object.
+        current = current.replace(tzinfo=datetime.timezone.utc)
 
         # Check if the lock matches what we expect.
         if current != self._lock_expiry:
@@ -1055,5 +1140,4 @@ class BaseConnector:
             )
 
         # Bye-bye lock.
-        self._lock_expiry = None
         self._lock_expiry = None

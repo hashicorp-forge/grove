@@ -83,7 +83,9 @@ isn't listed here, support can be added by creating a custom connector!
    :caption: Getting Started
 
    quickstart
+   scheduling
    configuration
+   processors
    examples
    faq
 

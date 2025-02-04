@@ -56,9 +56,11 @@ version = {attr = "grove.__about__.__version__"}
 
 [project.scripts]
 grove = "grove.entrypoints.local_process:entrypoint"
+groved = "grove.entrypoints.local_daemon:entrypoint"
 
 [project.entry-points."grove.entrypoints"]
 aws_lambda = "grove.entrypoints.aws_lambda:entrypoint"
+local_daemon = "grove.entrypoints.local_daemon:entrypoint"
 local_process = "grove.entrypoints.local_process:entrypoint"
 
 [project.entry-points."grove.connectors"]

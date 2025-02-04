@@ -4,6 +4,7 @@
 """Implements tests for connector locking."""
 
 import os
+import tempfile
 import time
 import unittest
 from unittest.mock import patch
@@ -17,6 +18,11 @@ from tests import mocks
 
 class ConnectorLockingTestCase(unittest.TestCase):
     """Implements tests for connector locking."""
+
+    def setUp(self):
+        """Ensure a local file cache handler is used for testing."""
+        self.path = tempfile.TemporaryDirectory()
+        os.environ["GROVE_CACHE_LOCAL_FILE_PATH"] = self.path.name
 
     @patch("grove.helpers.plugin.load_handler", mocks.load_handler)
     def test_lock_acquire(self):
@@ -73,8 +79,8 @@ class ConnectorLockingTestCase(unittest.TestCase):
         first_execution = BaseConnector(config=config, context=context)
         first_execution.lock()
 
-        # Attempt to acquire a lock for the same connector instance - after the lock
-        # has expired. This should succeed due to expiry.
+        # Attempt to acquire a lock while a lock is still held by the first execution.
+        # this should fail.
         second_execution = BaseConnector(config=config, context=context)
 
         # In-memory cache does not support locking as it's only intended for local
@@ -91,8 +97,10 @@ class ConnectorLockingTestCase(unittest.TestCase):
         # Wait to ensure the lock has expired.
         time.sleep(5)
 
-        # Ensure the lock is taken-over successfully after expiration.
+        # Now ensure that the lock is able to be taken-over after expiration.
+        second_execution = BaseConnector(config=config, context=context)
         second_execution.lock()
+        first_execution._cache._data = second_execution._cache._data
 
         # Ensure subsequent attempts of the first fail due to this lock takeover.
         with self.assertRaises(ConcurrencyException):
@@ -135,10 +143,5 @@ class ConnectorLockingTestCase(unittest.TestCase):
         with self.assertRaises(ConcurrencyException):
             second_execution.lock()
 
-        # Unlock the first connector, and then ensure the second calling lock does not
-        # error. First though, we need to clone the newly updated cache again.
-        #
-        # TODO: Remove the need for this, as it's going to cause confusion in future.
         first_execution.unlock()
-        second_execution._cache._data = first_execution._cache._data
         second_execution.lock()

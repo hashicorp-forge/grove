@@ -102,6 +102,29 @@ used to assist with encoding (:code:`encoding`), disabling a connector
 
 Please see the :meth:`grove.models.ConnectorConfig` implementation for more details.
 
+Optional Fields
+^^^^^^^^^^^^^^^
+
+As specified in :meth:`grove.models.ConnectorConfig`, the following fields are optional.
+This is not an exhaustive list, but only covers important fields which are noteworthy.
+
+  * :code:`frequency`
+
+    * The frequency on which a connector should be executed, in seconds.
+    * If not specified, this defaults to 600 seconds.
+
+  * :code:`processors`
+
+    * Defines a list of processors which should be run.
+    * Processors enable transformation of collected log records prior to output.
+    * See the :doc:`processors` section of the documentation for more information.
+
+.. Warning::
+    :code:`frequency` is still adhered to when running in scheduled mode. If Grove is
+    executed more frequently than the specified :code:`frequency`, it will not execute
+    until enough time has passed since the last execution. This is done to ensure
+    consistency between daemon mode, and scheduled mode.
+
 .. _secrets:
 
 Secrets
