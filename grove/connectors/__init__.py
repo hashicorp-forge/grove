@@ -212,6 +212,7 @@ class BaseConnector:
                 f"Connector '{self.kind}' may already be running in another location.",
                 extra={"exception": err, **self.log_context},
             )
+            return
 
         # Perform collection.
         try:
