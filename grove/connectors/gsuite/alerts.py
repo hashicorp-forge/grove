@@ -149,7 +149,7 @@ class Connector(BaseConnector):
             credentials = service_account.Credentials.from_service_account_info(
                 service_account_info,
                 scopes=SCOPES,
-                subject=self.identity,
+                subject=self.subject,
             )
         except ValueError as err:
             raise ConfigurationException(
@@ -158,3 +158,4 @@ class Connector(BaseConnector):
             )
 
         return credentials
+

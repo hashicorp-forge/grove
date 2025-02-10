@@ -74,6 +74,7 @@ class BaseConnector:
         self.identity = self.configuration.identity
         self.operation = self.configuration.operation
         self.name = self.configuration.name
+        self.subject = getattr(self.configuration, 'subject', None)
 
         # Define contextual log data to be appended to all log messages.
         self.log_context = {
