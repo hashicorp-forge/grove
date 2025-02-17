@@ -7,14 +7,36 @@ import datetime
 
 from grove.connectors import BaseConnector
 from grove.connectors.dropbox.api import Client
-from grove.constants import CHRONOLOGICAL, OPERATION_DEFAULT
+from grove.constants import OPERATION_DEFAULT, REVERSE_CHRONOLOGICAL
 from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
     CONNECTOR = "dropbox_team_events"
     POINTER_PATH = "timestamp"
-    LOG_ORDER = CHRONOLOGICAL
+    LOG_ORDER = REVERSE_CHRONOLOGICAL
+
+    @property
+    def client_id(self):
+        """Fetches the Client ID from the configuration.
+
+        :return: The "client_id" portion of the connector's configuration.
+        """
+        try:
+            return self.configuration.client_id
+        except AttributeError:
+            return None
+
+    @property
+    def client_secret(self):
+        """Fetches the Client Secret from the configuration.
+
+        :return: The "client_secret" portion of the connector's configuration.
+        """
+        try:
+            return self.configuration.client_secret
+        except AttributeError:
+            return None
 
     def collect(self):
         """Collects all logs from the Dropbox team event API.
@@ -22,8 +44,15 @@ class Connector(BaseConnector):
         This will first check whether there are any pointers cached to indicate previous
         collections. If not, the last week of data will be collected.
         """
-        client = Client(token=self.key)
+        client = Client(
+            client_id=self.client_id,
+            client_secret=self.client_secret,
+            refresh_token=self.key,
+        )
         cursor = None
+
+        # Fetch an access token.
+        client.get_access_token()
 
         # If no pointer is stored then a previous run hasn't been performed, so set the
         # pointer to a week ago.

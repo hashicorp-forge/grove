@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import patch
 
 import responses
+import responses.registries
 
 from grove.connectors.dropbox.team_events import Connector
 from grove.models import ConnectorConfig
@@ -26,6 +27,8 @@ class DropboxTeamEventsTestCase(unittest.TestCase):
             config=ConnectorConfig(
                 identity="examplecorp",
                 key="0123456789",
+                client_id="0123456789",
+                client_secret="0123456789",
                 name="examplecorp",
                 connector="test",
             ),
@@ -111,7 +114,7 @@ class DropboxTeamEventsTestCase(unittest.TestCase):
 
         responses.add(
             responses.POST,
-            re.compile(r"https://.*"),
+            re.compile(r"https://.*/continue"),
             status=200,
             content_type="application/json",
             body=bytes(
@@ -126,4 +129,4 @@ class DropboxTeamEventsTestCase(unittest.TestCase):
         # Ensure only a single value is returned, and the pointer is properly set.
         self.connector.run()
         self.assertEqual(self.connector._saved["logs"], 2)
-        self.assertEqual(self.connector.pointer, "2017-01-25T15:51:31Z")
+        self.assertEqual(self.connector.pointer, "2017-01-25T15:51:20Z")

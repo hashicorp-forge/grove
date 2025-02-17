@@ -19,19 +19,25 @@ API_PAGE_SIZE = 1000
 class Client:
     def __init__(
         self,
-        token: Optional[str] = None,
+        client_id: Optional[str] = None,
+        client_secret: Optional[str] = None,
+        refresh_token: Optional[str] = None,
         retry: Optional[bool] = True,
     ):
         """Setup a new Dropbox team events client.
 
-        :param token: Dropbox access token token to authenticate with.
+        :param client_id: The OAuth2 client id to authenticate with.
+        :param client_secret: The OAuth2 client secret to authenticate with.
+        :param refresh_token: The OAuth2 refresh token to authenticate with.
         :param retry: Automatically retry if recoverable errors are encountered, such as
             rate-limiting.
         """
         self.retry = retry
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.refresh_token = refresh_token
         self.logger = logging.getLogger(__name__)
         self.headers = {
-            "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
         }
 
@@ -40,25 +46,30 @@ class Client:
         url: str,
         payload: Optional[Dict[str, Any]] = None,
         params: Optional[Dict[str, Optional[str]]] = None,
+        headers: Optional[Dict[str, str]] = None,
     ) -> HTTPResponse:
         """A POST wrapper to handle retries for the caller.
 
         :param url: URL to perform the HTTP POST against.
         :param payload: Dictionary of data to pass as JSON in the request.
         :param params: HTTP parameters to add to the request.
+        :param headers: HTTP headers to add to the request.
 
         :raises RateLimitException: A rate limit was encountered.
         :raises RequestFailedException: An HTTP request failed.
 
         :return: HTTP Response object containing the headers and body of a response.
         """
+        if not headers:
+            headers = {}
+
         while True:
             try:
                 response = requests.post(
                     url,
                     json=payload,
-                    headers=self.headers,
                     params=params,
+                    headers={**self.headers, **headers},
                 )
                 response.raise_for_status()
                 break
@@ -84,6 +95,31 @@ class Client:
                     time.sleep(1)
 
         return HTTPResponse(headers=response.headers, body=response.json())
+
+    def get_access_token(self):
+        """Exchange a refresh token for an access token.
+
+        :return: If the request is successful, the bearer token is returned to
+            the Client class header.
+        """
+        # Note: this is a different endpoint to the rest of the API operations.
+        url = "https://api.dropbox.com/oauth2/token"
+
+        bearer_response = self._post(
+            url,
+            params={
+                "client_id": f"{self.client_id}",
+                "client_secret": f"{self.client_secret}",
+                "grant_type": "refresh_token",
+                "refresh_token": f"{self.refresh_token}",
+            },
+            headers={
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+        )
+
+        access_token = bearer_response.body.get("access_token")
+        self.headers["Authorization"] = f"Bearer {access_token}"
 
     def get_events(
         self,
@@ -121,7 +157,9 @@ class Client:
                 payload={
                     "category": category,
                     "limit": API_PAGE_SIZE,
-                    "start_time": start_time,
+                    "time": {
+                        "start_time": start_time,
+                    },
                 },
             )
 
