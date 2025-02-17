@@ -41,6 +41,21 @@ class DropboxTeamEventsTestCase(unittest.TestCase):
     @responses.activate
     def test_client_rate_limit(self):
         """Ensure ratelimit waiting is working as expected."""
+        # Authentication.
+        responses.add(
+            responses.POST,
+            re.compile(r"https://.*/oauth2/token"),
+            status=200,
+            content_type="application/json",
+            body=bytes(
+                open(
+                    os.path.join(self.dir, "fixtures/dropbox/client/001.json"),
+                    "r",
+                ).read(),
+                "utf-8",
+            ),
+        )
+
         # Rate limit the first request.
         responses.add(
             responses.POST,
@@ -76,6 +91,22 @@ class DropboxTeamEventsTestCase(unittest.TestCase):
     @responses.activate
     def test_collect_no_pagination(self):
         """Ensure collection without pagination is working as expected."""
+        # Authentication.
+        responses.add(
+            responses.POST,
+            re.compile(r"https://.*/oauth2/token"),
+            status=200,
+            content_type="application/json",
+            body=bytes(
+                open(
+                    os.path.join(self.dir, "fixtures/dropbox/client/001.json"),
+                    "r",
+                ).read(),
+                "utf-8",
+            ),
+        )
+
+        # Results.
         responses.add(
             responses.POST,
             re.compile(r"https://.*"),
@@ -98,6 +129,22 @@ class DropboxTeamEventsTestCase(unittest.TestCase):
     @responses.activate
     def test_collect_pagination(self):
         """Ensure collection with pagination is working as expected."""
+        # Authentication.
+        responses.add(
+            responses.POST,
+            re.compile(r"https://.*/oauth2/token"),
+            status=200,
+            content_type="application/json",
+            body=bytes(
+                open(
+                    os.path.join(self.dir, "fixtures/dropbox/client/001.json"),
+                    "r",
+                ).read(),
+                "utf-8",
+            ),
+        )
+
+        # Results.
         responses.add(
             responses.POST,
             re.compile(r"https://.*"),

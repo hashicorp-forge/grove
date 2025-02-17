@@ -108,17 +108,22 @@ class Client:
         bearer_response = self._post(
             url,
             params={
-                "client_id": f"{self.client_id}",
-                "client_secret": f"{self.client_secret}",
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "refresh_token": self.refresh_token,
                 "grant_type": "refresh_token",
-                "refresh_token": f"{self.refresh_token}",
             },
             headers={
                 "Content-Type": "application/x-www-form-urlencoded",
             },
         )
 
-        access_token = bearer_response.body.get("access_token")
+        # Allow this to throw if the access_token isn't in the response.
+        try:
+            access_token = bearer_response.body["access_token"]
+        except KeyError:
+            raise RequestFailedException("Response did not include an access token.")
+
         self.headers["Authorization"] = f"Bearer {access_token}"
 
     def get_events(
