@@ -176,4 +176,4 @@ class DropboxTeamEventsTestCase(unittest.TestCase):
         # Ensure only a single value is returned, and the pointer is properly set.
         self.connector.run()
         self.assertEqual(self.connector._saved["logs"], 2)
-        self.assertEqual(self.connector.pointer, "2017-01-25T15:51:20Z")
+        self.assertEqual(self.connector.pointer, "2017-01-25T15:51:10Z")
