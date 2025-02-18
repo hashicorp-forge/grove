@@ -7,14 +7,14 @@ import datetime
 
 from grove.connectors import BaseConnector
 from grove.connectors.dropbox.api import Client
-from grove.constants import OPERATION_DEFAULT, REVERSE_CHRONOLOGICAL
+from grove.constants import OPERATION_DEFAULT, CHRONOLOGICAL
 from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
     CONNECTOR = "dropbox_team_events"
     POINTER_PATH = "timestamp"
-    LOG_ORDER = REVERSE_CHRONOLOGICAL
+    LOG_ORDER = CHRONOLOGICAL
 
     @property
     def client_id(self):
