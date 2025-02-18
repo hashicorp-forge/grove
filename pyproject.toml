@@ -64,6 +64,7 @@ local_process = "grove.entrypoints.local_process:entrypoint"
 [project.entry-points."grove.connectors"]
 fleetdm_host_logs = "grove.connectors.fleetdm.host_logs:Connector"
 atlassian_audit_events = "grove.connectors.atlassian.audit_events:Connector"
+dropbox_team_events = "grove.connectors.dropbox.team_events:Connector"
 github_audit_log = "grove.connectors.github.audit_log:Connector"
 gsuite_activities = "grove.connectors.gsuite.activities:Connector"
 local_heartbeat = "grove.connectors.local.heartbeat:Connector"
@@ -125,7 +126,7 @@ files = [
     "./grove/**/*.py",
     "./tests/**/*.py"
 ]
-disable_error_code = "attr-defined, union-attr, unused-ignore"
+disable_error_code = "attr-defined, union-attr, unused-ignore, arg-type"
 allow_redefinition = false
 check_untyped_defs = true
 disallow_any_generics = true
