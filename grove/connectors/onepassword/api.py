@@ -76,7 +76,6 @@ class Client:
                         raise RateLimitException(err)
 
                 raise RequestFailedException(err)
-
         return HTTPResponse(headers=response.headers, body=response.json())
 
     def get_events(
@@ -84,7 +83,7 @@ class Client:
         event_type: str,
         cursor: Optional[str] = None,
         start_time: Optional[str] = None,
-    ) -> AuditLogEntries:
+    ) -> tuple[AuditLogEntries, bool]:
         """Returns a list of logs from a specified endpoint.
 
         :param event_type: The API endpoint name and type of logs we're pulling.
@@ -93,12 +92,13 @@ class Client:
 
         :return: AuditLogEntries object containing a pagination cursor, and log entries.
         """
-        url = f"https://{self.hostname}/api/v1/{event_type}"
+        url = f"https://{self.hostname}/api/v2/{event_type}"
 
         # Use the cursor URL if set, otherwise construct the initial query.
         if cursor is not None:
-            self.logger.debug(
-                "Collecting next page with provided cursor", extra={"cursor": cursor}
+            self.logger.info(
+                "Collecting next page with provided cursor",
+                extra={"cursor": cursor},
             )
             result = self._post(url, payload={"cursor": cursor})
         else:
@@ -109,20 +109,20 @@ class Client:
                 payload={"limit": API_PAGE_SIZE, "start_time": start_time},
             )
 
-        # Check if pagination is required.
-        if result.body.get("has_more", False):
-            cursor = result.body.get("cursor")
-        else:
-            cursor = None
+        cursor = result.body.get("cursor")
+        has_more = result.body.get("has_more") in (True, "true", "True")
 
         # Return the cursor and the results to allow the caller to page as required.
-        return AuditLogEntries(cursor=cursor, entries=result.body.get("items", []))
+        return (
+            AuditLogEntries(cursor=cursor, entries=result.body.get("items", [])),
+            has_more,
+        )
 
     def get_signinattempts(
         self,
         cursor: Optional[str] = None,
         start_time: Optional[str] = None,
-    ) -> AuditLogEntries:
+    ) -> tuple[AuditLogEntries, bool]:
         """Fetches a list of signing attempt logs.
 
         :param cursor: Cursor to use when fetching results. Supersedes other parameters.
@@ -130,15 +130,20 @@ class Client:
 
         :return: AuditLogEntries object containing a pagination cursor, and log entries.
         """
-        return self.get_events(
+        events, has_more = self.get_events(
             event_type="signinattempts", cursor=cursor, start_time=start_time
         )
+
+        for entry in events.entries:
+            entry["cursor"] = events.cursor
+
+        return events, has_more
 
     def get_itemusages(
         self,
         cursor: Optional[str] = None,
         start_time: Optional[str] = None,
-    ) -> AuditLogEntries:
+    ) -> tuple[AuditLogEntries, bool]:
         """Fetches a list of modified, accessed, or used items from a shared vault.
 
         :param cursor: Cursor to use when fetching results. Supersedes other parameters.
@@ -146,15 +151,20 @@ class Client:
 
         :return: AuditLogEntries object containing a pagination cursor, and log entries.
         """
-        return self.get_events(
+        events, has_more = self.get_events(
             event_type="itemusages", cursor=cursor, start_time=start_time
         )
+
+        for entry in events.entries:
+            entry["cursor"] = events.cursor
+
+        return events, has_more
 
     def get_auditevents(
         self,
         cursor: Optional[str] = None,
         start_time: Optional[str] = None,
-    ) -> AuditLogEntries:
+    ) -> tuple[AuditLogEntries, bool]:
         """Fetches a list of actions performed by members of a 1Password account.
 
         :param cursor: Cursor to use when fetching results. Supersedes other parameters.
@@ -162,6 +172,11 @@ class Client:
 
         :return: AuditLogEntries object containing a pagination cursor, and log entries.
         """
-        return self.get_events(
+        events, has_more = self.get_events(
             event_type="auditevents", cursor=cursor, start_time=start_time
         )
+
+        for entry in events.entries:
+            entry["cursor"] = events.cursor
+
+        return events, has_more
