@@ -11,7 +11,12 @@ def get_pointer_values(connector):
     Checks to see if a previous pointer has been set. If so, it checks to see if it's
     a date (pointer was previously set in cache and not upgraded) and if not assumes
     it's a cursor. If the pointer is not found, it sets a date of 7 days ago as a starting
-    point"""
+    point
+
+    :param connector: Instance of the 1Password connector (we use logger and pointer).
+    :return: start_time - either initial time or parsed time parsed from pointer
+    :return: cursor - opaque string representing an index into 1Password's event stream
+    """
 
     try:
         _ = connector.pointer
@@ -20,7 +25,7 @@ def get_pointer_values(connector):
     except NotFoundException:
         week_ago = datetime.now() - timedelta(days=7)
         start_time = (week_ago).astimezone().replace(microsecond=0).isoformat()
-        return None, start_time
+        return "", start_time
 
     cursor = ""
     start_time = ""
@@ -30,9 +35,13 @@ def get_pointer_values(connector):
     try:
         datetime.fromisoformat(connector.pointer)
     except ValueError:
-        connector.logger.info("Pointer is already a cursor")
+        connector.logger.debug(
+            f"Pointer has value of {connector.pointer}, which appears to already be a cursor."
+        )
         cursor = connector.pointer
     else:
-        connector.logger.info("Pointer is a timestamp.")
+        connector.logger.debug(
+            f"Pointer has value of {connector.pointer}, which appears to be a timestamp."
+        )
         start_time = connector.pointer
     return cursor, start_time

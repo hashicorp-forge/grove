@@ -96,7 +96,7 @@ class Client:
 
         # Use the cursor URL if set, otherwise construct the initial query.
         if cursor is not None:
-            self.logger.info(
+            self.logger.debug(
                 "Collecting next page with provided cursor",
                 extra={"cursor": cursor},
             )
@@ -134,6 +134,9 @@ class Client:
             event_type="signinattempts", cursor=cursor, start_time=start_time
         )
 
+        # when saving the pointer, Grove looks for the pointer value within an entry
+        # rather than externally to it. 1Password's pointer is external to the entry. To
+        # get around this, copy internally.
         for entry in events.entries:
             entry["cursor"] = events.cursor
 
@@ -155,6 +158,9 @@ class Client:
             event_type="itemusages", cursor=cursor, start_time=start_time
         )
 
+        # when saving the pointer, Grove looks for the pointer value within an entry
+        # rather than externally to it. 1Password's pointer is external to the entry. To
+        # get around this, copy internally.
         for entry in events.entries:
             entry["cursor"] = events.cursor
 
@@ -176,6 +182,9 @@ class Client:
             event_type="auditevents", cursor=cursor, start_time=start_time
         )
 
+        # when saving the pointer, Grove looks for the pointer value within an entry
+        # rather than externally to it. 1Password's pointer is external to the entry. To
+        # get around this, copy internally.
         for entry in events.entries:
             entry["cursor"] = events.cursor
 
