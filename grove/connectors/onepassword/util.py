@@ -14,8 +14,12 @@ def get_pointer_values(connector):
     point
 
     :param connector: Instance of the 1Password connector (we use logger and pointer).
-    :return: start_time - either initial time or parsed time parsed from pointer
-    :return: cursor - opaque string representing an index into 1Password's event stream
+    :return: A tuple containing (cursor, start_time).
+        - cursor - opaque string representing an index into 1Password's event stream. If
+        we can't parse the cached pointer as a time, we assume it's a cursor. Returns an
+        empty string if start_time is present.
+        - start_time - Time parsed from cached pointer. Returns an empty string if
+        cursor is present. If there's no cached pointer, default to 7 days ago.
     """
 
     try:
