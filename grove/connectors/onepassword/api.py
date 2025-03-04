@@ -90,7 +90,9 @@ class Client:
         :param cursor: Cursor to use when fetching results. Supersedes other parameters.
         :param start_time: The ISO Format timestamp to query logs since.
 
-        :return: AuditLogEntries object containing a pagination cursor, and log entries.
+        :return:
+            - AuditLogEntries object containing a pagination cursor, and log entries.
+            - Bool object indicates whether there are more events to process.
         """
         url = f"https://{self.hostname}/api/v2/{event_type}"
 
@@ -110,7 +112,7 @@ class Client:
             )
 
         cursor = result.body.get("cursor")
-        has_more = result.body.get("has_more") in (True, "true", "True")
+        has_more = result.body.get("has_more") in [True]
 
         # Return the cursor and the results to allow the caller to page as required.
         return (
@@ -128,7 +130,9 @@ class Client:
         :param cursor: Cursor to use when fetching results. Supersedes other parameters.
         :param start_time: The ISO Format timestamp to query logs since.
 
-        :return: AuditLogEntries object containing a pagination cursor, and log entries.
+        :return:
+            - AuditLogEntries object containing a pagination cursor, and log entries.
+            - Bool object indicates whether there are more events to process.
         """
         events, has_more = self.get_events(
             event_type="signinattempts", cursor=cursor, start_time=start_time
@@ -137,8 +141,8 @@ class Client:
         # when saving the pointer, Grove looks for the pointer value within an entry
         # rather than externally to it. 1Password's pointer is external to the entry. To
         # get around this, copy internally.
-        for entry in events.entries:
-            entry["cursor"] = events.cursor
+        if len(events.entries) > 0:
+            events.entries[-1]["cursor"] = events.cursor
 
         return events, has_more
 
@@ -152,7 +156,9 @@ class Client:
         :param cursor: Cursor to use when fetching results. Supersedes other parameters.
         :param start_time: The ISO Format timestamp to query logs since.
 
-        :return: AuditLogEntries object containing a pagination cursor, and log entries.
+        :return:
+            - AuditLogEntries object containing a pagination cursor, and log entries.
+            - Bool object indicates whether there are more events to process.
         """
         events, has_more = self.get_events(
             event_type="itemusages", cursor=cursor, start_time=start_time
@@ -161,8 +167,8 @@ class Client:
         # when saving the pointer, Grove looks for the pointer value within an entry
         # rather than externally to it. 1Password's pointer is external to the entry. To
         # get around this, copy internally.
-        for entry in events.entries:
-            entry["cursor"] = events.cursor
+        if len(events.entries) > 0:
+            events.entries[-1]["cursor"] = events.cursor
 
         return events, has_more
 
@@ -176,7 +182,9 @@ class Client:
         :param cursor: Cursor to use when fetching results. Supersedes other parameters.
         :param start_time: The ISO Format timestamp to query logs since.
 
-        :return: AuditLogEntries object containing a pagination cursor, and log entries.
+        :return:
+            - AuditLogEntries object containing a pagination cursor, and log entries.
+            - Bool object indicates whether there are more events to process.
         """
         events, has_more = self.get_events(
             event_type="auditevents", cursor=cursor, start_time=start_time
@@ -185,7 +193,7 @@ class Client:
         # when saving the pointer, Grove looks for the pointer value within an entry
         # rather than externally to it. 1Password's pointer is external to the entry. To
         # get around this, copy internally.
-        for entry in events.entries:
-            entry["cursor"] = events.cursor
+        if len(events.entries) > 0:
+            events.entries[-1]["cursor"] = events.cursor
 
         return events, has_more

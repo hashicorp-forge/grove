@@ -16,23 +16,20 @@ def get_pointer_values(connector):
     :param connector: Instance of the 1Password connector (we use logger and pointer).
     :return: A tuple containing (cursor, start_time).
         - cursor - opaque string representing an index into 1Password's event stream. If
-        we can't parse the cached pointer as a time, we assume it's a cursor. Returns an
-        empty string if start_time is present.
-        - start_time - Time parsed from cached pointer. Returns an empty string if
+        we can't parse the cached pointer as a time, we assume it's a cursor. Returns None
+        if start_time is present.
+        - start_time - Time parsed from cached pointer. Returns None if
         cursor is present. If there's no cached pointer, default to 7 days ago.
     """
 
+    cursor = None
+    start_time = None
     try:
         _ = connector.pointer
-        if not connector.pointer:
-            raise NotFoundException
     except NotFoundException:
         week_ago = datetime.now() - timedelta(days=7)
         start_time = (week_ago).astimezone().replace(microsecond=0).isoformat()
-        return "", start_time
-
-    cursor = ""
-    start_time = ""
+        return cursor, start_time
 
     # originally, we used the timestamp for the pointer. Check to see we have a timestamp
     # for backwards compatibility. Otherwise interpet it as a cursor.
@@ -40,12 +37,13 @@ def get_pointer_values(connector):
         datetime.fromisoformat(connector.pointer)
     except ValueError:
         connector.logger.debug(
-            f"Pointer has value of {connector.pointer}, which appears to already be a cursor."
+            "Pointer appears to already be a cursor.", extra={"cursor": cursor}
         )
         cursor = connector.pointer
     else:
         connector.logger.debug(
-            f"Pointer has value of {connector.pointer}, which appears to be a timestamp."
+            "Pointer appears to be a timestamp.",
+            extra={"cursor": cursor},
         )
         start_time = connector.pointer
     return cursor, start_time
