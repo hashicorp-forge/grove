@@ -92,7 +92,7 @@ class Client:
 
         :return:
             - AuditLogEntries object containing a pagination cursor, and log entries.
-            - Bool object indicates whether there are more events to process.
+            - Boolean indicating whether there are more events to process.
         """
         url = f"https://{self.hostname}/api/v2/{event_type}"
 
@@ -112,7 +112,7 @@ class Client:
             )
 
         cursor = result.body.get("cursor")
-        has_more = result.body.get("has_more") in [True]
+        has_more = result.body.get("has_more") is True
 
         # Return the cursor and the results to allow the caller to page as required.
         return (
@@ -132,7 +132,7 @@ class Client:
 
         :return:
             - AuditLogEntries object containing a pagination cursor, and log entries.
-            - Bool object indicates whether there are more events to process.
+            - Boolean indicating whether there are more events to process.
         """
         events, has_more = self.get_events(
             event_type="signinattempts", cursor=cursor, start_time=start_time
@@ -158,7 +158,7 @@ class Client:
 
         :return:
             - AuditLogEntries object containing a pagination cursor, and log entries.
-            - Bool object indicates whether there are more events to process.
+            - Boolean indicating whether there are more events to process.
         """
         events, has_more = self.get_events(
             event_type="itemusages", cursor=cursor, start_time=start_time
@@ -184,7 +184,7 @@ class Client:
 
         :return:
             - AuditLogEntries object containing a pagination cursor, and log entries.
-            - Bool object indicates whether there are more events to process.
+            - Boolean indicating whether there are more events to process.
         """
         events, has_more = self.get_events(
             event_type="auditevents", cursor=cursor, start_time=start_time
