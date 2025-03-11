@@ -112,7 +112,7 @@ class Client:
             )
 
         cursor = result.body.get("cursor")
-        has_more = result.body.get("has_more") is True
+        has_more = result.body.get("has_more", False)
 
         # Return the cursor and the results to allow the caller to page as required.
         return (
