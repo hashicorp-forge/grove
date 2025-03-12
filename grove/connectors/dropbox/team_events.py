@@ -7,7 +7,7 @@ import datetime
 
 from grove.connectors import BaseConnector
 from grove.connectors.dropbox.api import Client
-from grove.constants import OPERATION_DEFAULT, CHRONOLOGICAL
+from grove.constants import CHRONOLOGICAL, DEFAULT_OPERATION
 from grove.exceptions import NotFoundException
 
 
@@ -68,7 +68,7 @@ class Connector(BaseConnector):
         # are required, the field needs to be omitted.
         category = None
 
-        if self.operation != OPERATION_DEFAULT:
+        if self.operation != DEFAULT_OPERATION:
             category = self.operation
 
         # Get log data from the upstream API, paging as required.
