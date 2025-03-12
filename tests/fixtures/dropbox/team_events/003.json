@@ -1,0 +1,92 @@
+{
+    "cursor": "ZtkX9_EHj3x7PMkVuFIhwKYXEpwpLwyxp9vMKomUhllil9q7eWiAf",
+    "events": [
+        {
+            "actor": {
+                ".tag": "user",
+                "user": {
+                    ".tag": "non_team_member",
+                    "account_id": "dbid:AAHgR8xsQP48a5DQUGPo-Vxsrjd0OByVmho",
+                    "display_name": "John Smith",
+                    "email": "john_smith@acmecorp.com"
+                }
+            },
+            "assets": [
+                {
+                    ".tag": "file",
+                    "display_name": "reports.xls",
+                    "file_id": "id:jQKLsZFQImAAAAAAEZAAQt",
+                    "file_size": 4,
+                    "path": {
+                        "contextual": "/Contract Work/Draft",
+                        "namespace_relative": {
+                            "is_shared_namespace": false,
+                            "ns_id": "1234",
+                            "relative_path": "/Contract Work/Draft"
+                        }
+                    }
+                }
+            ],
+            "context": {
+                ".tag": "team_member",
+                "account_id": "dbid:AAHgR8xsQP48a5DQUGPo-Vxsrjd0OByVmho",
+                "display_name": "John Smith",
+                "email": "john_smith@acmecorp.com",
+                "member_external_id": "ADSYNC S-1-5-21-1004296348-1135238915-682003432-1224",
+                "team": {
+                    "display_name": "A Team"
+                },
+                "team_member_id": "dbmid:AAFoi-tmvRuQR0jU-3fN4B-9nZo6nHcDO9Q"
+            },
+            "details": {
+                ".tag": "shared_content_download_details",
+                "shared_content_access_level": {
+                    ".tag": "traverse"
+                },
+                "shared_content_link": "abc",
+                "shared_content_owner": {
+                    ".tag": "non_team_member",
+                    "account_id": "dbid:AAHgR8xsQP48a5DQUGPo-Vxsrjd0OByVmho",
+                    "display_name": "John Smith",
+                    "email": "john_smith@acmecorp.com"
+                }
+            },
+            "event_category": {
+                ".tag": "tfa"
+            },
+            "event_type": {
+                ".tag": "shared_content_download",
+                "description": "(sharing) Downloaded shared file/folder"
+            },
+            "involve_non_team_member": true,
+            "origin": {
+                "access_method": {
+                    ".tag": "end_user",
+                    "end_user": {
+                        ".tag": "desktop",
+                        "session_id": "dbwsid:123456789012345678901234567890123456789"
+                    }
+                },
+                "geo_location": {
+                    "city": "San Francisco",
+                    "country": "US",
+                    "ip_address": "45.56.78.100",
+                    "region": "California"
+                }
+            },
+            "participants": [
+                {
+                    ".tag": "user",
+                    "user": {
+                        ".tag": "non_team_member",
+                        "account_id": "dbid:AAGx4oiLtHdvRdNxUpvvJBXYgR4BS19c9kw",
+                        "display_name": "Jane Smith",
+                        "email": "jane_smith@acmecorp.com"
+                    }
+                }
+            ],
+            "timestamp": "2017-01-25T15:51:10Z"
+        }
+    ],
+    "has_more": false
+}

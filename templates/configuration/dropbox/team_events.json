@@ -1,0 +1,8 @@
+{
+    "identity": "TEAM_NAME_HERE",
+    "key": "REFRESH_TOKEN_HERE",
+    "client_id": "CLIENT_ID_HERE",
+    "client_secret": "CLIENT_SECRET_HERE",
+    "name": "dropbox-team-events-example",
+    "connector": "dropbox_team_events"
+}

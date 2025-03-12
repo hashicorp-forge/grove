@@ -45,6 +45,7 @@ isn't listed here, support can be added by creating a custom connector!
 
 * Atlassian audit events (e.g. Confluence, Jira)
 * FleetDM host logs
+* Dropbox team event logs
 * GitHub audit logs
 * GSuite alerts
 * GSuite activity logs

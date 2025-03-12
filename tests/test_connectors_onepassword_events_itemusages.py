@@ -91,7 +91,9 @@ class OnePasswordItemUsageEventTestCase(unittest.TestCase):
         # Ensure only a single value is returned, and the pointer is properly set.
         self.connector.run()
         self.assertEqual(self.connector._saved["logs"], 3)
-        self.assertEqual(self.connector.pointer, "2020-06-11T16:42:55-03:00")
+        self.assertEqual(
+            self.connector.pointer, "aGVsbG8hIGlzIGl0IG1lIHlvdSBhcmUgbG9va2luZyBmb3IK"
+        )
 
     @responses.activate
     def test_collect_pagination(self):
@@ -131,4 +133,6 @@ class OnePasswordItemUsageEventTestCase(unittest.TestCase):
         # Ensure only a single value is returned, and the pointer is properly set.
         self.connector.run()
         self.assertEqual(self.connector._saved["logs"], 2)
-        self.assertEqual(self.connector.pointer, "2020-06-11T16:52:55-03:00")
+        self.assertEqual(
+            self.connector.pointer, "aGVsbG8hIGlzIGl0IG1lIHlvdSBhcmUgbG9va2luZyBmb3IL"
+        )
