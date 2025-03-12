@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 from grove.connectors import BaseConnector
 from grove.connectors.tines.api import Client
-from grove.constants import OPERATION_DEFAULT, REVERSE_CHRONOLOGICAL
+from grove.constants import DEFAULT_OPERATION, REVERSE_CHRONOLOGICAL
 from grove.exceptions import NotFoundException
 
 
@@ -65,7 +65,7 @@ class Connector(BaseConnector):
         # Grove default is 'all'.
         operation = None
 
-        if self.operation != OPERATION_DEFAULT:
+        if self.operation != DEFAULT_OPERATION:
             operation = self.operation
 
         # Page over data using the cursor, saving returned data page by page.

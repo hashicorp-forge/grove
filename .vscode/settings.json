@@ -1,6 +1,4 @@
 {
-    "python.linting.enabled": true,
-    "python.formatting.provider": "none",
     "[python]": {
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {

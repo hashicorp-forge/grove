@@ -3,12 +3,13 @@
 
 """Implements tests for the Base connector."""
 
+import datetime
 import unittest
 from unittest.mock import patch
 
 from grove.connectors import BaseConnector
 from grove.constants import REVERSE_CHRONOLOGICAL
-from grove.exceptions import NotFoundException
+from grove.exceptions import ConfigurationException, NotFoundException
 from grove.models import ConnectorConfig
 from tests import mocks
 
@@ -95,6 +96,44 @@ class BaseConnectorTestCase(unittest.TestCase):
         )
         self.assertEqual(connector.key, "ABCDEF")
 
+    def test_due(self):
+        """Ensures the due method, used by the scheduler, is working as expected."""
+        connector = BaseConnector(
+            config=ConnectorConfig(
+                key="test",
+                name="test",
+                identity="1FEEDFEED1",
+                frequency=100,
+                connector="example_one",
+            ),
+            context={
+                "runtime": "test_harness",
+                "runtime_id": "NA",
+            },
+        )
+
+        # Ensure we report a run is due if there is no 'last' in cache.
+        self.assertTrue(connector.due())
+
+        # Ensure we report a run is not required if run frequency has not passed.
+        now = datetime.datetime.now(datetime.timezone.utc)
+        connector.last = now
+        self.assertFalse(connector.due())
+
+        # Ensure we report a run is required if run frequency has passed.
+        connector.last = now - datetime.timedelta(seconds=100)
+        self.assertTrue(connector.due())
+
+        # Ensure a configuration exception is raised if no frequency is set.
+        connector.configuration.frequency = None
+        with self.assertRaises(ConfigurationException):
+            connector.due()
+
+        # Ensure a configuration exception is raised if an invalid frequency is set.
+        connector.configuration.frequency = "a"
+        with self.assertRaises(ConfigurationException):
+            connector.due()
+
     @patch("grove.helpers.plugin.load_handler", mocks.load_handler)
     def test_recover_from_incomplete(self):
         # Setup a connector which operates in reverse chronological mode.
@@ -128,27 +167,27 @@ class BaseConnectorTestCase(unittest.TestCase):
 
         # Setup the cache to match the described failure case.
         connector._cache.set(
-            pk="pointer_next.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="pointer_next.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
             value="2022-11-20T20:31:18.382Z",
         )
         connector._cache.set(
-            pk="window_start.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="window_start.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
             value="2022-11-20T20:31:18.382Z",
         )
         connector._cache.set(
-            pk="pointer_previous.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="pointer_previous.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
             value="2022-11-20T20:30:10.772Z",
         )
         connector._cache.set(
-            pk="window_end.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="window_end.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
             value="2022-11-20T20:30:10.772Z",
         )
         connector._cache.set(
-            pk="pointer.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="pointer.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
             value="2022-11-20T20:31:18.382Z",
         )
@@ -163,15 +202,15 @@ class BaseConnectorTestCase(unittest.TestCase):
         # Clean-up to simulate a fresh run without having to re-create everything in
         # a subsequent test case.
         connector._cache.delete(
-            pk="window_start.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="window_start.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
         )
         connector._cache.delete(
-            pk="window_end.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="window_end.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
         )
         connector._cache.delete(
-            pk="pointer_next.test.06dc0fd3c08a2bc6a33f5460da9fea10",
+            pk="pointer_next.example_one.06dc0fd3c08a2bc6a33f5460da9fea10",
             sk="all",
         )
         connector._window_end = ""
