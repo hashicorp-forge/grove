@@ -1,0 +1,11 @@
+{
+        "name": "zitadel_events",
+        "identity": "",
+        "connector": "zitadel_events",
+        "key": "",
+        "batch_size": 10,
+        "timeout": 120,
+        "aggregate_event_types": ["user"]
+    
+}
+
