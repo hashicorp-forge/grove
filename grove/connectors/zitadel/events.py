@@ -52,7 +52,7 @@ class Connector(BaseConnector):
 
     def _make_request(self, query: dict) -> dict:
         url = f"{self._host.rstrip('/')}/admin/v1/events/_search"
-       
+    
         try:
             response = requests.post(
                 url,
@@ -62,12 +62,6 @@ class Connector(BaseConnector):
             )
             response.raise_for_status()
 
-            # If the response is JSON, parse it
-            try:
-                response_data = response.json()
-            except requests.exceptions.JSONDecodeError:
-                return None
-
         except requests.exceptions.HTTPError as err:
             if response.status_code == 429:
                 retry_after = int(response.headers.get("Retry-After", self.RATE_LIMIT_WINDOW))
@@ -75,34 +69,31 @@ class Connector(BaseConnector):
                 return self._make_request(query)
             raise RequestFailedException(f"Request failed: {err}")
 
-        return response_data
+        try:
+            _ = response.json()  
+        except requests.exceptions.JSONDecodeError:
+            return None
+
+        return response.json()  
+
 
     def collect(self):
-        self.configure()  # Ensure configuration is set up before collecting
+        self.configure()  
 
         try:
             _ = self.pointer
         except NotFoundException:
             self.pointer = "0"
 
-        cursor = str(self.pointer) if self.pointer else None
         has_more = True
 
         while has_more:
-            try:
-                query = self._build_query(cursor)
-                result = self._make_request(query)
-                
-                events = result.get("events", [])
-   
-                if not events:
-                    print("no new events found")
-                    break
-
-                self.save(events)
-                cursor = max(cursor or "0", max(event.get("sequence", "0") for event in events))
-                self.pointer = cursor
-                has_more = result.get("pagination", {}).get("has_more", False)
-                
-            except RequestFailedException as err:
+            query = self._build_query(self.pointer)
+            result = self._make_request(query)
+            events = result.get("events", [])
+            if not events:
                 break
+            self.save(events)
+
+            has_more = result.get("pagination", {}).get("has_more", False)
+
