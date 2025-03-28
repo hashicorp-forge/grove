@@ -24,11 +24,7 @@ class Connector(BaseConnector):
 
     def configure(self):
         self._host = self.configuration.identity
-
-        
         self._pat = self.configuration.key
-        if not self._pat:
-            raise ConfigurationException("Missing required 'key' parameter")
 
         self._batch_size = self.configuration.batch_size
         self._timeout = self.configuration.timeout
