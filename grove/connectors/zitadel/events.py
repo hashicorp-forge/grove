@@ -24,8 +24,7 @@ class Connector(BaseConnector):
 
     def configure(self):
         self._host = self.configuration.identity
-        if not self._host:
-            raise ConfigurationException("Missing required 'identity' parameter")
+
         
         self._pat = self.configuration.key
         if not self._pat:
