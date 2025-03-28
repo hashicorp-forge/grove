@@ -31,7 +31,6 @@ class Connector(BaseConnector):
         self._event_types = self.configuration.aggregate_event_types
 
     def _build_headers(self) -> dict:
-        print('this is the pat', self._pat)
         return {
             "Authorization": f"Bearer {self._pat}",
             "Content-Type": "application/json",
@@ -55,25 +54,19 @@ class Connector(BaseConnector):
         url = f"{self._host.rstrip('/')}/admin/v1/events/_search"
        
         try:
-            print("Request URL:", url)
-            print("Request Headers:", json.dumps(self._build_headers(), indent=2))
-            print("Request Body:", json.dumps(query, indent=2))
             response = requests.post(
                 url,
                 headers=self._build_headers(),
                 json=query,
                 timeout=self._timeout,
             )
-            print("Response status code:", response.status_code)  # Prints 200
-            print("Response text:", response.text)  # Prints raw response content
             response.raise_for_status()
 
             # If the response is JSON, parse it
             try:
                 response_data = response.json()
-                print("Response JSON:", response_data)
             except requests.exceptions.JSONDecodeError:
-                print("Response is not JSON.")
+                return None
 
         except requests.exceptions.HTTPError as err:
             if response.status_code == 429:
@@ -82,7 +75,7 @@ class Connector(BaseConnector):
                 return self._make_request(query)
             raise RequestFailedException(f"Request failed: {err}")
 
-        return response.json()
+        return response_data
 
     def collect(self):
         self.configure()  # Ensure configuration is set up before collecting
