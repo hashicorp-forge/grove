@@ -3,14 +3,13 @@
 
 """Zitadel Events connector for Grove."""
 
-import json
 import time
 from typing import Any, Dict, Optional
 
 import requests
 from grove.connectors import BaseConnector
 from grove.constants import CHRONOLOGICAL
-from grove.exceptions import ConfigurationException, NotFoundException, RequestFailedException
+from grove.exceptions import NotFoundException, RequestFailedException
 
 
 # Zitadel Events API allows you to retrieve all events based on a given aggregate event type
