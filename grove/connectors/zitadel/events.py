@@ -29,7 +29,7 @@ class Connector(BaseConnector):
         self._timeout = self.configuration.timeout
         self._event_types = self.configuration.aggregate_event_types
 
-    def _build_headers(self) -> dict:
+    def _build_headers(self) -> Dict[str, str]:
         return {
             "Authorization": f"Bearer {self._pat}",
             "Content-Type": "application/json",
@@ -49,7 +49,7 @@ class Connector(BaseConnector):
 
         return query
 
-    def _make_request(self, query: dict) -> dict:
+    def _make_request(self, query: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         url = f"{self._host.rstrip('/')}/admin/v1/events/_search"
     
         try:
