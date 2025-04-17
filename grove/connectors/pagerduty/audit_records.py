@@ -30,11 +30,13 @@ class Connector(BaseConnector):
         # If no pointer is stored then a previous run hasn't been performed, so set the
         # pointer to a week ago. In the case of the PagerDuty audit API the pointer is
         # the value of the "execution_time" field from the latest record retrieved from
-        # the API - which is in ISO8601 Format.
+        # the API.
         try:
             _ = self.pointer
         except NotFoundException:
-            self.pointer = (datetime.utcnow() - timedelta(days=7)).isoformat()
+            since = datetime.now(tz=timezone.utc) - timedelta(days=7)
+            since = since.replace(tzinfo=None)
+            self.pointer = since.isoformat(timespec="milliseconds") + "Z"
 
         # Get log data from the upstream API, paging as required.
         while True:
