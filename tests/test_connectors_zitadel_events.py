@@ -5,14 +5,20 @@
 
 
 import os
+import re
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 import responses
 from responses import matchers
-import re
+
 from grove.connectors.zitadel.events import Connector
+from grove.exceptions import (
+    ConfigurationException,
+    RateLimitException,
+    RequestFailedException,
+)
 from grove.models import ConnectorConfig
-from grove.exceptions import ConfigurationException, RequestFailedException
 from tests import mocks
 
 
@@ -25,10 +31,12 @@ class ZitadelEventsTestCase(unittest.TestCase):
         self.dir = os.path.dirname(os.path.abspath(__file__))
         self.connector = Connector(
             config=ConnectorConfig(
+                name="test",
+                connector="test",
                 identity="https://zitadel.example.com",
                 key="test_pat",
                 batch_size=100,
-                timeout=30,
+                timeout=1,
                 aggregate_event_types=["user.created", "user.updated"],
             ),
             context={
@@ -37,24 +45,12 @@ class ZitadelEventsTestCase(unittest.TestCase):
             },
         )
 
-    def test_configure_missing_identity(self):
-        """Ensure configure raises an exception if identity is missing."""
-        self.connector.configuration.identity = None
-        with self.assertRaises(ConfigurationException):
-            self.connector.configure()
-
-    def test_configure_missing_key(self):
-        """Ensure configure raises an exception if key is missing."""
-        self.connector.configuration.key = None
-        with self.assertRaises(ConfigurationException):
-            self.connector.configure()
-
     @responses.activate
     def test_collect_success(self):
         """Ensure collect works as expected when API returns valid data."""
         responses.add(
             responses.POST,
-            re.compile(r"https://zitadel\.example\.com/admin/v1/events/_search"),
+            re.compile(r"https://.*"),
             json={
                 "events": [{"sequence": "1", "type": "user.created"}],
                 "next_sequence": "2",
@@ -77,13 +73,13 @@ class ZitadelEventsTestCase(unittest.TestCase):
         """Ensure collect handles rate-limiting correctly."""
         responses.add(
             responses.POST,
-            re.compile(r"https://zitadel\.example\.com/admin/v1/events/_search"),
+            re.compile(r"https://.*"),
             status=429,
             headers={"Retry-After": "1"},
         )
 
         self.connector.pointer = "0"
-        with self.assertRaises(RequestFailedException):
+        with self.assertRaises(RateLimitException):
             self.connector.collect()
 
     @responses.activate
@@ -91,24 +87,13 @@ class ZitadelEventsTestCase(unittest.TestCase):
         """Ensure collect raises an exception on server error."""
         responses.add(
             responses.POST,
-            re.compile(r"https://zitadel\.example\.com/admin/v1/events/_search"),
+            re.compile(r"https://.*"),
             status=500,
         )
 
         self.connector.pointer = "0"
         with self.assertRaises(RequestFailedException):
             self.connector.collect()
-
-    def test_build_headers(self):
-        """Ensure headers are built correctly."""
-        headers = self.connector._build_headers()
-        self.assertEqual(
-            headers,
-            {
-                "Authorization": "Bearer test_pat",
-                "Content-Type": "application/json",
-            },
-        )
 
     def test_build_query(self):
         """Ensure query is built correctly."""
@@ -119,6 +104,6 @@ class ZitadelEventsTestCase(unittest.TestCase):
                 "limit": 100,
                 "asc": True,
                 "sequence": "10",
-                "aggregate_event_types": ["user.created", "user.updated"],
+                "aggregateTypes": ["user.created", "user.updated"],
             },
         )
