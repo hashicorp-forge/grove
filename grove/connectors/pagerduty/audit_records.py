@@ -3,7 +3,7 @@
 
 """PagerDuty Audit connector for Grove."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from grove.connectors import BaseConnector
 from grove.connectors.pagerduty.api import Client
