@@ -1,0 +1,14 @@
+{
+    "key": "",
+    "identity": "",
+    "name": "bigquery_query_gmail",
+    "connector": "bigquery_query",
+    "columns" : ["*"],
+    "project_id": "",
+    "dataset_name": "",
+    "table_name": "",
+    "pointer_path": "",
+    "encoding": {
+        "key": "base64"
+    }
+}
