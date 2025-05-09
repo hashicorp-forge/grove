@@ -1,0 +1,248 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+"""Google BigQuery connector for Grove."""
+
+import json
+from datetime import datetime, timedelta, timezone
+
+from google.auth.exceptions import GoogleAuthError
+from google.oauth2 import service_account
+from google.cloud import bigquery
+
+from grove.connectors import BaseConnector
+from grove.constants import CHRONOLOGICAL
+from grove.exceptions import (
+    ConfigurationException,
+    NotFoundException,
+    RequestFailedException,
+)
+
+def as_epoch_milliseconds(date: datetime) -> int:
+    """Converts a datetime object to epoch milliseconds.
+
+    :param date: The input datetime object.
+
+    :return: The epoch time in milliseconds as an integer.
+    """
+    return int(date.replace(tzinfo=timezone.utc).timestamp() * 1000)
+
+
+def as_bigquery_timestamp(epoch_ms_str: str) -> str:
+    """
+    Converts a string containing epoch time in milliseconds to a BigQuery-compatible timestamp string.
+
+    :param epoch_ms_str: The epoch time in milliseconds as a string.
+    :return: A BigQuery TIMESTAMP formatted date string (YYYY-MM-DD HH:MM:SS+00).
+    """
+    dt = datetime.fromtimestamp(int(epoch_ms_str) / 1000.0, tz=timezone.utc)
+    # BigQuery expects "+00" not "+0000" or "+00:00"
+    return dt.strftime("%Y-%m-%d %H:%M:%S+00")
+
+
+class Connector(BaseConnector):
+    CONNECTOR = "bigquery_query"
+    POINTER_PATH = "gmail.event_info.timestamp_usec"
+    LOG_ORDER = CHRONOLOGICAL
+
+    def collect(self):
+        """Collects logs from the specified table using Google BigQuery API."""
+        self.logger.info("Starting data collection from BigQuery.")
+
+        try:
+            project_id = self.configuration.project_id
+            dataset_name = self.configuration.dataset_name
+            table_name = self.configuration.table_name
+            columns = self.configuration.columns
+            POINTER_PATH = self.configuration.pointer_path
+
+
+            if not POINTER_PATH:
+                raise ConfigurationException(
+                    "POINTER_PATH is not set in the configuration."
+                )
+
+            if not all(isinstance(value, str) for value in [project_id, dataset_name, table_name]):
+                raise ConfigurationException(
+                    "project_id, dataset_name, and table_name must all be strings."
+                )
+            if not isinstance(columns, list):
+                raise ConfigurationException(
+                "columns must be a list."
+        )
+        except AttributeError as err:
+            raise ConfigurationException(
+                f"Missing required configuration attribute: {err}"
+            )
+
+        self.logger.info("BigQuery connector configured successfully.")
+
+        try:
+            client = bigquery.Client(credentials=self.get_credentials(), project=project_id)
+            self.logger.debug("BigQuery client created successfully.")
+        except Exception as e:
+            self.logger.error(f"Failed to create BigQuery client: {e}")
+            raise
+
+        # If no pointer is stored, set it to a week ago
+        try:
+            pointer_epoch_ms = int(self.pointer)
+            self.logger.info(f"Pointer found: {pointer_epoch_ms} ({type(pointer_epoch_ms)})")
+        except (NotFoundException, ValueError):
+            pointer_epoch_ms = as_epoch_milliseconds(datetime.utcnow() - timedelta(days=7))
+            self.logger.info(f"No pointer found. Setting pointer to: {pointer_epoch_ms} ({type(pointer_epoch_ms)})")
+            self.pointer = str(pointer_epoch_ms)
+
+        str_pointer = as_bigquery_timestamp(pointer_epoch_ms)
+
+        while True:
+            self.logger.info(f"Pointer for query: {str_pointer} ({type(str_pointer)})")
+
+            query = f"""
+            SELECT {', '.join(columns)}
+            FROM `{project_id}.{dataset_name}.{table_name}`
+            WHERE TIMESTAMP(_PARTITIONTIME) > TIMESTAMP('{str_pointer}')
+            ORDER BY TIMESTAMP(_PARTITIONTIME) ASC
+            LIMIT 1000
+            """
+            self.logger.debug(f"Constructed query: {query}")
+
+            try:
+                self.logger.info("Executing query on BigQuery.")
+                query_job = client.query(query)
+                results = query_job.result()
+                self.logger.debug("Query executed successfully.")
+
+                rows = [dict(row) for row in results]
+                if not rows:
+                    self.logger.info("No more logs found.")
+                    break
+
+                self.logger.info(f"Collected {len(rows)} logs.")
+                self.logger.info(f"Last row: {rows[-1]}")
+                self.save(rows)
+
+                # Update pointer using last row's POINTER_PATH
+                last_row_time_usec = rows[-1].get(self.POINTER_PATH)
+                if last_row_time_usec:
+                    last_row_epoch_ms = int(last_row_time_usec) // 1000  # convert from microseconds to ms
+                    if last_row_epoch_ms <= pointer_epoch_ms:
+                        self.logger.warning("Pointer did not advance. Exiting loop to avoid infinite cycle.")
+                        break
+
+                    pointer_epoch_ms = last_row_epoch_ms
+                    self.pointer = str(pointer_epoch_ms)
+                    str_pointer = as_bigquery_timestamp(pointer_epoch_ms)
+                    self.logger.info(f"Pointer updated to: {self.pointer}")
+                else:
+                    self.logger.warning(f"{self.POINTER_PATH} not found in last row. Skipping pointer update.")
+                    break
+
+            except Exception as err:
+                self.logger.error(f"BigQuery query failed: {err}")
+                raise RequestFailedException(f"BigQuery query failed: {err}")
+
+
+    # def collect(self):
+    #     """Collects Gmail headers from the Google BigQuery API."""
+    #     self.logger.info("Starting data collection from BigQuery.")
+
+    #     try:
+    #         project_id = self.configuration.project_id
+    #         dataset_name = self.configuration.dataset_name
+    #         table_name = self.configuration.table_name
+
+    #         if not all(isinstance(value, str) for value in [project_id, dataset_name, table_name]):
+    #             raise ConfigurationException(
+    #                 "project_id, dataset_name, and table_name must all be strings."
+    #             )
+    #     except AttributeError as err:
+    #         raise ConfigurationException(
+    #             f"Missing required configuration attribute: {err}"
+    #         )
+
+    #     self.logger.info("BigQuery connector configured successfully.")
+
+    #     try:
+    #         client = bigquery.Client(credentials=self.get_credentials(), project=project_id)
+    #         self.logger.debug("BigQuery client created successfully.")
+    #     except Exception as e:
+    #         self.logger.error(f"Failed to create BigQuery client: {e}")
+    #         raise
+
+    #     # If no pointer is stored, set it to a week ago
+    #             # Ensure pointer is set, default to a week ago if not found
+    #     try:
+    #         pointer_epoch_ms = int(self.pointer)
+    #         self.logger.info(f"Pointer found: {pointer_epoch_ms} ({type(pointer_epoch_ms)})")
+    #     except (NotFoundException, ValueError):
+    #         pointer_epoch_ms = as_epoch_milliseconds(datetime.utcnow() - timedelta(days=7))
+    #         self.logger.info(f"No pointer found. Setting pointer to: {pointer_epoch_ms} ({type(pointer_epoch_ms)})")
+    #         self.pointer = str(pointer_epoch_ms)
+
+    #     str_pointer = as_bigquery_timestamp(pointer_epoch_ms)
+        
+    #     # Pagination loop
+    #     while True:
+    #         self.logger.info(f"Pointer for query: {str_pointer} ({type(str_pointer)})")
+
+
+    #         query = f"""
+    #         SELECT *
+    #         FROM `{project_id}.{dataset_name}.{table_name}`
+    #         WHERE TIMESTAMP(_PARTITIONTIME) > TIMESTAMP('{str_pointer}')
+    #         ORDER BY TIMESTAMP(_PARTITIONTIME) ASC
+    #         LIMIT 1000
+    #         """
+    #         self.logger.debug(f"Constructed query: {query}")
+
+    #         try:
+    #             self.logger.info("Executing query on BigQuery.")
+    #             query_job = client.query(query)
+    #             results = query_job.result()
+    #             self.logger.debug("Query executed successfully.")
+
+    #             rows = [dict(row) for row in results]
+    #             if not rows:
+    #                 self.logger.info("No more Gmail logs found.")
+    #                 break
+
+    #             self.logger.info(f"Collected {len(rows)} logs.")
+    #             self.logger.info(f"last row: {rows[-1]}")
+    #             self.save(rows)  
+
+    #         except Exception as err:
+    #             self.logger.error(f"BigQuery query failed: {err}")
+    #             raise RequestFailedException(f"BigQuery query failed: {err}")
+
+    def get_credentials(self):
+        """Generates and returns a credentials instance from the connector's configured
+        service account info. This is used for required to perform operations using the
+        Google API client.
+
+        :return: A credentials instance built from configured service account info.
+
+        :raises ConfigurationException: There is an issue with the configuration
+            for this connector.
+        """
+        try:
+            service_account_info = json.loads(self.key)
+        except json.JSONDecodeError as err:
+            raise ConfigurationException(
+                f"Unable to load service account JSON for {self.identity}: {err}"
+            )
+
+        # Construct the credentials, including scopes and delegation.
+        # Subject not needed for Bigquery API
+        try:
+            credentials = service_account.Credentials.from_service_account_info(
+                service_account_info,
+                scopes=["https://www.googleapis.com/auth/bigquery"],
+            )
+        except ValueError as err:
+            raise ConfigurationException(
+                "Unable to generate credentials from service account info for "
+                f"{self.identity}: {err}"
+            )
+
+        return credentials
