@@ -138,7 +138,7 @@ def entrypoint():
                         continue
 
                     # Otherwise, schedule it and track the run. If the connector isn't
-                    # due to run, if it has run more recently in another location, then
+                    # due to run, if it has run more recently inz another location, then
                     # the local 'last' time will be replaced with the cached value when
                     # the future returns.
                     future = pool.submit(base.dispatch, configuration, context)
@@ -158,7 +158,10 @@ def entrypoint():
 
                     run.last = run.future.result()
                     run.future = None
-                except GroveException as err:
+                except Exception as err:
+                    # We catch as wide as exception as possible here to try and avoid
+                    # an unhandled error in a connector from taking down the main event
+                    # loop.
                     logger.error(
                         "Connector exited abnormally.",
                         extra={

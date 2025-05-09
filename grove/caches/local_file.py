@@ -83,7 +83,7 @@ class Handler(BaseCache):
             raise AccessException(f"Unable to read cache entry from {path}. {err}")
 
         if value is None:
-            self.logger.info("No value found in cache", extra={"pk": pk, "sk": sk})
+            self.logger.debug("No value found in cache", extra={"pk": pk, "sk": sk})
             raise NotFoundException("No value found in cache")
 
         return value
