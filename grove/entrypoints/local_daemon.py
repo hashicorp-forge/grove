@@ -138,7 +138,7 @@ def entrypoint():
                         continue
 
                     # Otherwise, schedule it and track the run. If the connector isn't
-                    # due to run, if it has run more recently inz another location, then
+                    # due to run, if it has run more recently in another location, then
                     # the local 'last' time will be replaced with the cached value when
                     # the future returns.
                     future = pool.submit(base.dispatch, configuration, context)
