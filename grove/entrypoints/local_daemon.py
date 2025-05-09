@@ -170,6 +170,7 @@ def entrypoint():
                             "connector": run.configuration.connector,
                         },
                     )
+                    run.future = None
 
                 logger.info(
                     "Connector has exited.",
