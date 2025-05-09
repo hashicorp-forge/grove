@@ -142,7 +142,7 @@ class Handler(BaseCache):
             )
             raise AccessException(err)
         except KeyError:
-            self.logger.info("No value found in cache", extra={"pk": pk, "sk": sk})
+            self.logger.debug("No value found in cache", extra={"pk": pk, "sk": sk})
             raise NotFoundException()
 
         return str(pointer)

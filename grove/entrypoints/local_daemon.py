@@ -158,7 +158,10 @@ def entrypoint():
 
                     run.last = run.future.result()
                     run.future = None
-                except GroveException as err:
+                except Exception as err:
+                    # We catch as wide as exception as possible here to try and avoid
+                    # an unhandled error in a connector from taking down the main event
+                    # loop.
                     logger.error(
                         "Connector exited abnormally.",
                         extra={
@@ -167,6 +170,7 @@ def entrypoint():
                             "connector": run.configuration.connector,
                         },
                     )
+                    run.future = None
 
                 logger.info(
                     "Connector has exited.",
