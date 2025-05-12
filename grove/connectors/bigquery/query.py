@@ -102,6 +102,7 @@ class Connector(BaseConnector):
             SELECT {', '.join(columns)}
             FROM `{project_id}.{dataset_name}.{table_name}`
             WHERE TIMESTAMP(_PARTITIONTIME) > TIMESTAMP('{str_pointer}')
+            AND {self.POINTER_PATH} IS NOT NULL
             ORDER BY TIMESTAMP(_PARTITIONTIME) ASC
             LIMIT 1000
             """
