@@ -1,7 +1,7 @@
 # Copyright (c) HashiCorp, Inc.
 # SPDX-License-Identifier: MPL-2.0
 
-"""Google GSuite Usage Report connector for Grove."""
+"""Google GSuite Usage connector for Grove."""
 
 import json
 from datetime import datetime, timedelta
@@ -73,9 +73,9 @@ class Connector(BaseConnector):
         return candidate
 
     def collect(self):
-        """Collects customer usage reports from the Google GSuite Reports API.
+        """Collects usage reports from the Google GSuite Reports API.
 
-        This method retrieves usage reports for the entire enterprise for a specific date range,
+        This method retrieves usage reports for the entire enterprise or users for a specific date range,
         starting from 7 days ago if no pointer is stored, and paginates through the results.
 
         :raises RequestFailedException: An HTTP request failed.
@@ -86,6 +86,22 @@ class Connector(BaseConnector):
             self.get_credentials(),
             http=self.get_http_transport(),
         )
+
+        # Determine the report type to query.
+        try:
+            report_type = self.configuration.usage_report_type
+            if report_type not in ["customerUsageReports", "userUsageReports", "entityUsageReports"]:
+                raise ConfigurationException(
+                    f"Invalid usage_report_type: {report_type}. Must be 'customerUsageReports', 'userUsageReports', or 'entityUsageReports'."
+                )
+            if report_type == "entityUsageReports" and not getattr(self.configuration, "entity_type", None):
+                raise ConfigurationException(
+                    "Missing configuration: 'entity_type' must be specified when 'usage_report_type' is 'entityUsageReports'."
+                )
+        except AttributeError:
+            raise ConfigurationException(
+                "Missing configuration: 'usage_report_type' must be specified in the connector configuration."
+            )
 
         # If no pointer is stored, set it to 7 days ago.
         try:
@@ -106,24 +122,41 @@ class Connector(BaseConnector):
                 while more_requests:
                     try:
                         self.logger.debug(
-                            "Requesting customer usage reports for date.",
+                            "Requesting usage reports for date.",
                             extra={"date": report_date, "cursor": cursor, **self.log_context},
                         )
 
-                        # Build the request with or without a page token.
-                        if cursor:
-                            request = service.customerUsageReports().get(
-                                date=report_date, pageToken=cursor
-                            )
-                        else:
-                            request = service.customerUsageReports().get(date=report_date)
+                        # Build the request based on the report type.
+                        if report_type == "customerUsageReports":
+                            if cursor:
+                                request = service.customerUsageReports().get(
+                                    date=report_date, pageToken=cursor
+                                )
+                            else:
+                                request = service.customerUsageReports().get(date=report_date)
+                        elif report_type == "userUsageReports":
+                            if cursor:
+                                request = service.userUsageReport().get(
+                                    userKey="all", date=report_date, pageToken=cursor
+                                )
+                            else:
+                                request = service.userUsageReport().get(userKey="all", date=report_date)
+                        elif report_type == "entityUsageReports":
+                            if cursor:
+                                request = service.entityUsageReports().get(
+                                    entityType=self.configuration.entity_type, entityKey="all", date=report_date, pageToken=cursor
+                                )
+                            else:
+                                request = service.entityUsageReports().get(
+                                     entityType=self.configuration.entity_type, entityKey="all", date=report_date
+                                )
 
                         # Execute the request and process the results.
                         results = request.execute()
                         usage_reports = results.get("usageReports", [])
 
                         self.logger.debug(
-                            "Got customer usage reports from the GSuite API.",
+                            "Got usage reports from the GSuite API.",
                             extra={
                                 "count": len(usage_reports),
                                 "date": report_date,
