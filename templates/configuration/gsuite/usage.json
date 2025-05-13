@@ -1,0 +1,10 @@
+{
+    "key": "BASE64_ENCODED_SERVICE_ACCOUNT_JSON",
+    "identity": "SERVICE_ACCOUNT_EMAIL",
+    "name": "gsuite-activities-example",
+    "delay": 40,
+    "connector": "gsuite_activities",
+    "encoding": {
+        "key": "base64"
+    }
+}
