@@ -18,16 +18,6 @@ from grove.exceptions import (
     RequestFailedException,
 )
 
-def as_epoch_milliseconds(date: datetime) -> int:
-    """Converts a datetime object to epoch milliseconds.
-
-    :param date: The input datetime object.
-
-    :return: The epoch time in milliseconds as an integer.
-    """
-    return int(date.replace(tzinfo=timezone.utc).timestamp() * 1000)
-
-
 def as_bigquery_timestamp(epoch_ms_str: str) -> str:
     """
     Converts a string containing epoch time in milliseconds to a BigQuery-compatible timestamp string.
@@ -89,14 +79,16 @@ class Connector(BaseConnector):
             pointer_epoch_ms = int(self.pointer)
             self.logger.info(f"Pointer found: {pointer_epoch_ms} ({type(pointer_epoch_ms)})")
         except (NotFoundException, ValueError):
-            pointer_epoch_ms = as_epoch_milliseconds(datetime.utcnow() - timedelta(days=7))
+            pointer_epoch_ms = int((datetime.utcnow() - timedelta(days=7)).replace(tzinfo=timezone.utc).timestamp() * 1_000_000)
+
             self.logger.info(f"No pointer found. Setting pointer to: {pointer_epoch_ms} ({type(pointer_epoch_ms)})")
             self.pointer = str(pointer_epoch_ms)
 
         str_pointer = as_bigquery_timestamp(pointer_epoch_ms)
 
+
         while True:
-            self.logger.info(f"Pointer for query: {str_pointer} ({type(str_pointer)})")
+            self.logger.debug(f"Pointer for query: {str_pointer} ({type(str_pointer)})")
 
             query = f"""
             SELECT {', '.join(columns)}
@@ -168,10 +160,13 @@ class Connector(BaseConnector):
                 service_account_info,
                 scopes=["https://www.googleapis.com/auth/bigquery"],
             )
-        except ValueError as err:
+        except GoogleAuthError as err:  
             raise ConfigurationException(
-                "Unable to generate credentials from service account info for "
-                f"{self.identity}: {err}"
+                f"Authentication error while generating credentials for {self.identity}: {err}"
+            )
+        except ValueError as err: 
+            raise ConfigurationException(
+                f"Unable to generate credentials from service account info for {self.identity}: {err}"
             )
 
         return credentials
