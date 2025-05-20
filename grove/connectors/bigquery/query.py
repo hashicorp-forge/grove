@@ -77,11 +77,11 @@ class Connector(BaseConnector):
         # If no pointer is stored, set it to a week ago
         try:
             pointer_epoch_ms = int(self.pointer)
-            self.logger.info(f"Pointer found: {pointer_epoch_ms} ({type(pointer_epoch_ms)})")
+            self.logger.debug(f"Pointer found: {pointer_epoch_ms} ({type(pointer_epoch_ms)})")
         except (NotFoundException, ValueError):
-            pointer_epoch_ms = int((datetime.utcnow() - timedelta(days=7)).replace(tzinfo=timezone.utc).timestamp() * 1_000_000)
+            pointer_epoch_ms = int((datetime.utcnow() - timedelta(days=7)).replace(tzinfo=timezone.utc).timestamp() * 1_000)
 
-            self.logger.info(f"No pointer found. Setting pointer to: {pointer_epoch_ms} ({type(pointer_epoch_ms)})")
+            self.logger.debug(f"No pointer found. Setting pointer to: {pointer_epoch_ms} ({type(pointer_epoch_ms)})")
             self.pointer = str(pointer_epoch_ms)
 
         str_pointer = as_bigquery_timestamp(pointer_epoch_ms)
@@ -112,23 +112,10 @@ class Connector(BaseConnector):
                     break
 
                 self.logger.info(f"Collected {len(rows)} logs.")
-                self.logger.info(f"Last row: {rows[-1]}")
                 self.save(rows)
 
-                # Update pointer using last row's POINTER_PATH
-                last_row_time_usec = rows[-1].get(self.POINTER_PATH)
-                if last_row_time_usec:
-                    last_row_epoch_ms = int(last_row_time_usec) // 1000  # convert from microseconds to ms
-                    if last_row_epoch_ms <= pointer_epoch_ms:
-                        self.logger.warning("Pointer did not advance. Exiting loop to avoid infinite cycle.")
-                        break
 
-                    pointer_epoch_ms = last_row_epoch_ms
-                    self.pointer = str(pointer_epoch_ms)
-                    str_pointer = as_bigquery_timestamp(pointer_epoch_ms)
-                    self.logger.info(f"Pointer updated to: {self.pointer}")
-                else:
-                    self.logger.warning(f"{self.POINTER_PATH} not found in last row. Skipping pointer update.")
+                if len(rows) < 1000:
                     break
 
             except Exception as err:
