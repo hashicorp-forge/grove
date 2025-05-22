@@ -19,7 +19,7 @@ class Connector(OnePasswordConnector):
         This will first check whether there are any pointers cached to indicate previous
         collections. If not, the last week of data will be collected.
         """
-        client = Client(token=self.key, hostname=self.domain)
+        client = Client(token=self.key, domain=self.domain)
 
         # self.pointer could start out as either a cursor or ISO timestamp depending on if this
         # is an upgrade. That said, once we reach here, cursor will always be used as the

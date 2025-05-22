@@ -11,6 +11,8 @@ from grove.connectors import BaseConnector
 from grove.exceptions import ConfigurationException
 
 
+API_DEFAULT_DOMAIN = "1password.com"  # Default to US endpoint
+
 class OnePasswordConnector(BaseConnector):
     """Defines common fields used across all 1Password connector types.
 
@@ -28,4 +30,4 @@ class OnePasswordConnector(BaseConnector):
             return self.configuration.domain
 
         except AttributeError:
-            return API_HOSTNAME
+            return API_DEFAULT_DOMAIN
