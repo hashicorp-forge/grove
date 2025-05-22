@@ -3,6 +3,7 @@
 
 """Grove local daemon entrypoint."""
 
+import copy
 import datetime
 import os
 import socket
@@ -20,7 +21,7 @@ from grove.constants import (
     ENV_GROVE_WORKER_COUNT,
 )
 from grove.entrypoints import base
-from grove.exceptions import GroveException
+from grove.exceptions import ConcurrencyException, GroveException
 from grove.logging import GroveFormatter
 from grove.models import Run
 
@@ -96,13 +97,12 @@ def entrypoint():
 
     with ThreadPoolExecutor(max_workers=workers) as pool:
         runs: Dict[str, Run] = {}
-
         while True:
             if refreshed_at:
                 since_refresh = datetime.datetime.now() - refreshed_at  # type:ignore
 
             # (Re)load the configuration from the configured backend if required.
-            if not refreshed_at or since_refresh.seconds >= refresh_frequency:  # type: ignore
+            if not refreshed_at or since_refresh.total_seconds() >= refresh_frequency:  # type: ignore
                 try:
                     configurations = base.configure()
                     refreshed_at = datetime.datetime.now()
@@ -131,7 +131,7 @@ def entrypoint():
                 # may have been changed in the configuration.
                 frequency = configuration.frequency
 
-                if run.last is None or (now - run.last).seconds >= frequency:
+                if run.last is None or (now - run.last).total_seconds() >= frequency:
                     # If there's a valid future on the local run object a run is still
                     # in progress.
                     if run.future is not None:
@@ -151,13 +151,19 @@ def entrypoint():
             # again, but should be cleaned up if removed from the configuration backend.
 
             # Check the status of all futures.
+            completed = []
+
             for ref, run in runs.items():
                 try:
                     if run.future is None or run.future.running():
                         continue
 
-                    run.last = run.future.result()
-                    run.future = None
+                    # Sync last run time from connector completion.
+                    run.last = copy.copy(run.future.result())
+                except ConcurrencyException:
+                    # We don't consider concurrency to be abnormal - as it may indicate
+                    # another worker has scheduled the connector before us.
+                    pass
                 except Exception as err:
                     # We catch as wide as exception as possible here to try and avoid
                     # an unhandled error in a connector from taking down the main event
@@ -170,7 +176,6 @@ def entrypoint():
                             "connector": run.configuration.connector,
                         },
                     )
-                    run.future = None
 
                 logger.info(
                     "Connector has exited.",
@@ -180,8 +185,16 @@ def entrypoint():
                     },
                 )
 
+                # Track completed and failed connectors.
+                completed.append(ref)
+
+            # Clean-up completed runs.
+            for complete in completed:
+                candidate = runs.get(complete)
+                candidate.future = None
+
             # Yield between iterations.
-            time.sleep(1)
+            time.sleep(0.25)
 
 
 # Support local development if called as a script.
