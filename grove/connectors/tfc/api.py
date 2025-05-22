@@ -69,7 +69,11 @@ class Client:
 
                     if self.retry and retries < RETRY_LIMIT:
                         time.sleep(
-                            int(err.response.headers.get("X-RateLimit-Reset", "1"))
+                            int(
+                                float(
+                                    err.response.headers.get("X-RateLimit-Reset", "1")
+                                )
+                            )
                         )
                         retries += 1
                         continue
