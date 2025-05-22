@@ -12,26 +12,28 @@ import requests
 from grove.exceptions import RateLimitException, RequestFailedException
 from grove.types import AuditLogEntries, HTTPResponse
 
-API_HOSTNAME = "events.1password.com"
+API_HOSTNAME = "events.{domain}"  # Domain will be inserted from config
+API_DEFAULT_DOMAIN = "1password.com"  # Default to US endpoint
 API_PAGE_SIZE = 1000
 
 
 class Client:
     def __init__(
         self,
-        hostname: Optional[str] = API_HOSTNAME,
+        domain: Optional[str] = API_DEFAULT_DOMAIN,
         token: Optional[str] = None,
         retry: Optional[bool] = True,
     ):
         """Setup a new 1Password audit log client.
 
-        :param hostname: Hostname of the 1Password API to interact with.
+        :param domain: Domain suffix for the 1Password API ('1password.com' for US, '1password.eu' for EU).
+                       Defaults to '1password.com' (US endpoint).
         :param token: 1Password token to authenticate with.
         :param retry: Automatically retry if recoverable errors are encountered, such as
             rate-limiting.
         """
         self.retry = retry
-        self.hostname = hostname
+        self.hostname = API_HOSTNAME.format(domain=domain or API_DEFAULT_DOMAIN)
         self.logger = logging.getLogger(__name__)
         self.headers = {
             "Authorization": f"Bearer {token}",
