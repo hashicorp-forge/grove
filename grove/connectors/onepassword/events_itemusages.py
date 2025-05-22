@@ -3,12 +3,12 @@
 
 """1Password ItemUsage event log connector for Grove."""
 from grove.connectors.onepassword.api import Client
-from grove.connectors import BaseConnector
+from grove.connectors.onepassword.common import OnePasswordConnector
 from grove.constants import CHRONOLOGICAL
 from grove.connectors.onepassword.util import get_pointer_values
 
 
-class Connector(BaseConnector):
+class Connector(OnePasswordConnector):
     CONNECTOR = "onepassword_events_itemusages"
     POINTER_PATH = "cursor"
     LOG_ORDER = CHRONOLOGICAL
@@ -19,7 +19,7 @@ class Connector(BaseConnector):
         This will first check whether there are any pointers cached to indicate previous
         collections. If not, the last week of data will be collected.
         """
-        client = Client(token=self.key)
+        client = Client(token=self.key, hostname=self.domain)
 
         # self.pointer could start out as either a cursor or ISO timestamp depending on if this
         # is an upgrade. That said, once we reach here, cursor will always be used as the
