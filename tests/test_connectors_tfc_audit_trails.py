@@ -44,6 +44,9 @@ class TFCAuditTestCase(unittest.TestCase):
             re.compile(r"https://.*"),
             status=429,
             content_type="application/json",
+            adding_headers={
+                "X-RateLimit-Reset": "1.203",
+            },
             body=bytes(),
         )
 
