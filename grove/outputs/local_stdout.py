@@ -76,7 +76,7 @@ class Handler(BaseOutput):
             # We don't want to silently drop and lose single records, so drop the entire
             # batch if there is bad data (which will trigger a retry next run).
             try:
-                candidate.append(json.dumps(entry, separators=(",", ":")))
+                candidate.append(json.dumps(entry, separators=(",", ":"), default=str))
             except TypeError as err:
                 message = f"Unable to serialize to JSON: {err}"
                 raise DataFormatException(message)
