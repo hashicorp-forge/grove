@@ -3,6 +3,8 @@
 
 """GitHub Ruleset connector for Grove."""
 
+from typing import Any, List
+
 from grove.connectors import BaseConnector
 from grove.connectors.github.api import Client
 from grove.constants import REVERSE_CHRONOLOGICAL
@@ -88,7 +90,7 @@ class Connector(BaseConnector):
 
         # Batch records into appropriate sized chunks ourselves, to try and ensure logs
         # are flushed periodically.
-        entries = []
+        entries: List[Any] = []
 
         for ruleset in rulesets:
             try:
