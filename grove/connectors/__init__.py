@@ -550,11 +550,18 @@ class BaseConnector:
 
         :return: A dictionary of metadata for storing with log entries.
         """
+        # Guard against no pointer being set by default. This should only really happen
+        # for specific connector types, and for the first collection.
+        try:
+            pointer = self.pointer
+        except NotFoundException:
+            pointer = None
+
         return {
             "connector": self.__class__.__module__,
             "identity": self.identity,
             "operation": self.operation,
-            "pointer": self.pointer,
+            "pointer": pointer,
             "previous_pointer": self.pointer_previous,
             "collection_time": datetime.datetime.utcnow().strftime(DATESTAMP_FORMAT),
             "runtime": self.runtime_context,

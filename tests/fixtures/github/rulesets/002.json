@@ -1,0 +1,15 @@
+[
+    {
+        "id": 666,
+        "actor_id": 13371337,
+        "actor_name": "userone",
+        "before_sha": "553b82c4dd9de6e9e6c4d020a9e59551c8836286",
+        "after_sha": "ccf271b7830882da1791852baeca1737fcbe4b90",
+        "ref": "refs/heads/main",
+        "repository_id": 987654321,
+        "repository_name": "an-example-only",
+        "pushed_at": "2025-05-23T18:40:27+01:00",
+        "result": "pass",
+        "evaluation_result": "pass"
+    }
+]

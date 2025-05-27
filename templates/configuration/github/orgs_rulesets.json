@@ -1,0 +1,7 @@
+{
+    "key": "BEARER_TOKEN_HERE",
+    "identity": "ORGANIZATION_NAME_HERE",
+    "interval": 3600,
+    "name": "github-orgs-rulesets-example",
+    "connector": "github_rulesets"
+}

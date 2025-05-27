@@ -1,0 +1,41 @@
+[
+    {
+        "id": 999,
+        "actor_id": 13371337,
+        "actor_name": "userone",
+        "before_sha": "553b82c4dd9de6e9e6c4d020a9e59551c8836286",
+        "after_sha": "ccf271b7830882da1791852baeca1737fcbe4b90",
+        "ref": "refs/heads/main",
+        "repository_id": 987654321,
+        "repository_name": "an-example-only",
+        "pushed_at": "2025-05-23T18:45:27+01:00",
+        "result": "pass",
+        "evaluation_result": "pass"
+    },
+    {
+        "id": 888,
+        "actor_id": 13381338,
+        "actor_name": "user-two",
+        "before_sha": "d3964f9dad9f60363c81b688324d95b4ec7c8038",
+        "after_sha": "136571b41aa14adc10c5f3c987d43c02c8f5d498",
+        "ref": "refs/heads/main",
+        "repository_id": 987654321,
+        "repository_name": "another-example",
+        "pushed_at": "2025-05-23T18:45:25+01:00",
+        "result": "pass",
+        "evaluation_result": "pass"
+    },
+    {
+        "id": 777,
+        "actor_id": 13391339,
+        "actor_name": "user-three",
+        "before_sha": "b6abd567fa79cbe0196d093a067271361dc6ca8b",
+        "after_sha": "4143d3a341877154d6e95211464e1df1015b74bd",
+        "ref": "refs/heads/main",
+        "repository_id": 123456789,
+        "repository_name": "yet-another-example",
+        "pushed_at": "2025-05-23T18:41:15+01:00",
+        "result": "pass",
+        "evaluation_result": "pass"
+    }
+]
