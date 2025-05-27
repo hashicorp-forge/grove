@@ -3,10 +3,6 @@
 
 """1Password connector for Grove."""
 
-from typing import Optional
-
-from cryptography.hazmat.primitives import serialization
-
 from grove.connectors import BaseConnector
 from grove.exceptions import ConfigurationException
 
