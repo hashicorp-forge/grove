@@ -118,7 +118,6 @@ class Connector(BaseConnector):
                 self.logger.error(f"BigQuery query failed: {err}")
                 raise RequestFailedException(f"BigQuery query failed: {err}")
 
-
     def get_credentials(self):
         """Generates and returns a credentials instance from the connector's configured
         service account info. This is used for required to perform operations using the
