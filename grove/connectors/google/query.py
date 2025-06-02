@@ -51,10 +51,10 @@ class Connector(BaseConnector):
                     "POINTER_PATH is not set in the configuration."
                 )
 
-            if not all(isinstance(value, str) for value in [project_id, dataset_name, table_name]):
-                raise ConfigurationException(
-                    "project_id, dataset_name, and table_name must all be strings."
-                )
+            for value in [project_id, dataset_name, table_name]:
+                if not isinstance(value, str):
+                    raise ConfigurationException(f"{value} must be a string")
+            
             if not isinstance(columns, list):
                 raise ConfigurationException(
                 "columns must be a list."
