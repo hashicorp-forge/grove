@@ -31,7 +31,7 @@ def as_bigquery_timestamp(epoch_ms_str: str) -> str:
 
 
 class Connector(BaseConnector):
-    CONNECTOR = "bigquery_query"
+    CONNECTOR = "google_bigquery_query"
     POINTER_PATH = "gmail.event_info.timestamp_usec"
     LOG_ORDER = CHRONOLOGICAL
 
