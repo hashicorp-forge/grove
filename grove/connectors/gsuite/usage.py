@@ -4,7 +4,7 @@
 """Google GSuite Usage connector for Grove."""
 
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import google_auth_httplib2
 import httplib2
@@ -39,6 +39,7 @@ class Connector(BaseConnector):
     CONNECTOR = "gsuite_usage"
     POINTER_PATH = "date"
     LOG_ORDER = CHRONOLOGICAL
+
 
     @property
     def delay(self):
@@ -105,14 +106,17 @@ class Connector(BaseConnector):
             )
 
         # If no pointer is stored, set it to 7 days ago.
+        # instantiate current datetime in utc
+        now = datetime.now(tz=timezone.utc)
+
         try:
             start_date = datetime.strptime(self.pointer, "%Y-%m-%d")
         except NotFoundException:
-            start_date = datetime.utcnow() - timedelta(days=7)
+            start_date = now - timedelta(days=7)
             self.pointer = start_date.strftime("%Y-%m-%d")
 
         # Iterate through each day up to today.
-        end_date = datetime.datetime.now(tz=datetime.timezone.utc)
+        end_date = now
         current_date = start_date
 
         while current_date <= end_date:
