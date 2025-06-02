@@ -85,7 +85,6 @@ class Connector(BaseConnector):
 
         str_pointer = as_bigquery_timestamp(pointer_epoch_ms)
 
-
         while True:
             self.logger.debug(f"Pointer for query: {str_pointer} ({type(str_pointer)})")
 
