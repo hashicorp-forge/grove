@@ -45,7 +45,6 @@ class Connector(BaseConnector):
             columns = self.configuration.columns
             POINTER_PATH = self.configuration.pointer_path
 
-
             if not POINTER_PATH:
                 raise ConfigurationException(
                     "POINTER_PATH is not set in the configuration."
