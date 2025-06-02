@@ -112,7 +112,6 @@ class Connector(BaseConnector):
                 self.logger.info(f"Collected {len(rows)} logs.")
                 self.save(rows)
 
-
                 if len(rows) < 1000:
                     break
 
