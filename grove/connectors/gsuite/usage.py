@@ -90,9 +90,10 @@ class Connector(BaseConnector):
         # Determine the report type to query.
         try:
             report_type = self.configuration.usage_report_type
-            if report_type not in ["customerUsageReports", "userUsageReports", "entityUsageReports"]:
+            supported_types = ["customerUsageReports", "userUsageReports", "entityUsageReports"]
+            if report_type not in supported_types:
                 raise ConfigurationException(
-                    f"Invalid usage_report_type: {report_type}. Must be 'customerUsageReports', 'userUsageReports', or 'entityUsageReports'."
+                    f"Invalid usage_report_type: {report_type}. Must be one of {supported_types}"
                 )
             if report_type == "entityUsageReports" and not getattr(self.configuration, "entity_type", None):
                 raise ConfigurationException(
@@ -111,7 +112,7 @@ class Connector(BaseConnector):
             self.pointer = start_date.strftime("%Y-%m-%d")
 
         # Iterate through each day up to today.
-        end_date = datetime.utcnow()
+        end_date = datetime.datetime.now(tz=datetime.timezone.utc)
         current_date = start_date
 
         while current_date <= end_date:
@@ -187,8 +188,6 @@ class Connector(BaseConnector):
             current_date += timedelta(days=1)
             cursor = None  # Reset the cursor for the next day's pagination.
 
-        # Update the pointer to the latest date processed.
-        self.pointer = end_date.strftime("%Y-%m-%d")
 
     def get_http_transport(self):
         """Creates an HTTP object for use by the Google API Client.
