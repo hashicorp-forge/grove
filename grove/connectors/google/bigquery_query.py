@@ -43,9 +43,15 @@ class Connector(BaseConnector):
             dataset_name = self.configuration.dataset_name
             table_name = self.configuration.table_name
             columns = self.configuration.columns
-            POINTER_PATH = self.configuration.pointer_path
+            self.POINTER_PATH = self.configuration.pointer_path
 
-            if not POINTER_PATH:
+            self.logger.debug("Configuration parameters:")
+            self.logger.debug(f"Project ID: {project_id}")
+            self.logger.debug(f"Dataset Name: {dataset_name}")
+            self.logger.debug(f"Table Name: {table_name}")
+            self.logger.debug(f"Columns: {columns}")
+
+            if not self.POINTER_PATH:
                 raise ConfigurationException(
                     "POINTER_PATH is not set in the configuration."
                 )

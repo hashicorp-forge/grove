@@ -47,8 +47,10 @@ isn't listed here, support can be added by creating a custom connector!
 * FleetDM host logs
 * Dropbox team event logs
 * GitHub audit logs
+* Google BigQuery tables
 * GSuite alerts
 * GSuite activity logs
+* GSuite Usage Reports
 * Okta system logs
 * Oomnitza activity logs
 * 1Password sign-in attempt logs
@@ -70,6 +72,7 @@ isn't listed here, support can be added by creating a custom connector!
 * Twilio monitor events
 * Twilio message logs
 * Workday activity logs
+* Zitadel event logs
 * Zoom activity logs
 * Zoom operation logs
 
