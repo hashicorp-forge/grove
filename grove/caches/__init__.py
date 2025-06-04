@@ -8,6 +8,13 @@ from typing import Optional
 
 
 class BaseCache(abc.ABC):
+    def setup(self):
+        """Implements logic to setup any required clients, sockets, or connections.
+
+        If not required for the given cache handler, this may be a no-op.
+        """
+        pass
+
     @abc.abstractmethod
     def get(self, pk: str, sk: str) -> str:
         """Gets the value for the given key from the cache.

@@ -93,6 +93,8 @@ class BaseConnector:
             os.environ.get(ENV_GROVE_CACHE_HANDLER, DEFAULT_CACHE_HANDLER),
             PLUGIN_GROUP_CACHE,
         )
+        self._cache.setup()
+
         self._output = plugin.load_handler(
             os.environ.get(ENV_GROVE_OUTPUT_HANDLER, DEFAULT_OUTPUT_HANDLER),
             PLUGIN_GROUP_OUTPUT,

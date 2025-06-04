@@ -148,23 +148,39 @@ class Handler(BaseOutput):
         if descriptor and not descriptor.endswith("/"):
             descriptor = f"{descriptor}/"
 
-        try:
-            datestamp = datetime.datetime.utcnow()
-            self.s3.put_object(
-                Body=data,
-                Bucket=self.config.bucket,
-                Key=OBJECT_KEY.format(
-                    part=part,
-                    connector=connector,
-                    identity=identity,
-                    operation=operation,
-                    year=datestamp.strftime("%Y"),
-                    month=datestamp.strftime("%m"),
-                    day=datestamp.strftime("%d"),
-                    datestamp=datestamp.strftime(DATESTAMP_FORMAT),
-                    descriptor=descriptor,
-                    kind=kind,
-                ),
-            )
-        except ClientError as err:
-            raise AccessException(f"Unable to write object to AWS S3: {err}")
+        # We only want to retry once to handle cases where the session expires during
+        # long runs with STS tokens.
+        datestamp = datetime.datetime.utcnow()
+
+        for _ in range(2):
+            try:
+                self.s3.put_object(
+                    Body=data,
+                    Bucket=self.config.bucket,
+                    Key=OBJECT_KEY.format(
+                        part=part,
+                        connector=connector,
+                        identity=identity,
+                        operation=operation,
+                        year=datestamp.strftime("%Y"),
+                        month=datestamp.strftime("%m"),
+                        day=datestamp.strftime("%d"),
+                        datestamp=datestamp.strftime(DATESTAMP_FORMAT),
+                        descriptor=descriptor,
+                        kind=kind,
+                    ),
+                )
+
+                # If the upload is successful, we don't need to loop.
+                return
+            except ClientError as err:
+                if err.response.get("Error", {}).get("Code", "") != "ExpiredToken":
+                    raise AccessException(f"Unable to write object to AWS S3: {err}")
+
+            # Try to renew the token if the write fails with an expired token error.
+            self.logger.warning("AWS S3 session expired, requesting a new one.")
+            self.setup()
+
+        raise AccessException(
+            "An unknown error occurred when attempting to write the object to S3."
+        )
