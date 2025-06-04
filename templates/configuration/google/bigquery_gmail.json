@@ -1,0 +1,14 @@
+{
+    "key": "base64-key-goeshere",
+    "identity": "your-service-account.iam.gserviceaccount.com",
+    "name": "bigquery_query_gmail",
+    "connector": "bigquery_query",
+    "columns" : ["gmail"],
+    "project_id": "your-project-id",
+    "dataset_name": "activity",
+    "table_name": "activity",
+    "pointer_path": "gmail.event_info.timestamp_usec",
+    "encoding": {
+        "key": "base64"
+    }
+}

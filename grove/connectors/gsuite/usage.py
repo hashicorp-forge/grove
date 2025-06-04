@@ -110,7 +110,7 @@ class Connector(BaseConnector):
         now = datetime.now(tz=timezone.utc)
 
         try:
-            start_date = datetime.strptime(self.pointer, "%Y-%m-%d")
+            start_date = datetime.strptime(self.pointer, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         except NotFoundException:
             start_date = now - timedelta(days=7)
             self.pointer = start_date.strftime("%Y-%m-%d")
