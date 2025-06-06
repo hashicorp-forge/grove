@@ -11,23 +11,13 @@ from google.oauth2 import service_account
 from google.cloud import bigquery
 
 from grove.connectors import BaseConnector
+from grove.connectors.google.utils import as_bigquery_timestamp_microseconds
 from grove.constants import CHRONOLOGICAL
 from grove.exceptions import (
     ConfigurationException,
     NotFoundException,
     RequestFailedException,
 )
-
-def as_bigquery_timestamp(epoch_ms_str: str) -> str:
-    """
-    Converts a string containing epoch time in milliseconds to a BigQuery-compatible timestamp string.
-
-    :param epoch_ms_str: The epoch time in milliseconds as a string.
-    :return: A BigQuery TIMESTAMP formatted date string (YYYY-MM-DD HH:MM:SS+00).
-    """
-    dt = datetime.fromtimestamp(int(epoch_ms_str) / 1000.0, tz=timezone.utc)
-    # BigQuery expects "+00" not "+0000" or "+00:00"
-    return dt.strftime("%Y-%m-%d %H:%M:%S+00")
 
 
 class Connector(BaseConnector):
@@ -80,15 +70,16 @@ class Connector(BaseConnector):
 
         # If no pointer is stored, set it to a week ago
         try:
-            pointer_epoch_ms = int(self.pointer)
-            self.logger.debug(f"Pointer found: {pointer_epoch_ms} ({type(pointer_epoch_ms)})")
+            pointer_epoch_usec = int(self.pointer)
+            self.logger.debug(f"Pointer found: {pointer_epoch_usec} ({type(pointer_epoch_usec)})")
         except (NotFoundException, ValueError):
-            pointer_epoch_ms = int((datetime.utcnow() - timedelta(days=7)).replace(tzinfo=timezone.utc).timestamp() * 1_000)
+            # Set to a week ago in microseconds
+            pointer_epoch_usec = int((datetime.utcnow() - timedelta(days=7)).replace(tzinfo=timezone.utc).timestamp() * 1_000_000)
 
-            self.logger.debug(f"No pointer found. Setting pointer to: {pointer_epoch_ms} ({type(pointer_epoch_ms)})")
-            self.pointer = str(pointer_epoch_ms)
+            self.logger.debug(f"No pointer found. Setting pointer to: {pointer_epoch_usec} ({type(pointer_epoch_usec)})")
+            self.pointer = str(pointer_epoch_usec)
 
-        str_pointer = as_bigquery_timestamp(pointer_epoch_ms)
+        str_pointer = as_bigquery_timestamp_microseconds(pointer_epoch_usec)
 
         while True:
             self.logger.debug(f"Pointer for query: {str_pointer} ({type(str_pointer)})")
