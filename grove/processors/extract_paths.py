@@ -70,7 +70,7 @@ class Handler(BaseProcessor):
             result = parsing.update_path(
                 result,
                 parsing.quote_aware_split(self.configuration.raw),
-                json.dumps(entry, separators=(",", ":")),
+                json.dumps(entry, separators=(",", ":"), default=str),
             )
 
         for field in self.configuration.fields:

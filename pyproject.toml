@@ -26,6 +26,7 @@ dependencies = [
     "pydantic>=1.10,<2.0",
     "jmespath>=1.0.0,<2.0",
     "stripe>=8.4.0,<9.0",
+    "google-cloud-bigquery>=3.31.0,<4.0"
 ]
 
 [project.optional-dependencies]
@@ -66,9 +67,12 @@ local_process = "grove.entrypoints.local_process:entrypoint"
 [project.entry-points."grove.connectors"]
 fleetdm_host_logs = "grove.connectors.fleetdm.host_logs:Connector"
 atlassian_audit_events = "grove.connectors.atlassian.audit_events:Connector"
+google_bigquery_query = "grove.connectors.google.bigquery_query:Connector"
 dropbox_team_events = "grove.connectors.dropbox.team_events:Connector"
 github_audit_log = "grove.connectors.github.audit_log:Connector"
+github_rulesets = "grove.connectors.github.rulesets:Connector"
 gsuite_activities = "grove.connectors.gsuite.activities:Connector"
+gsuite_usage = "grove.connectors.gsuite.usage:Connector"
 local_heartbeat = "grove.connectors.local.heartbeat:Connector"
 gsuite_alerts = "grove.connectors.gsuite.alerts:Connector"
 okta_system_log = "grove.connectors.okta.system_log:Connector"
@@ -94,6 +98,8 @@ workday_activity_logging = "grove.connectors.workday.activity_logging:Connector"
 zoom_activities = "grove.connectors.zoom.activities:Connector"
 zoom_operationlogs = "grove.connectors.zoom.operationlogs:Connector"
 oomnitza_activities = "grove.connectors.oomnitza.activities:Connector"
+zitadel_events = "grove.connectors.zitadel.events:Connector"
+
 
 
 [project.entry-points."grove.caches"]

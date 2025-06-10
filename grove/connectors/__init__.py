@@ -180,7 +180,7 @@ class BaseConnector:
             return True
 
         # Check if the frequency between last run and now has passed.
-        delta = (self._started - last).seconds
+        delta = (self._started - last).total_seconds()
         self.logger.debug(
             f"Connector '{self.kind}' last ran {delta} seconds ago, run frequency is "
             f"{self.frequency} seconds.",
@@ -208,11 +208,14 @@ class BaseConnector:
         try:
             self.lock()
         except ConcurrencyException as err:
-            self.logger.warning(
-                f"Connector '{self.kind}' may already be running in another location.",
+            self.logger.info(
+                f"Connector '{self.kind}' appears to be running in another location.",
                 extra={"exception": err, **self.log_context},
             )
-            return
+            # TODO: Should this really raise or just return? However, if we return here
+            # we can get stuck in a dispatch loop without changes to last successful run
+            # tracking.
+            raise err
 
         # Perform collection.
         try:
@@ -547,11 +550,18 @@ class BaseConnector:
 
         :return: A dictionary of metadata for storing with log entries.
         """
+        # Guard against no pointer being set by default. This should only really happen
+        # for specific connector types, and for the first collection.
+        try:
+            pointer = self.pointer
+        except NotFoundException:
+            pointer = None
+
         return {
             "connector": self.__class__.__module__,
             "identity": self.identity,
             "operation": self.operation,
-            "pointer": self.pointer,
+            "pointer": pointer,
             "previous_pointer": self.pointer_previous,
             "collection_time": datetime.datetime.utcnow().strftime(DATESTAMP_FORMAT),
             "runtime": self.runtime_context,
@@ -652,8 +662,9 @@ class BaseConnector:
 
             entries.append(candidate)
 
-        # Update known in-memory hashes to include our new entries.
-        self.hashes = {**old_hashes, **new_hashes}
+        # Swap hash entries, as we should, hopefully, not see duplicates within the
+        # same collection more than a page apart.
+        self.hashes = new_hashes
 
         return entries
 
@@ -694,6 +705,7 @@ class BaseConnector:
 
             if candidate_pointer == self.pointer:
                 pointer_passed = True
+                continue
 
             # Only track chronological records on and after the pointer.
             if pointer_passed:

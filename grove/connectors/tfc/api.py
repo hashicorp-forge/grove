@@ -16,6 +16,7 @@ import requests
 from grove.exceptions import RateLimitException, RequestFailedException
 from grove.types import AuditLogEntries, HTTPResponse
 
+RETRY_LIMIT = 5
 API_BASE_URI = "https://app.terraform.io/api/v2"
 
 
@@ -53,17 +54,28 @@ class Client:
 
         :return: HTTP Response object containing the headers and body of a response.
         """
+        retries = 0
+
         while True:
             try:
                 response = requests.get(url, headers=self.headers, params=params)
                 response.raise_for_status()
                 break
             except requests.exceptions.RequestException as err:
-                # Retry on rate-limit, but only if requested.
+                # Retry on rate-limit, but only if requested and if the retry limit
+                # hasn't yet been hit.
                 if getattr(err.response, "status_code", None) == 429:
                     self.logger.warning("Rate-limit was exceeded during request")
-                    if self.retry:
-                        time.sleep(1)
+
+                    if self.retry and retries < RETRY_LIMIT:
+                        time.sleep(
+                            int(
+                                float(
+                                    err.response.headers.get("X-RateLimit-Reset", "1")
+                                )
+                            )
+                        )
+                        retries += 1
                         continue
                     else:
                         raise RateLimitException(err)

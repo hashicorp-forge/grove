@@ -10,7 +10,7 @@ the interim.
 import datetime
 import logging
 import time
-from typing import Dict, Optional
+from typing import Any, Dict, List, Optional
 from urllib.parse import unquote
 
 import requests
@@ -134,6 +134,99 @@ class Client:
                     time.sleep(1)
 
         return HTTPResponse(headers=response.headers, body=response.json())
+
+    def get_rulesets(
+        self,
+        after: Optional[str] = None,
+        time_period: Optional[str] = "day",
+        rule_suite_result: Optional[str] = "all",
+    ) -> List[str]:
+        """Fetches a list of rulesets identifiers from the Github API.
+
+        This method does not return audit log entries, nor results per page. Instead it
+        will attempt to fetch ALL relevant ruleset identifiers for the configured
+        organisation and repository (if configured).
+
+        An API call per ruleset identifier must be performed to fetch the data around
+        which rules were evaluated, and their outcomes.
+
+        As a result of the above, and as a result of the lack of filtering on this
+        endpoint this is an expensive operation.
+
+        :param time_period: The time period to request data for (hour, day, week, etc).
+        :param rule_suite_result: The result type to filter by (defaults to 'all').
+
+        :return: A list of strings, containing the ruleset identifiers."""
+        cursor = None
+        rulesets = []
+
+        # We perform client side filtering to only include new data, as each request
+        # we have to process a day worth of data - due to the design of this API.
+        more_requests = True
+
+        while more_requests:
+            if cursor is None:
+                result = self._get(
+                    f"https://{self.hostname}/{self.scope}/{self.identity}/rulesets/rule-suites",  # noqa: E501
+                    params={
+                        "rule_suite_result": rule_suite_result,
+                        "time_period": time_period,
+                        "per_page": "100",
+                    },
+                )
+            else:
+                self.logger.debug(
+                    "Collecting next page with provided cursor",
+                    extra={"cursor": cursor},
+                )
+                result = self._get(cursor)
+
+            # Grab a list of all ruleset identifiers.
+            for entry in result.body:
+                rulesets.append(entry.get("id"))
+
+                if after:
+                    # The data returned from the API is in reverse chronological order,
+                    # so we will collect all of the rulesets up to and including the
+                    # value we have previously seen - or all available data for the
+                    # period if we never encounter that value.
+                    pushed_at = entry.get("pushed_at")
+                    if pushed_at == after:
+                        more_requests = False
+                        break
+
+            # Return the results if no more data is available.
+            try:
+                cursor = self._parse_link_header(result.headers.get("Link", ""))
+            except ValueError:
+                break
+
+        return rulesets
+
+    def get_rule_suite(self, rule_suite_id: str) -> Dict[str, Any]:
+        """Fetches the rule-suite information by identifier.
+
+        :param rule_suite_id: The rule-suite identifier to return data for.
+
+        :return: A dictionary containing the rule-suite information from Github.
+        """
+        try:
+            result = self._get(
+                f"https://{self.hostname}/{self.scope}/{self.identity}/rulesets/rule-suites/{rule_suite_id}",  # noqa: E501
+            )
+        except RequestFailedException as err:
+            if hasattr(err, "response"):
+                # Don't fail the entire batch if the rule-suite can't be found, just log
+                # and continue.
+                if err.response.status_code == 404:
+                    self.logger.warning(
+                        f"Could not get rule-suite for '{rule_suite_id}', skipping",
+                    )
+                    return {}
+
+            raise err
+
+        return result.body
 
     def get_audit_log(
         self,

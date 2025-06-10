@@ -2,10 +2,6 @@
     "logs": [
         {
             "timestamp": "7",
-            "event": "Example H"
-        },
-        {
-            "timestamp": "7",
             "event": "Example G"
         }
     ],

@@ -45,7 +45,7 @@ def quick_copy(value: Any):
 
     :return: The deep copy of the input value.
     """
-    return json.loads(json.dumps(value))
+    return json.loads(json.dumps(value, default=str))
 
 
 def quote_aware_split(value: str, delimiter=".") -> List[str]:

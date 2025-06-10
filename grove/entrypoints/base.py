@@ -21,7 +21,7 @@ from grove.constants import (
     PLUGIN_GROUP_CONNECTOR,
     PLUGIN_GROUP_SECRET,
 )
-from grove.exceptions import GroveException
+from grove.exceptions import ConcurrencyException, GroveException
 from grove.helpers import plugin
 from grove.logging import GroveFormatter
 from grove.models import ConnectorConfig
@@ -131,6 +131,10 @@ def entrypoint(context: Dict[str, Any]):
             # logged out.
             try:
                 _ = future.result()
+            except ConcurrencyException:
+                # We don't consider concurrency to be abnormal - as it may indicate
+                # another worker has scheduled the connector before us.
+                pass
             except GroveException as err:
                 logger.error(
                     "Connector exited abnormally.",

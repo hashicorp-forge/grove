@@ -1,0 +1,12 @@
+{
+    "key": "BASE64_ENCODED_SERVICE_ACCOUNT_JSON",
+    "identity": "SERVICE_ACCOUNT_EMAIL",
+    "name": "gsuite-usage-entityUsageReports-example",
+    "delay": 40,
+    "connector": "gsuite_usage",
+    "usage_report_type": "entityUsageReports",
+    "entity_type": "gplus_communities",
+    "encoding": {
+        "key": "base64"
+    }
+}

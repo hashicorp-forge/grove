@@ -30,7 +30,7 @@ class Handler(BaseCache):
         value = self._data.get(pk, {}).get(sk, None)
 
         if value is None:
-            self.logger.info("No value found in cache", extra={"pk": pk, "sk": sk})
+            self.logger.debug("No value found in cache", extra={"pk": pk, "sk": sk})
             raise NotFoundException("No value found in cache")
 
         return value
