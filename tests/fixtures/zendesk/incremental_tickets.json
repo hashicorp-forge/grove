@@ -1,0 +1,32 @@
+{
+  "tickets": [
+    {
+      "id": 1,
+      "subject": "Test ticket 1",
+      "status": "closed",
+      "priority": "normal",
+      "type": "incident",
+      "created_at": "2023-01-01T10:00:00Z",
+      "updated_at": "2023-01-01T12:00:00Z",
+      "description": "This is a test ticket",
+      "submitter_id": 123,
+      "assignee_id": 456,
+      "tags": ["test", "api"]
+    },
+    {
+      "id": 2,
+      "subject": "Test ticket 2",
+      "status": "solved",
+      "priority": "high",
+      "type": "question",
+      "created_at": "2023-01-01T11:00:00Z",
+      "updated_at": "2023-01-01T13:00:00Z",
+      "description": "Another test ticket",
+      "submitter_id": 789,
+      "assignee_id": 456,
+      "tags": ["test", "closed"]
+    }
+  ],
+  "end_of_stream": false,
+  "after_cursor": "MTYzOTQxMzIwMC4wfDEyMzQ1Njc4OTA="
+} 

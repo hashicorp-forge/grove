@@ -1,0 +1,10 @@
+{
+    "subdomain": "",
+    "identity": "",
+    "key": "YOUR_API_TOKEN_HERE",
+    "statuses": ["closed", "solved"],
+    "delay_minutes": 5,
+    "batch_size": 25,
+    "name": "zendesk-closed-tickets-example",
+    "connector": "zendesk_tickets"
+} 

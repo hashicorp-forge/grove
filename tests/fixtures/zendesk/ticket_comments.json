@@ -1,0 +1,36 @@
+{
+  "comments": [
+    {
+      "id": 101,
+      "type": "Comment",
+      "author_id": 123,
+      "body": "Initial ticket description",
+      "html_body": "<div>Initial ticket description</div>",
+      "plain_body": "Initial ticket description",
+      "public": true,
+      "created_at": "2023-01-01T10:00:00Z",
+      "attachments": []
+    },
+    {
+      "id": 102,
+      "type": "Comment",
+      "author_id": 456,
+      "body": "Response from support agent",
+      "html_body": "<div>Response from support agent</div>",
+      "plain_body": "Response from support agent",
+      "public": true,
+      "created_at": "2023-01-01T11:30:00Z",
+      "attachments": [
+        {
+          "id": 201,
+          "name": "screenshot.png",
+          "content_type": "image/png",
+          "size": 12345,
+          "url": "https://example.zendesk.com/attachments/screenshot.png"
+        }
+      ]
+    }
+  ],
+  "next_page": null,
+  "previous_page": null
+} 
