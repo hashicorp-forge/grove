@@ -61,10 +61,11 @@ class Handler(BaseCache):
     """This cache handler allows Grove to write objects into an AWS DynamoDB cache."""
 
     def __init__(self):
-        """Sets up access to DynamoDB
+        """Sets up the DynamoDB cache handler.
 
-        This handler also attempt to assume a configured role in order to allow
-        cross-account use - if required.
+        This does not generate a session, as the connector base performs the required
+        operation during creation. This is to allow sessions to be regenerated when
+        collections run longer than the maximum token expiration.
 
         :raises ConfigurationException: There was an issue with configuration.
         :raises AccessException: An issue occurred when accessing DynamoDB.
@@ -77,6 +78,15 @@ class Handler(BaseCache):
         except ValidationError as err:
             raise ConfigurationException(parsing.validation_error(err))
 
+    def setup(self):
+        """Sets up access to DynamoDB
+
+        This handler also attempt to assume a configured role in order to allow
+        cross-account use - if required.
+
+        :raises ConfigurationException: There was an issue with configuration.
+        :raises AccessException: An issue occurred when accessing DynamoDB.
+        """
         # Explicit calls to session are mostly used to allow mocks during testing.
         session = Session()
         session_arguments = {}
@@ -130,20 +140,37 @@ class Handler(BaseCache):
 
         :return: Value from the cache.
         """
-        try:
-            response = self._store.get_item(
-                TableName=self.config.table,
-                Key={"pk": {"S": pk}, "sk": {"S": sk}},
-            )
-            pointer = response["Item"]["data"]["S"]
-        except ClientError as err:
-            self.logger.error(
-                f"Unable to get value from cache. {err}", extra={"pk": pk, "sk": sk}
-            )
-            raise AccessException(err)
-        except KeyError:
-            self.logger.debug("No value found in cache", extra={"pk": pk, "sk": sk})
-            raise NotFoundException()
+        for tries in range(2):
+            try:
+                response = self._store.get_item(
+                    TableName=self.config.table,
+                    Key={"pk": {"S": pk}, "sk": {"S": sk}},
+                )
+                pointer = response["Item"]["data"]["S"]
+
+                # Break out of the retry loop if we got a value.
+                break
+            except ClientError as err:
+                # Handle conditional check failures differently as these may indicate
+                # concurrent execution.
+                error_type = err.response.get("Error", {}).get("Code", "")
+
+                # This is not ideal, but it is intended to allow retry if a token
+                # expires during long collections without caller intervention.
+                if error_type == "ExpiredToken":
+                    if tries == 0:
+                        self.logger.warning("AWS session expired, requesting a new one")
+                        self.setup()
+                        continue
+
+                # For anything else, just fail.
+                self.logger.error(
+                    f"Unable to get value from cache. {err}", extra={"pk": pk, "sk": sk}
+                )
+                raise AccessException(err)
+            except KeyError:
+                self.logger.debug("No value found in cache", extra={"pk": pk, "sk": sk})
+                raise NotFoundException()
 
         return str(pointer)
 
@@ -184,22 +211,46 @@ class Handler(BaseCache):
             options["ExpressionAttributeValues"][":constraint"] = {"S": str(constraint)}
 
         # Attempt to set the item.
-        try:
-            self._store.update_item(
-                TableName=self.config.table,
-                Key={"pk": {"S": str(pk)}, "sk": {"S": str(sk)}},
-                UpdateExpression="SET #data = :data",
-                ExpressionAttributeNames={"#data": "data"},
-                **options,
-            )
-        except ClientError as err:
-            # Handle conditional check failures differently as these may indicate
-            # concurrent execution.
-            error_type = err.response.get("Error", {}).get("Code", "")
+        for tries in range(2):
+            try:
+                self._store.update_item(
+                    TableName=self.config.table,
+                    Key={"pk": {"S": str(pk)}, "sk": {"S": str(sk)}},
+                    UpdateExpression="SET #data = :data",
+                    ExpressionAttributeNames={"#data": "data"},
+                    **options,
+                )
 
-            if error_type == "ConditionalCheckFailedException":
+                # Break out of the retry loop if the set was successful.
+                break
+            except ClientError as err:
+                # Handle conditional check failures differently as these may indicate
+                # concurrent execution.
+                error_type = err.response.get("Error", {}).get("Code", "")
+
+                if error_type == "ConditionalCheckFailedException":
+                    self.logger.error(
+                        "Cache set failed as constraint failed.",
+                        extra={
+                            "pk": pk,
+                            "sk": sk,
+                            "value": value,
+                            "not_set": not_set,
+                            "constraint": constraint,
+                        },
+                    )
+                    raise DataFormatException(err)
+
+                # Handle session expiration retries for long collections.
+                if error_type == "ExpiredToken":
+                    if tries == 0:
+                        self.logger.warning("AWS session expired, requesting a new one")
+                        self.setup()
+                        continue
+
+                # For everything else, just raise a generic error.
                 self.logger.error(
-                    "Cache set failed as constraint failed.",
+                    f"Unable to set value in cache: {err}",
                     extra={
                         "pk": pk,
                         "sk": sk,
@@ -208,20 +259,7 @@ class Handler(BaseCache):
                         "constraint": constraint,
                     },
                 )
-                raise DataFormatException(err)
-
-            # For everything else, just raise a generic error.
-            self.logger.error(
-                f"Unable to set value in cache: {err}",
-                extra={
-                    "pk": pk,
-                    "sk": sk,
-                    "value": value,
-                    "not_set": not_set,
-                    "constraint": constraint,
-                },
-            )
-            raise AccessException(err)
+                raise AccessException(err)
 
     def delete(self, pk: str, sk: str, constraint: Optional[str] = None):
         """Deletes an entry from DynamoDB that has the given PK / SK.
@@ -244,27 +282,39 @@ class Handler(BaseCache):
                 ":constraint": {"S": str(constraint)}
             }
 
-        try:
-            self._store.delete_item(
-                TableName=self.config.table,
-                Key={"pk": {"S": pk}, "sk": {"S": sk}},
-                **options,
-            )
-        except ClientError as err:
-            # Handle conditional check failures differently as these may indicate
-            # concurrent execution.
-            error_type = err.response.get("Error", {}).get("Code", "")
+        for tries in range(2):
+            try:
+                self._store.delete_item(
+                    TableName=self.config.table,
+                    Key={"pk": {"S": pk}, "sk": {"S": sk}},
+                    **options,
+                )
 
-            if error_type == "ConditionalCheckFailedException":
+                # Break out of the retry loop if the deletion was successful.
+                break
+            except ClientError as err:
+                # Handle conditional check failures differently as these may indicate
+                # concurrent execution.
+                error_type = err.response.get("Error", {}).get("Code", "")
+
+                # Handle optimistic locking failures.
+                if error_type == "ConditionalCheckFailedException":
+                    self.logger.error(
+                        "Cache set failed as constraint failed.",
+                        extra={"pk": pk, "sk": sk, "constraint": constraint},
+                    )
+                    raise DataFormatException(err)
+
+                # Handle session expiration retries for long collections.
+                if error_type == "ExpiredToken":
+                    if tries == 0:
+                        self.logger.warning("AWS session expired, requesting a new one")
+                        self.setup()
+                        continue
+
+                # For everything else, just raise a generic error.
                 self.logger.error(
-                    "Cache set failed as constraint failed.",
+                    f"Unable to delete value from cache: {err}",
                     extra={"pk": pk, "sk": sk, "constraint": constraint},
                 )
-                raise DataFormatException(err)
-
-            # For everything else, just raise a generic error.
-            self.logger.error(
-                f"Unable to delete value from cache: {err}",
-                extra={"pk": pk, "sk": sk, "constraint": constraint},
-            )
-            raise AccessException(err)
+                raise AccessException(err)
