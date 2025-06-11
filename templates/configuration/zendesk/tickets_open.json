@@ -1,0 +1,9 @@
+{
+    "subdomain": "YOUR_ZENDESK_SUBDOMAIN",
+    "identity": "YOUR_EMAIL@example.com",
+    "key": "YOUR_API_TOKEN_HERE",
+    "statuses": ["new", "open", "pending"],
+    "delay_minutes": 5,
+    "name": "zendesk-open-tickets-example",
+    "connector": "zendesk_tickets"
+} 
