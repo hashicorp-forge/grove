@@ -102,13 +102,13 @@ class AuditLogsConnector(BaseConnector):
         :param context: Runtime context for the connector.
         """
         super().__init__(config, context)
-        self.subdomain = getattr(config, "subdomain", None)
+        self.subdomain = getattr(self.configuration, "subdomain", None)
         if not self.subdomain:
             raise ConfigurationException("subdomain is required")
-        self.api_token = getattr(config, "key", None)
+        self.api_token = getattr(self.configuration, "key", None)
         if not self.api_token:
             raise ConfigurationException("key is required")
-        self.email = getattr(config, "identity", None)
+        self.email = getattr(self.configuration, "identity", None)
         if not self.email:
             raise ConfigurationException("identity is required")
             
@@ -129,7 +129,7 @@ class AuditLogsConnector(BaseConnector):
         :raises ConfigurationException: If batch_size is invalid.
         """
         try:
-            candidate = getattr(self.config, "batch_size", DEFAULT_BATCH_SIZE)
+            candidate = getattr(self.configuration, "batch_size", DEFAULT_BATCH_SIZE)
             if not isinstance(candidate, int) or candidate <= 0 or candidate > 100:
                 raise ConfigurationException("batch_size must be an integer between 1 and 100")
             return candidate
@@ -144,7 +144,7 @@ class AuditLogsConnector(BaseConnector):
         :raises ConfigurationException: If delay is invalid.
         """
         try:
-            candidate = int(getattr(self.config, "delay", DEFAULT_DELAY))
+            candidate = int(getattr(self.configuration, "delay", DEFAULT_DELAY))
             if candidate < 0:
                 raise ConfigurationException("delay must be a non-negative integer")
             return candidate
@@ -158,7 +158,7 @@ class AuditLogsConnector(BaseConnector):
         :return: True if rate limiting should be enforced, False otherwise.
         """
         try:
-            candidate = getattr(self.config, "enforce_rate_limit", False)
+            candidate = getattr(self.configuration, "enforce_rate_limit", False)
             if candidate not in [True, False]:
                 raise ConfigurationException("enforce_rate_limit must be a boolean")
             return candidate
