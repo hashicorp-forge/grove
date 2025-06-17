@@ -7,11 +7,9 @@ This connector utilizes the Zendesk Search API to retrieve closed tickets
 with their comments and attachments.
 """
 
-import logging
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from urllib.parse import quote
 
 import requests
 
