@@ -54,17 +54,14 @@ class ZendeskTicketsTestCase(unittest.TestCase):
         self.assertEqual(self.connector.subdomain, "test-company")
 
     def test_missing_subdomain_raises_exception(self):
-        """Test that missing subdomain raises ConfigurationException."""
+        """Test that missing subdomain raises ConfigurationException at init."""
         config = self.base_config.copy()
         del config["subdomain"]
-        
-        connector = TicketsConnector(
-            config=ConnectorConfig(**config),
-            context={"runtime": "test_harness", "runtime_id": "NA"},
-        )
-        
         with self.assertRaises(ConfigurationException):
-            _ = connector.subdomain
+            TicketsConnector(
+                config=ConnectorConfig(**config),
+                context={"runtime": "test_harness", "runtime_id": "NA"},
+            )
 
     def test_include_comments_default(self):
         """Test that include_comments defaults to True."""
@@ -116,51 +113,55 @@ class ZendeskTicketsTestCase(unittest.TestCase):
 
     @responses.activate
     def test_make_request_success(self):
-        """Test successful API request."""
+        """Test successful API request using ZendeskClient."""
         responses.add(
             responses.GET,
             "https://test-company.zendesk.com/api/v2/test",
             json={"test": "data"},
             status=200,
         )
-        
-        result = self.connector._make_request(
-            "https://test-company.zendesk.com/api/v2/test"
+        client = ZendeskClient(
+            subdomain="test-company",
+            identity="test@example.com",
+            api_token="test_api_token"
         )
+        result = client._make_request("test")
         self.assertEqual(result, {"test": "data"})
 
     @responses.activate
     def test_make_request_rate_limit(self):
-        """Test rate limit handling."""
+        """Test rate limit handling using ZendeskClient."""
         responses.add(
             responses.GET,
             "https://test-company.zendesk.com/api/v2/test",
             status=429,
             headers={"Retry-After": "60"},
         )
-        
+        client = ZendeskClient(
+            subdomain="test-company",
+            identity="test@example.com",
+            api_token="test_api_token"
+        )
         with self.assertRaises(RateLimitException) as cm:
-            self.connector._make_request(
-                "https://test-company.zendesk.com/api/v2/test"
-            )
-        
+            client._make_request("test")
         self.assertIn("Rate limited", str(cm.exception))
 
     @responses.activate
     def test_make_request_error(self):
-        """Test API request error handling."""
+        """Test API request error handling using ZendeskClient."""
         responses.add(
             responses.GET,
             "https://test-company.zendesk.com/api/v2/test",
             json={"error": "Not found"},
             status=404,
         )
-        
+        client = ZendeskClient(
+            subdomain="test-company",
+            identity="test@example.com",
+            api_token="test_api_token"
+        )
         with self.assertRaises(RequestFailedException) as cm:
-            self.connector._make_request(
-                "https://test-company.zendesk.com/api/v2/test"
-            )
-        
+            client._make_request("test")
         self.assertIn("Request failed with status 404", str(cm.exception))
 
     @responses.activate
@@ -327,34 +328,54 @@ class ZendeskSearchTestCase(unittest.TestCase):
 
     @responses.activate
     def test_search_tickets(self):
-        """Test searching for tickets."""
+        """Test searching for tickets using ZendeskClient."""
         responses.add(
             responses.GET,
-            re.compile(r"https://test-company\.zendesk\.com/api/v2/search\.json.*"),
+            "https://test-company.zendesk.com/api/v2/search.json",
+            match=[responses.matchers.query_param_matcher({
+                "query": "type:ticket status:closed",
+                "page": "1",
+                "per_page": "100",
+                "sort_by": "updated_at",
+                "sort_order": "asc"
+            })],
             json=self._load_fixture("search_results.json"),
             status=200,
         )
-        
+        client = ZendeskClient(
+            subdomain="test-company",
+            identity="test@example.com",
+            api_token="test_api_token"
+        )
         query = "type:ticket status:closed"
-        tickets = self.connector._search_tickets(query)
-        
+        tickets = client.search_tickets(query)
         self.assertEqual(len(tickets), 2)
         self.assertEqual(tickets[0]["id"], 1)
         self.assertEqual(tickets[1]["id"], 2)
 
     @responses.activate
     def test_search_tickets_no_results(self):
-        """Test searching with no results."""
+        """Test searching with no results using ZendeskClient."""
         responses.add(
             responses.GET,
-            re.compile(r"https://test-company\.zendesk\.com/api/v2/search\.json.*"),
+            "https://test-company.zendesk.com/api/v2/search.json",
+            match=[responses.matchers.query_param_matcher({
+                "query": "type:ticket status:nonexistent",
+                "page": "1",
+                "per_page": "100",
+                "sort_by": "updated_at",
+                "sort_order": "asc"
+            })],
             json=self._load_fixture("search_no_results.json"),
             status=200,
         )
-        
+        client = ZendeskClient(
+            subdomain="test-company",
+            identity="test@example.com",
+            api_token="test_api_token"
+        )
         query = "type:ticket status:nonexistent"
-        tickets = self.connector._search_tickets(query)
-        
+        tickets = client.search_tickets(query)
         self.assertEqual(len(tickets), 0)
 
     def test_build_search_query(self):
