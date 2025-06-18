@@ -5,17 +5,14 @@
 
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
-import requests
 
 from grove.connectors import BaseConnector
 from grove.constants import CHRONOLOGICAL
 from grove.exceptions import (
     ConfigurationException,
     NotFoundException,
-    RateLimitException,
-    RequestFailedException,
 )
 from grove.connectors.zendesk.api import ZendeskClient
 
