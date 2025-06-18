@@ -17,6 +17,7 @@ from grove.exceptions import (
     RateLimitException,
     RequestFailedException,
 )
+from grove.connectors.zendesk.api import ZendeskClient
 
 DATESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -25,6 +26,14 @@ class Connector(BaseConnector):
     CONNECTOR = "zendesk_tickets"
     POINTER_PATH = "updated_at"
     LOG_ORDER = CHRONOLOGICAL
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._client = ZendeskClient(
+            subdomain=self.subdomain,
+            identity=self.identity,
+            api_token=self.key
+        )
 
     @property
     def subdomain(self) -> str:
@@ -39,8 +48,6 @@ class Connector(BaseConnector):
             raise ConfigurationException(
                 "Zendesk subdomain is required but not configured."
             )
-
-
 
     @property
     def include_comments(self) -> bool:
@@ -87,126 +94,26 @@ class Connector(BaseConnector):
         except (AttributeError, ValueError):
             return 50  # Default batch size
 
-    def _make_request(self, url: str, params: Optional[Dict] = None) -> Dict[str, Any]:
-        """Make an authenticated request to the Zendesk API.
-
-        :param url: The API endpoint URL.
-        :param params: Optional query parameters.
-        :return: JSON response data.
-        :raises RequestFailedException: If the request fails.
-        :raises RateLimitException: If rate limited.
-        """
-        auth = (f"{self.identity}/token", self.key)
-        headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
-
-        try:
-            response = requests.get(
-                url, 
-                auth=auth, 
-                headers=headers, 
-                params=params or {},
-                timeout=30
-            )
-
-            if response.status_code == 429:
-                retry_after = int(response.headers.get("Retry-After", 60))
-                raise RateLimitException(
-                    f"Rate limited. Retry after {retry_after} seconds."
-                )
-
-            if response.status_code != 200:
-                raise RequestFailedException(
-                    f"Request failed with status {response.status_code}: {response.text}"
-                )
-
-            return response.json()
-
-        except requests.exceptions.RequestException as err:
-            raise RequestFailedException(f"Request failed: {err}")
-
     def _get_tickets_since(self, start_time: datetime) -> List[Dict[str, Any]]:
-        """Get all tickets updated since the specified time.
-
-        :param start_time: Start time for incremental export.
-        :return: List of ticket data.
-        """
+        """Get all tickets updated since the specified time using ZendeskClient."""
         tickets = []
-        url = f"https://{self.subdomain}.zendesk.com/api/v2/incremental/tickets/cursor.json"
-        
-        # Convert start_time to Unix timestamp
         start_timestamp = int(start_time.timestamp())
-        
-        # Initial request with start_time
-        params = {"start_time": start_timestamp}
-        
+        cursor = None
         while True:
-            self.logger.info(
-                f"Fetching tickets from Zendesk API",
-                extra={"url": url, "params": params, **self.log_context}
-            )
-            
-            data = self._make_request(url, params)
-            
-            # Add tickets from this page
+            data = self._client.get_incremental_tickets(start_timestamp, cursor)
             page_tickets = data.get("tickets", [])
             tickets.extend(page_tickets)
-            
-            self.logger.info(
-                f"Retrieved {len(page_tickets)} tickets from this page",
-                extra={"total_so_far": len(tickets), **self.log_context}
-            )
-            
-            # Check if we've reached the end
             if data.get("end_of_stream", False):
                 break
-                
-            # Get cursor for next page
             cursor = data.get("after_cursor")
             if not cursor:
                 break
-                
-            # Update params for next iteration
-            params = {"cursor": cursor}
-            
-            # Be respectful of rate limits
             time.sleep(1)
-
         return tickets
 
     def _get_ticket_comments(self, ticket_id: int) -> List[Dict[str, Any]]:
-        """Get all comments for a specific ticket.
-
-        :param ticket_id: The ticket ID to get comments for.
-        :return: List of comment data including attachments.
-        """
-        comments = []
-        url = f"https://{self.subdomain}.zendesk.com/api/v2/tickets/{ticket_id}/comments.json"
-        
-        params = {"per_page": 50}  # Smaller page size for faster initial response
-        if self.include_attachments:
-            params["include_inline_images"] = "true"
-
-        while True:
-            data = self._make_request(url, params)
-            
-            page_comments = data.get("comments", [])
-            comments.extend(page_comments)
-            
-            # Check pagination
-            next_page = data.get("next_page")
-            if not next_page:
-                break
-                
-            url = next_page
-            params = {}  # Next page URL includes all params
-            
-            # Reduced delay for comment pagination
-            time.sleep(0.05)  # Reduced from 0.5s
-
-        return comments
+        """Get all comments for a specific ticket using ZendeskClient."""
+        return self._client.get_ticket_comments(ticket_id, include_inline_images=self.include_attachments)
 
     def _filter_closed_tickets(self, tickets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Filter tickets to only include closed ones.
@@ -255,10 +162,10 @@ class Connector(BaseConnector):
                     ticket["comments"] = comments
                     
                     # Count attachments if present
-                    attachment_count = sum(
-                        len(comment.get("attachments", []))
-                        for comment in comments
-                    )
+                    attachment_count = 0
+                    for comment in comments:
+                        attachments = comment.get("attachments", [])
+                        attachment_count += len(attachments)
                     
                     self.logger.debug(
                         f"Retrieved {len(comments)} comments with {attachment_count} attachments",

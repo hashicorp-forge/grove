@@ -21,6 +21,7 @@ from grove.exceptions import (
     RateLimitException,
     RequestFailedException,
 )
+from grove.connectors.zendesk.api import ZendeskClient
 
 DATESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -43,8 +44,6 @@ class Connector(BaseConnector):
             raise ConfigurationException(
                 "Zendesk subdomain is required but not configured."
             )
-
-
 
     @property
     def ticket_status(self) -> str:
@@ -79,182 +78,13 @@ class Connector(BaseConnector):
         except (AttributeError, ValueError):
             return 5
 
-    def _make_request(self, url: str, params: Optional[Dict] = None) -> Dict[str, Any]:
-        """Make an authenticated request to the Zendesk API.
-
-        :param url: The API endpoint URL.
-        :param params: Optional query parameters.
-        :return: JSON response data.
-        :raises RequestFailedException: If the request fails.
-        :raises RateLimitException: If rate limited.
-        """
-        auth = (f"{self.identity}/token", self.key)
-        headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
-
-        try:
-            response = requests.get(
-                url, 
-                auth=auth, 
-                headers=headers, 
-                params=params or {},
-                timeout=30
-            )
-
-            if response.status_code == 429:
-                retry_after = int(response.headers.get("Retry-After", 60))
-                raise RateLimitException(
-                    f"Rate limited. Retry after {retry_after} seconds."
-                )
-
-            if response.status_code != 200:
-                raise RequestFailedException(
-                    f"Request failed with status {response.status_code}: {response.text}"
-                )
-
-            return response.json()
-
-        except requests.exceptions.RequestException as err:
-            raise RequestFailedException(f"Request failed: {err}")
-
-    def _search_tickets(self, query: str) -> List[Dict[str, Any]]:
-        """Search for tickets using the Zendesk Search API.
-
-        :param query: The search query to execute.
-        :return: List of ticket results.
-        """
-        tickets = []
-        url = f"https://{self.subdomain}.zendesk.com/api/v2/search.json"
-        
-        page = 1
-        per_page = 100
-        
-        while True:
-            params = {
-                "query": query,
-                "page": page,
-                "per_page": per_page,
-                "sort_by": "updated_at",
-                "sort_order": "asc"
-            }
-            
-            self.logger.debug(
-                f"Searching tickets with query: {query}",
-                extra={"page": page, "per_page": per_page, **self.log_context}
-            )
-            
-            data = self._make_request(url, params)
-            
-            page_results = data.get("results", [])
-            
-            # Filter only ticket results (search can return other types)
-            page_tickets = [
-                result for result in page_results 
-                if result.get("result_type") == "ticket"
-            ]
-            
-            tickets.extend(page_tickets)
-            
-            self.logger.info(
-                f"Retrieved {len(page_tickets)} tickets from page {page}",
-                extra={"total_so_far": len(tickets), **self.log_context}
-            )
-            
-            # Check if there are more pages
-            if not data.get("next_page") or len(page_tickets) < per_page:
-                break
-                
-            page += 1
-            
-            # Rate limiting between pages
-            time.sleep(1)
-
-        return tickets
-
-    def _get_ticket_comments(self, ticket_id: int) -> List[Dict[str, Any]]:
-        """Get all comments for a specific ticket.
-
-        :param ticket_id: The ticket ID to get comments for.
-        :return: List of comment data including attachments.
-        """
-        comments = []
-        url = f"https://{self.subdomain}.zendesk.com/api/v2/tickets/{ticket_id}/comments.json"
-        
-        params = {"include_inline_images": "true"}
-
-        while True:
-            data = self._make_request(url, params)
-            
-            page_comments = data.get("comments", [])
-            comments.extend(page_comments)
-            
-            # Check pagination
-            next_page = data.get("next_page")
-            if not next_page:
-                break
-                
-            url = next_page
-            params = {}  # Next page URL includes all params
-            
-            # Rate limiting between comment pages
-            time.sleep(0.5)
-
-        return comments
-
-    def _enrich_tickets_with_comments(self, tickets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Enrich tickets with their comments and attachments.
-
-        :param tickets: List of tickets to enrich.
-        :return: List of enriched tickets.
-        """
-        enriched_tickets = []
-        
-        for ticket in tickets:
-            ticket_id = ticket["id"]
-            
-            self.logger.debug(
-                f"Enriching ticket {ticket_id} with comments",
-                extra={"ticket_id": ticket_id, **self.log_context}
-            )
-            
-            # Get comments for this ticket
-            if self.include_comments:
-                try:
-                    comments = self._get_ticket_comments(ticket_id)
-                    ticket["comments"] = comments
-                    
-                    # Count attachments if present
-                    attachment_count = sum(
-                        len(comment.get("attachments", []))
-                        for comment in comments
-                    )
-                    
-                    self.logger.debug(
-                        f"Retrieved {len(comments)} comments with {attachment_count} attachments",
-                        extra={
-                            "ticket_id": ticket_id,
-                            "comment_count": len(comments),
-                            "attachment_count": attachment_count,
-                            **self.log_context
-                        }
-                    )
-                    
-                except Exception as err:
-                    self.logger.warning(
-                        f"Failed to get comments for ticket {ticket_id}: {err}",
-                        extra={"ticket_id": ticket_id, "exception": err, **self.log_context}
-                    )
-                    # Continue without comments rather than failing
-                    ticket["comments"] = []
-            
-            enriched_tickets.append(ticket)
-            
-            # Rate limiting between ticket comment requests
-            time.sleep(0.2)
-        
-        return enriched_tickets
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._client = ZendeskClient(
+            subdomain=self.subdomain,
+            identity=self.identity,
+            api_token=self.key
+        )
 
     def _build_search_query(self, start_time: datetime) -> str:
         """Build the search query for tickets.
@@ -317,7 +147,7 @@ class Connector(BaseConnector):
 
         # Build and execute the search query
         query = self._build_search_query(start_time)
-        tickets = self._search_tickets(query)
+        tickets = self._client.search_tickets(query)
         
         if not tickets:
             self.logger.info(
@@ -350,3 +180,56 @@ class Connector(BaseConnector):
                 **self.log_context
             }
         )
+
+    def _enrich_tickets_with_comments(self, tickets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Enrich tickets with their comments and attachments.
+
+        :param tickets: List of tickets to enrich.
+        :return: List of enriched tickets.
+        """
+        enriched_tickets = []
+        
+        for ticket in tickets:
+            ticket_id = ticket["id"]
+            
+            self.logger.debug(
+                f"Enriching ticket {ticket_id} with comments",
+                extra={"ticket_id": ticket_id, **self.log_context}
+            )
+            
+            # Get comments for this ticket
+            if self.include_comments:
+                try:
+                    comments = self._client.get_ticket_comments(ticket_id)
+                    ticket["comments"] = comments
+                    
+                    # Count attachments if present
+                    attachment_count = sum(
+                        len(comment.get("attachments", []))
+                        for comment in comments
+                    )
+                    
+                    self.logger.debug(
+                        f"Retrieved {len(comments)} comments with {attachment_count} attachments",
+                        extra={
+                            "ticket_id": ticket_id,
+                            "comment_count": len(comments),
+                            "attachment_count": attachment_count,
+                            **self.log_context
+                        }
+                    )
+                    
+                except Exception as err:
+                    self.logger.warning(
+                        f"Failed to get comments for ticket {ticket_id}: {err}",
+                        extra={"ticket_id": ticket_id, "exception": err, **self.log_context}
+                    )
+                    # Continue without comments rather than failing
+                    ticket["comments"] = []
+            
+            enriched_tickets.append(ticket)
+            
+            # Rate limiting between ticket comment requests
+            time.sleep(0.2)
+        
+        return enriched_tickets

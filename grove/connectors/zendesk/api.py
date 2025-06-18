@@ -45,7 +45,7 @@ class ZendeskClient:
                 url, 
                 auth=self.auth, 
                 headers=self.headers, 
-                params=params or {},
+                params=params,
                 timeout=30
             )
 
@@ -88,10 +88,10 @@ class ZendeskClient:
             page_results = data.get("results", [])
             
             # Filter only ticket results (search can return other types)
-            page_tickets = [
-                result for result in page_results 
-                if result.get("result_type") == "ticket"
-            ]
+            page_tickets = []
+            for result in page_results:
+                if result.get("result_type") == "ticket":
+                    page_tickets.append(result)
             
             tickets.extend(page_tickets)
             
