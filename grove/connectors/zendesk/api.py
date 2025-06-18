@@ -29,7 +29,7 @@ class ZendeskClient:
             "Accept": "application/json",
         }
 
-    def _make_request(self, endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any]:
+    def _make_request(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Make an authenticated request to the Zendesk API.
 
         :param endpoint: The API endpoint (relative to base_url).
@@ -148,6 +148,6 @@ class ZendeskClient:
         if cursor:
             params = {"cursor": cursor}
         else:
-            params = {"start_time": start_time}
+            params = {"start_time": str(start_time)}
         
         return self._make_request(endpoint, params) 
