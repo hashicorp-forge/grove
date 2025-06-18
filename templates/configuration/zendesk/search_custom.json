@@ -1,0 +1,10 @@
+{
+    "subdomain": "YOUR_ZENDESK_SUBDOMAIN",
+    "identity": "YOUR_EMAIL@example.com",
+    "key": "YOUR_API_TOKEN_HERE",
+    "statuses": ["pending", "hold"],
+    "include_comments": true,
+    "delay_minutes": 10,
+    "name": "zendesk-search-custom-status-example",
+    "connector": "zendesk_search"
+} 
