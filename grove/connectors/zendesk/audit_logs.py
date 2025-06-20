@@ -1,8 +1,6 @@
 """Zendesk ticket audits connector for Grove."""
 
 from typing import Any, Dict, List, Optional
-import datetime
-import json
 import time
 from datetime import datetime, timezone, timedelta
 
@@ -10,7 +8,7 @@ import requests
 import logging
 
 from grove.connectors import BaseConnector
-from grove.exceptions import ConfigurationException, NotFoundException, RequestFailedException
+from grove.exceptions import ConfigurationException, NotFoundException
 from grove.models import ConnectorConfig
 from grove.constants import CHRONOLOGICAL
 
@@ -44,7 +42,7 @@ class Client:
             "Content-Type": "application/json",
         })
         self.logger = logging.getLogger(__name__)
-        self.last_request_time = 0  # Track last request time for rate limiting
+        self.last_request_time = 0.0  # Track last request time for rate limiting
 
     def _enforce_rate_limit(self):
         """Enforce rate limit of 1 request per minute if enabled."""
