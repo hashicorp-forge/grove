@@ -19,6 +19,7 @@ DEFAULT_BATCH_SIZE = 100
 DEFAULT_DELAY = 0
 RATE_LIMIT_SECONDS = 60
 
+
 class Client:
     """Zendesk API client for account audit logs."""
 
@@ -105,9 +106,11 @@ class AuditLogsConnector(BaseConnector):
         self.subdomain = getattr(self.configuration, "subdomain", None)
         if not self.subdomain:
             raise ConfigurationException("subdomain is required")
+        
         self.api_token = getattr(self.configuration, "key", None)
         if not self.api_token:
             raise ConfigurationException("key is required")
+        
         self.email = getattr(self.configuration, "identity", None)
         if not self.email:
             raise ConfigurationException("identity is required")
@@ -129,11 +132,11 @@ class AuditLogsConnector(BaseConnector):
         :raises ConfigurationException: If batch_size is invalid.
         """
         try:
-            candidate = getattr(self.configuration, "batch_size", DEFAULT_BATCH_SIZE)
-            if not isinstance(candidate, int) or candidate <= 0 or candidate > 100:
+            candidate = int(getattr(self.configuration, "batch_size", DEFAULT_BATCH_SIZE))
+            if candidate <= 0 or candidate > 100:
                 raise ConfigurationException("batch_size must be an integer between 1 and 100")
             return candidate
-        except AttributeError:
+        except (AttributeError, ValueError):
             return DEFAULT_BATCH_SIZE
 
     @property
