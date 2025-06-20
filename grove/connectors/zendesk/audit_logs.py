@@ -198,30 +198,6 @@ class AuditLogsConnector(BaseConnector):
         log_time = datetime.fromisoformat(log["created_at"].replace('Z', '+00:00'))
         return log_time > start_time
 
-    def _update_pointer(self, logs: List[Dict[str, Any]]) -> None:
-        """Update the pointer to the most recent log timestamp.
-        
-        :param logs: List of log entries to check for the most recent timestamp.
-        """
-        if not logs:
-            return
-            
-        # Find the most recent log timestamp
-        latest_timestamp = max(
-            datetime.fromisoformat(log["created_at"].replace('Z', '+00:00'))
-            for log in logs
-        )
-        
-        # Update pointer if this is newer than current pointer
-        try:
-            current_pointer = datetime.fromisoformat(self.pointer.replace('Z', '+00:00'))
-            if latest_timestamp > current_pointer:
-                self.pointer = latest_timestamp.strftime(DATESTAMP_FORMAT)
-                self.logger.info(f"Updated pointer to: {self.pointer}")
-        except (NotFoundException, ValueError):
-            # If current pointer is invalid, always update
-            self.pointer = latest_timestamp.strftime(DATESTAMP_FORMAT)
-            self.logger.info(f"Set new pointer to: {self.pointer}")
 
     def collect(self) -> List[Dict[str, Any]]:
         """Collect account audit logs from Zendesk using cursor pagination."""
@@ -261,10 +237,10 @@ class AuditLogsConnector(BaseConnector):
                 if audit_logs_batch:
                     first_log = audit_logs_batch[0]
                     last_log = audit_logs_batch[-1]
-                    self.logger.info(f"First audit log ID in batch: {first_log['id']}")
-                    self.logger.info(f"Last audit log ID in batch: {last_log['id']}")
-                    self.logger.info(f"First audit log created_at: {first_log['created_at']}")
-                    self.logger.info(f"Last audit log created_at: {last_log['created_at']}")
+                    self.logger.debug(f"First audit log ID in batch: {first_log['id']}")
+                    self.logger.debug(f"Last audit log ID in batch: {last_log['id']}")
+                    self.logger.debug(f"First audit log created_at: {first_log['created_at']}")
+                    self.logger.debug(f"Last audit log created_at: {last_log['created_at']}")
 
                 # Filter logs newer than pointer using timezone-aware comparison
                 new_logs = [log for log in audit_logs_batch if self._is_log_newer_than_pointer(log, start_time)]
