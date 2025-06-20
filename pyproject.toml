@@ -103,8 +103,6 @@ zoom_operationlogs = "grove.connectors.zoom.operationlogs:Connector"
 oomnitza_activities = "grove.connectors.oomnitza.activities:Connector"
 zitadel_events = "grove.connectors.zitadel.events:Connector"
 
-
-
 [project.entry-points."grove.caches"]
 aws_dynamodb = "grove.caches.aws_dynamodb:Handler"
 local_memory = "grove.caches.local_memory:Handler"
