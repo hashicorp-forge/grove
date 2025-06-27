@@ -33,6 +33,7 @@ class Connector(BaseConnector):
             dataset_name = self.configuration.dataset_name
             table_name = self.configuration.table_name
             columns = self.configuration.columns
+            max_batches = self.configuration.max_batches
             self.POINTER_PATH = self.configuration.pointer_path
 
             self.logger.debug("Configuration parameters:")
@@ -44,6 +45,14 @@ class Connector(BaseConnector):
             if not self.POINTER_PATH:
                 raise ConfigurationException(
                     "POINTER_PATH is not set in the configuration."
+                )
+            
+            if max_batches is None:
+                max_batches = 3
+
+            if not isinstance(max_batches, int) or max_batches <= 0:
+                raise ConfigurationException(
+                    "max_batches must be a positive integer."
                 )
 
             for value in [project_id, dataset_name, table_name]:
@@ -81,6 +90,10 @@ class Connector(BaseConnector):
 
         str_pointer = as_bigquery_timestamp_microseconds(pointer_epoch_usec)
 
+        # Configuration for batching
+        all_rows = []
+        batch_count = 0
+
         while True:
             self.logger.debug(f"Pointer for query: {str_pointer} ({type(str_pointer)})")
 
@@ -105,10 +118,15 @@ class Connector(BaseConnector):
                     self.logger.info("No more logs found.")
                     break
 
-                self.logger.info(f"Collected {len(rows)} logs.")
-                self.save(rows)
+                self.logger.info(f"Collected {len(rows)} logs in batch {batch_count + 1}.")
+                all_rows.extend(rows)
+                batch_count += 1
 
-                if len(rows) < 1000:
+                # Save and break if we've collected enough batches or reached the end
+                if batch_count >= max_batches or len(rows) < 1000:
+                    if all_rows:
+                        self.logger.info(f"Saving {len(all_rows)} total logs from {batch_count} batches.")
+                        self.save(all_rows)
                     break
 
             except Exception as err:
