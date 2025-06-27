@@ -32,6 +32,7 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
                 table_name="test_table",
                 columns=["timestamp_usec", "message", "user_id"],
                 pointer_path="timestamp_usec",
+                max_batches=1
             ),
             context={
                 "runtime": "test_harness",
@@ -93,6 +94,9 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         
         # Set initial pointer
         self.connector._pointer = "1000000000000000"
+        
+        # Set max_batches to 2 for this test
+        self.connector.configuration.max_batches = 2
         
         # Run collection
         self.connector.run()
