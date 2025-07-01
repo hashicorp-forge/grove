@@ -952,11 +952,27 @@ class BaseConnector:
 
         # Intentionally allow exceptions to bubble up so the caller can catch if the
         # value is not in the cache.
-        self._pointer = self._cache.get(
-            self.cache_key(CACHE_KEY_POINTER), self.operation
-        )
+        try:
+            self._pointer = self._cache.get(
+                self.cache_key(CACHE_KEY_POINTER), self.operation
+            )
+        except NotFoundException as err:
+            # Only reverse chronological log collection uses windowing, so we can skip
+            # the rest of this method if not the correct type.
+            if self.LOG_ORDER != REVERSE_CHRONOLOGICAL:
+                raise err
 
-        return self._pointer
+        # Check if there is a current window, and if so, return the last seen value
+        # rather than the pointer. This speeds things up, and prevents duplication after
+        # failed collections.
+        if self.window_end is not None:
+            return self.window_end
+
+        if self._pointer:
+            return self._pointer
+
+        # No pointer, and no windowing.
+        raise NotFoundException()
 
     @pointer.setter
     def pointer(self, value: str):
