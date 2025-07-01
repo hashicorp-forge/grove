@@ -1,0 +1,9 @@
+{
+    "connector": "zendesk_audit_logs",
+    "name": "zendesk_audit_logs",
+    "subdomain": "your_subdomain",
+    "identity": "your_email@example.com",
+    "key": "your_api_key",
+    "batch_size": 100,
+    "enforce_rate_limit": true
+}

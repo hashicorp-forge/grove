@@ -95,12 +95,13 @@ torq_audit_logs = "grove.connectors.torq.audit_logs:Connector"
 twilio_monitor_events = "grove.connectors.twilio.monitor_events:Connector"
 twilio_messages = "grove.connectors.twilio.messages:Connector"
 workday_activity_logging = "grove.connectors.workday.activity_logging:Connector"
+zendesk_tickets = "grove.connectors.zendesk.tickets:Connector"
+zendesk_search = "grove.connectors.zendesk.search_api:Connector"
+zendesk_audit_logs = "grove.connectors.zendesk.audit_logs:AuditLogsConnector"
 zoom_activities = "grove.connectors.zoom.activities:Connector"
 zoom_operationlogs = "grove.connectors.zoom.operationlogs:Connector"
 oomnitza_activities = "grove.connectors.oomnitza.activities:Connector"
 zitadel_events = "grove.connectors.zitadel.events:Connector"
-
-
 
 [project.entry-points."grove.caches"]
 aws_dynamodb = "grove.caches.aws_dynamodb:Handler"

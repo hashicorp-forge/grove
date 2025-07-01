@@ -1,0 +1,9 @@
+{
+    "subdomain": "YOUR_ZENDESK_SUBDOMAIN",
+    "identity": "YOUR_EMAIL@example.com",
+    "key": "YOUR_API_TOKEN_HERE",
+    "status": "closed",
+    "delay_minutes": 5,
+    "name": "zendesk-single-status-example",
+    "connector": "zendesk_tickets"
+} 

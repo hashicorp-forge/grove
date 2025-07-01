@@ -72,6 +72,8 @@ isn't listed here, support can be added by creating a custom connector!
 * Twilio monitor events
 * Twilio message logs
 * Workday activity logs
+* Zendesk audit logs
+* Zendesk tickets
 * Zitadel event logs
 * Zoom activity logs
 * Zoom operation logs
