@@ -17,6 +17,7 @@ from grove.types import AuditLogEntries, HTTPResponse
 API_BASE_URI = "https://quay.io/api/v1"
 API_ORGANIZATION = "/organization/{identity}/logs" # org name will be inserted from config
 
+
 class Client:
     def __init__(
         self,
