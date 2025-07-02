@@ -47,7 +47,7 @@ class Connector(BaseConnector):
             log = client.get_organization_logs(
                 after=self.pointer,
                 cursor=cursor,
-                )
+            )
 
             # Save this batch of log entries.
             self.save(log.entries)
