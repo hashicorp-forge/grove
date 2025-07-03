@@ -125,7 +125,7 @@ class Connector(BaseConnector):
                 # Save and break if we've collected enough batches or reached the end
                 if batch_count >= max_batches or len(rows) < 1000:
                     if all_rows:
-                        self.logger.info(f"Saving {len(all_rows)} total logs from {batch_count} batches.")
+                        self.logger.debug(f"Saving {len(all_rows)} total logs from {batch_count} batches.")
                         self.save(all_rows)
                     break
 
