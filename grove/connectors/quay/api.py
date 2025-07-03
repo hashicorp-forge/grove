@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional
 
 import requests
 
+from datetime import datetime
 from email.utils import parsedate_to_datetime
 
 from grove.exceptions import RateLimitException, RequestFailedException
@@ -118,8 +119,8 @@ class Client:
         # filter out logs that are before the 'after' timestamp
         filtered = []
         for entry in response.body.get("logs", []) or []:
-            date_time = parsedate_to_datetime(entry.get("datetime", ""))
-            if after_timestamp and date_time < after_timestamp:
+            date_time = parse_time(entry.get("datetime", ""))
+            if date_time and after_timestamp and date_time < after_timestamp:
                 continue
             filtered.append(entry)
         
@@ -127,3 +128,14 @@ class Client:
             entries=filtered,
             cursor=response.body.get("next_page"),
     )
+
+def parse_time(timestamp: str) -> Optional[datetime]:
+    """" It is possible the timestamp may be '' (default), 
+    adding this check to avoid errors.
+    """
+    if not timestamp:
+        return None
+    try:
+        return parsedate_to_datetime(timestamp)
+    except (ValueError, TypeError):
+        return None
