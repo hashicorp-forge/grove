@@ -33,7 +33,7 @@ class Connector(BaseConnector):
             dataset_name = self.configuration.dataset_name
             table_name = self.configuration.table_name
             columns = self.configuration.columns
-            max_batches = self.configuration.max_batches
+            max_batches = getattr(self.configuration, 'max_batches', 3)
             self.POINTER_PATH = self.configuration.pointer_path
 
             self.logger.debug("Configuration parameters:")
@@ -47,9 +47,6 @@ class Connector(BaseConnector):
                     "POINTER_PATH is not set in the configuration."
                 )
             
-            if max_batches is None:
-                max_batches = 3
-
             if not isinstance(max_batches, int) or max_batches <= 0:
                 raise ConfigurationException(
                     "max_batches must be a positive integer."
