@@ -97,9 +97,9 @@ class Connector(BaseConnector):
             query = f"""
             SELECT {', '.join(columns)}
             FROM `{project_id}.{dataset_name}.{table_name}`
-            WHERE TIMESTAMP(_PARTITIONTIME) > TIMESTAMP('{str_pointer}')
+            WHERE {self.POINTER_PATH} > {str_pointer}
             AND {self.POINTER_PATH} IS NOT NULL
-            ORDER BY TIMESTAMP(_PARTITIONTIME) ASC
+            ORDER BY {self.POINTER_PATH} ASC
             LIMIT 1000
             """
             self.logger.debug(f"Constructed query: {query}")
