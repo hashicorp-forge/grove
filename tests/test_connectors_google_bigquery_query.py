@@ -32,6 +32,7 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
                 table_name="test_table",
                 columns=["timestamp_usec", "message", "user_id"],
                 pointer_path="timestamp_usec",
+                time_format="microseconds",
                 max_batches=1
             ),
             context={
@@ -138,7 +139,8 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
                 dataset_name="test_dataset",
                 table_name="test_table",
                 columns=["timestamp_usec", "message", "user_id"],
-                pointer_path="timestamp_usec"
+                pointer_path="timestamp_usec",
+                time_format="microseconds"
                 # Note: no max_batches field - should default to 3
             ),
             context={
@@ -159,3 +161,58 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         # Verify that the default value of 3 was used by checking the connector's behavior
         # Since we only have 2 rows (< 1000), it should complete in one batch
         self.assertEqual(mock_client.query.call_count, 1)
+
+    @patch('grove.connectors.google.bigquery_query.bigquery.Client')
+    @patch.object(Connector, 'get_credentials')
+    def test_collect_with_timestamp_format(self, mock_get_creds, mock_bigquery_client):
+        """Test collection with timestamp format (for _PARTITIONTIME scenarios)."""
+        # Mock credentials
+        mock_get_creds.return_value = Mock()
+        
+        # Mock BigQuery client and query results
+        mock_client = Mock()
+        mock_bigquery_client.return_value = mock_client
+        
+        mock_query_job = Mock()
+        mock_client.query.return_value = mock_query_job
+        
+        # Mock query results
+        mock_rows = [
+            {"_PARTITIONTIME": "2025-07-08 20:00:00+00", "message": "Test log 1"},
+            {"_PARTITIONTIME": "2025-07-08 21:00:00+00", "message": "Test log 2"},
+        ]
+        mock_query_job.result.return_value = mock_rows
+        
+        # Create connector with timestamp format
+        connector_timestamp = Connector(
+            config=ConnectorConfig(
+                identity="test-project",
+                key="{}",
+                name="test-bigquery-timestamp",
+                connector="google_bigquery_query",
+                project_id="test-project",
+                dataset_name="test_dataset",
+                table_name="test_table",
+                columns=["_PARTITIONTIME", "message"],
+                pointer_path="_PARTITIONTIME",
+                time_format="timestamp"
+            ),
+            context={
+                "runtime": "test_harness",
+                "runtime_id": "NA",
+            },
+        )
+        
+        # Set initial pointer
+        connector_timestamp._pointer = "1738500089504000"
+        
+        # Run collection
+        connector_timestamp.run()
+        
+        # Verify results
+        self.assertEqual(connector_timestamp._saved["logs"], 2)
+        
+        # Verify the query was constructed with timestamp format
+        # The query should use TIMESTAMP() function for comparison
+        call_args = mock_client.query.call_args[0][0]
+        self.assertIn("TIMESTAMP", call_args)

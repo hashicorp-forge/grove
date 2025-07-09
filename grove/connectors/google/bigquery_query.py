@@ -35,6 +35,7 @@ class Connector(BaseConnector):
             columns = self.configuration.columns
             max_batches = getattr(self.configuration, 'max_batches', 3)
             self.POINTER_PATH = self.configuration.pointer_path
+            time_format = getattr(self.configuration, 'time_format', 'microseconds')
 
             self.logger.debug("Configuration parameters:")
             self.logger.debug(f"Project ID: {project_id}")
@@ -59,7 +60,12 @@ class Connector(BaseConnector):
             if not isinstance(columns, list):
                 raise ConfigurationException(
                 "columns must be a list."
-        )
+            )
+            
+            if time_format not in ['microseconds', 'timestamp']:
+                raise ConfigurationException(
+                    "time_format must be either 'microseconds' or 'timestamp'"
+                )
         except AttributeError as err:
             raise ConfigurationException(
                 f"Missing required configuration attribute: {err}"
@@ -85,19 +91,24 @@ class Connector(BaseConnector):
             self.logger.debug(f"No pointer found. Setting pointer to: {pointer_epoch_usec} ({type(pointer_epoch_usec)})")
             self.pointer = str(pointer_epoch_usec)
 
-        str_pointer = as_bigquery_timestamp_microseconds(pointer_epoch_usec)
-
         # Configuration for batching
         all_rows = []
         batch_count = 0
 
         while True:
-            self.logger.debug(f"Pointer for query: {str_pointer} ({type(str_pointer)})")
+            if time_format == 'microseconds':
+                query_pointer = pointer_epoch_usec
+                self.logger.debug(f"Pointer for query (microseconds): {query_pointer} ({type(query_pointer)})")
+                where_clause = f"{self.POINTER_PATH} > {query_pointer}"
+            else:  # timestamp
+                query_pointer = as_bigquery_timestamp_microseconds(pointer_epoch_usec)
+                self.logger.debug(f"Pointer for query (timestamp): {query_pointer} ({type(query_pointer)})")
+                where_clause = f"{self.POINTER_PATH} > TIMESTAMP('{query_pointer}')"
 
             query = f"""
             SELECT {', '.join(columns)}
             FROM `{project_id}.{dataset_name}.{table_name}`
-            WHERE {self.POINTER_PATH} > {str_pointer}
+            WHERE {where_clause}
             AND {self.POINTER_PATH} IS NOT NULL
             ORDER BY {self.POINTER_PATH} ASC
             LIMIT 1000
