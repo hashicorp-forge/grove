@@ -80,16 +80,46 @@ class Connector(BaseConnector):
             self.logger.error(f"Failed to create BigQuery client: {e}")
             raise
 
-        # If no pointer is stored, set it to a week ago
+        # Handle pointer retrieval based on time_format
         try:
-            pointer_epoch_usec = int(self.pointer)
-            self.logger.debug(f"Pointer found: {pointer_epoch_usec} ({type(pointer_epoch_usec)})")
-        except (NotFoundException, ValueError):
-            # Set to a week ago in microseconds
-            pointer_epoch_usec = int((datetime.utcnow() - timedelta(days=7)).replace(tzinfo=timezone.utc).timestamp() * 1_000_000)
+            stored_pointer = self.pointer
+            self.logger.debug(f"Stored pointer: {stored_pointer} ({type(stored_pointer)})")
+            
+            # Validate pointer format matches time_format (if pointer exists)
+            if stored_pointer and stored_pointer.strip():
+                if time_format == 'microseconds':
+                    try:
+                        int(stored_pointer)  # Validate it's a valid integer
+                    except ValueError:
+                        raise ConfigurationException(f"Pointer '{stored_pointer}' is not a valid microseconds value")
+                else:  # timestamp
+                    try:
+                        datetime.fromisoformat(stored_pointer.replace("+00", "+00:00"))
+                    except ValueError:
+                        raise ConfigurationException(f"Pointer '{stored_pointer}' is not a valid timestamp format")
+                    
+            # Store pointer in native format
+            if time_format == 'microseconds':
+                pointer_epoch_usec = int(stored_pointer)
+                self.pointer = str(pointer_epoch_usec)
+            else:  # timestamp
+                self.pointer = stored_pointer  # Keep original timestamp string
+            
+        except (NotFoundException, ValueError, ConfigurationException):
+            # Set to a week ago based on time_format
+            week_ago = datetime.utcnow() - timedelta(days=7)
+            week_ago = week_ago.replace(tzinfo=timezone.utc)
+            
+            if time_format == 'microseconds':
+                pointer_epoch_usec = int(week_ago.timestamp() * 1_000_000)
+                self.pointer = str(pointer_epoch_usec)
+            else:  # timestamp
+                self.pointer = week_ago.strftime("%Y-%m-%d %H:%M:%S+00")
+                pointer_epoch_usec = int(week_ago.timestamp() * 1_000_000)  
+            
+            self.logger.debug(f"No valid pointer found. Setting pointer to: {self.pointer}")
 
-            self.logger.debug(f"No pointer found. Setting pointer to: {pointer_epoch_usec} ({type(pointer_epoch_usec)})")
-            self.pointer = str(pointer_epoch_usec)
+        
 
         # Configuration for batching
         all_rows = []
@@ -101,9 +131,8 @@ class Connector(BaseConnector):
                 self.logger.debug(f"Pointer for query (microseconds): {query_pointer} ({type(query_pointer)})")
                 where_clause = f"{self.POINTER_PATH} > {query_pointer}"
             else:  # timestamp
-                query_pointer = as_bigquery_timestamp_microseconds(pointer_epoch_usec)
-                self.logger.debug(f"Pointer for query (timestamp): {query_pointer} ({type(query_pointer)})")
-                where_clause = f"{self.POINTER_PATH} > TIMESTAMP('{query_pointer}')"
+                # Use the original timestamp string directly
+                where_clause = f"{self.POINTER_PATH} > TIMESTAMP('{self.pointer}')"
 
             query = f"""
             SELECT {', '.join(columns)}
