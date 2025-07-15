@@ -3,7 +3,6 @@
 
 """Implements unit tests for the Google BigQuery Query connector."""
 
-import json
 import os
 import unittest
 from unittest.mock import Mock, patch
@@ -11,7 +10,6 @@ from unittest.mock import Mock, patch
 from grove.connectors.google.bigquery_query import Connector
 from grove.models import ConnectorConfig
 from tests import mocks
-from grove.exceptions import ConfigurationException
 
 
 class GoogleBigQueryQueryTestCase(unittest.TestCase):
