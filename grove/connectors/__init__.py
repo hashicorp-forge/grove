@@ -967,7 +967,6 @@ class BaseConnector:
         # failed collections.
         if self.window_end is not None:
             self._pointer = self.window_end
-            return self.window_end
 
         if self._pointer:
             return self._pointer
