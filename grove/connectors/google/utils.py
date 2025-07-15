@@ -16,10 +16,10 @@ def as_bigquery_timestamp_microseconds(epoch_usec) -> str:
     # Convert to int if it's a string
     if isinstance(epoch_usec, str):
         epoch_usec = int(epoch_usec)
-    
+
     # Convert microseconds to seconds
     timestamp_seconds = epoch_usec / 1_000_000.0
-    
+
     dt = datetime.fromtimestamp(timestamp_seconds, tz=timezone.utc)
     # BigQuery expects "+00" not "+0000" or "+00:00"
     return dt.strftime("%Y-%m-%d %H:%M:%S+00")
@@ -35,7 +35,7 @@ def as_bigquery_timestamp_seconds(epoch_sec) -> str:
     # Convert to float if it's a string
     if isinstance(epoch_sec, str):
         epoch_sec = float(epoch_sec)
-    
+
     dt = datetime.fromtimestamp(epoch_sec, tz=timezone.utc)
     # BigQuery expects "+00" not "+0000" or "+00:00"
     return dt.strftime("%Y-%m-%d %H:%M:%S+00")
@@ -51,10 +51,10 @@ def as_bigquery_timestamp_milliseconds(epoch_msec) -> str:
     # Convert to int if it's a string
     if isinstance(epoch_msec, str):
         epoch_msec = int(epoch_msec)
-    
+
     # Convert milliseconds to seconds
     timestamp_seconds = epoch_msec / 1_000.0
-    
+
     dt = datetime.fromtimestamp(timestamp_seconds, tz=timezone.utc)
     # BigQuery expects "+00" not "+0000" or "+00:00"
-    return dt.strftime("%Y-%m-%d %H:%M:%S+00") 
+    return dt.strftime("%Y-%m-%d %H:%M:%S+00")

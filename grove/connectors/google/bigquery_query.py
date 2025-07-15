@@ -7,11 +7,10 @@ import json
 from datetime import datetime, timedelta, timezone
 
 from google.auth.exceptions import GoogleAuthError
-from google.oauth2 import service_account
 from google.cloud import bigquery
+from google.oauth2 import service_account
 
 from grove.connectors import BaseConnector
-from grove.connectors.google.utils import as_bigquery_timestamp_microseconds
 from grove.constants import CHRONOLOGICAL
 from grove.exceptions import (
     ConfigurationException,
@@ -33,9 +32,9 @@ class Connector(BaseConnector):
             dataset_name = self.configuration.dataset_name
             table_name = self.configuration.table_name
             columns = self.configuration.columns
-            max_batches = getattr(self.configuration, 'max_batches', 3)
+            max_batches = getattr(self.configuration, "max_batches", 3)
             self.POINTER_PATH = self.configuration.pointer_path
-            time_format = getattr(self.configuration, 'time_format', 'microseconds')
+            time_format = getattr(self.configuration, "time_format", "microseconds")
 
             self.logger.debug("Configuration parameters:")
             self.logger.debug(f"Project ID: {project_id}")
@@ -47,22 +46,18 @@ class Connector(BaseConnector):
                 raise ConfigurationException(
                     "POINTER_PATH is not set in the configuration."
                 )
-            
+
             if not isinstance(max_batches, int) or max_batches <= 0:
-                raise ConfigurationException(
-                    "max_batches must be a positive integer."
-                )
+                raise ConfigurationException("max_batches must be a positive integer.")
 
             for value in [project_id, dataset_name, table_name]:
                 if not isinstance(value, str):
                     raise ConfigurationException(f"{value} must be a string")
-            
+
             if not isinstance(columns, list):
-                raise ConfigurationException(
-                "columns must be a list."
-            )
-            
-            if time_format not in ['microseconds', 'timestamp']:
+                raise ConfigurationException("columns must be a list.")
+
+            if time_format not in ["microseconds", "timestamp"]:
                 raise ConfigurationException(
                     "time_format must be either 'microseconds' or 'timestamp'"
                 )
@@ -74,7 +69,9 @@ class Connector(BaseConnector):
         self.logger.info("BigQuery connector configured successfully.")
 
         try:
-            client = bigquery.Client(credentials=self.get_credentials(), project=project_id)
+            client = bigquery.Client(
+                credentials=self.get_credentials(), project=project_id
+            )
             self.logger.debug("BigQuery client created successfully.")
         except Exception as e:
             self.logger.error(f"Failed to create BigQuery client: {e}")
@@ -83,52 +80,60 @@ class Connector(BaseConnector):
         # Handle pointer retrieval based on time_format
         try:
             stored_pointer = self.pointer
-            self.logger.debug(f"Stored pointer: {stored_pointer} ({type(stored_pointer)})")
-            
+            self.logger.debug(
+                f"Stored pointer: {stored_pointer} ({type(stored_pointer)})"
+            )
+
             # Validate pointer format matches time_format (if pointer exists)
             if stored_pointer and stored_pointer.strip():
-                if time_format == 'microseconds':
+                if time_format == "microseconds":
                     try:
                         int(stored_pointer)  # Validate it's a valid integer
                     except ValueError:
-                        raise ConfigurationException(f"Pointer '{stored_pointer}' is not a valid microseconds value")
+                        raise ConfigurationException(
+                            f"Pointer '{stored_pointer}' is not a valid microseconds value"
+                        )
                 else:  # timestamp
                     try:
                         datetime.fromisoformat(stored_pointer.replace("+00", "+00:00"))
                     except ValueError:
-                        raise ConfigurationException(f"Pointer '{stored_pointer}' is not a valid timestamp format")
-                    
+                        raise ConfigurationException(
+                            f"Pointer '{stored_pointer}' is not a valid timestamp format"
+                        )
+
             # Store pointer in native format
-            if time_format == 'microseconds':
+            if time_format == "microseconds":
                 pointer_epoch_usec = int(stored_pointer)
                 self.pointer = str(pointer_epoch_usec)
             else:  # timestamp
                 self.pointer = stored_pointer  # Keep original timestamp string
-            
+
         except (NotFoundException, ValueError, ConfigurationException):
             # Set to a week ago based on time_format
             week_ago = datetime.utcnow() - timedelta(days=7)
             week_ago = week_ago.replace(tzinfo=timezone.utc)
-            
-            if time_format == 'microseconds':
+
+            if time_format == "microseconds":
                 pointer_epoch_usec = int(week_ago.timestamp() * 1_000_000)
                 self.pointer = str(pointer_epoch_usec)
             else:  # timestamp
                 self.pointer = week_ago.strftime("%Y-%m-%d %H:%M:%S+00")
-                pointer_epoch_usec = int(week_ago.timestamp() * 1_000_000)  
-            
-            self.logger.debug(f"No valid pointer found. Setting pointer to: {self.pointer}")
+                pointer_epoch_usec = int(week_ago.timestamp() * 1_000_000)
 
-        
+            self.logger.debug(
+                f"No valid pointer found. Setting pointer to: {self.pointer}"
+            )
 
         # Configuration for batching
         all_rows = []
         batch_count = 0
 
         while True:
-            if time_format == 'microseconds':
+            if time_format == "microseconds":
                 query_pointer = pointer_epoch_usec
-                self.logger.debug(f"Pointer for query (microseconds): {query_pointer} ({type(query_pointer)})")
+                self.logger.debug(
+                    f"Pointer for query (microseconds): {query_pointer} ({type(query_pointer)})"
+                )
                 where_clause = f"{self.POINTER_PATH} > {query_pointer}"
             else:  # timestamp
                 # Use the original timestamp string directly
@@ -155,14 +160,18 @@ class Connector(BaseConnector):
                     self.logger.info("No more logs found.")
                     break
 
-                self.logger.info(f"Collected {len(rows)} logs in batch {batch_count + 1}.")
+                self.logger.info(
+                    f"Collected {len(rows)} logs in batch {batch_count + 1}."
+                )
                 all_rows.extend(rows)
                 batch_count += 1
 
                 # Save and break if we've collected enough batches or reached the end
                 if batch_count >= max_batches or len(rows) < 1000:
                     if all_rows:
-                        self.logger.debug(f"Saving {len(all_rows)} total logs from {batch_count} batches.")
+                        self.logger.debug(
+                            f"Saving {len(all_rows)} total logs from {batch_count} batches."
+                        )
                         self.save(all_rows)
                     break
 
@@ -194,11 +203,11 @@ class Connector(BaseConnector):
                 service_account_info,
                 scopes=["https://www.googleapis.com/auth/bigquery"],
             )
-        except GoogleAuthError as err:  
+        except GoogleAuthError as err:
             raise ConfigurationException(
                 f"Authentication error while generating credentials for {self.identity}: {err}"
             )
-        except ValueError as err: 
+        except ValueError as err:
             raise ConfigurationException(
                 f"Unable to generate credentials from service account info for {self.identity}: {err}"
             )
