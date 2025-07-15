@@ -966,6 +966,7 @@ class BaseConnector:
         # rather than the pointer. This speeds things up, and prevents duplication after
         # failed collections.
         if self.window_end is not None:
+            self._pointer = self.window_end
             return self.window_end
 
         if self._pointer:
