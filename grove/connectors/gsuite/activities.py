@@ -106,85 +106,99 @@ class Connector(BaseConnector):
             self.pointer = as_rfc3339(datetime.utcnow() - timedelta(days=7))
 
         # Page over all activities since the last pointer.
+        service = None
+        pages_fetched = 0
         more_requests = True
 
-        with build("admin", "reports_v1", http=http) as service:
-            while more_requests:
-                # Transform the dates back to native to allow timedelta and comparison.
-                start = datetime.fromisoformat(self.pointer.replace("Z", ""))
-                end = datetime.utcnow() - timedelta(minutes=self.delay)
+        while more_requests:
+            # Transform the dates back to native to allow timedelta and comparison.
+            start = datetime.fromisoformat(self.pointer.replace("Z", ""))
+            end = datetime.utcnow() - timedelta(minutes=self.delay)
 
-                if end <= start:
-                    self.logger.debug(
-                        "Collection end time is prior to start, skipping.",
-                        extra={
-                            "start": as_rfc3339(start),
-                            "end": as_rfc3339(end),
-                            **self.log_context,
-                        },
-                    )
-                    break
+            if end <= start:
+                self.logger.debug(
+                    "Collection end time is prior to start, skipping.",
+                    extra={
+                        "start": as_rfc3339(start),
+                        "end": as_rfc3339(end),
+                        **self.log_context,
+                    },
+                )
+                break
 
-                if cursor:
-                    self.logger.debug(
-                        "Using pageToken as cursor to request next page of activities.",
-                        extra={"cursor": cursor, **self.log_context},
-                    )
-                    request = service.activities().list(
-                        userKey="all",
-                        applicationName=self.operation,
-                        startTime=as_rfc3339(start),
-                        endTime=as_rfc3339(end),
-                        pageToken=cursor,
-                    )
-                else:
-                    self.logger.debug(
-                        "Using startTime from pointer to request activity list.",
-                        extra={
-                            "start": as_rfc3339(start),
-                            "end": as_rfc3339(end),
-                            **self.log_context,
-                        },
-                    )
-                    request = service.activities().list(
-                        userKey="all",
-                        startTime=as_rfc3339(start),
-                        endTime=as_rfc3339(end),
-                        applicationName=self.operation,
-                    )
+            # Recreate the service every N requests due to memory allocation slowly
+            # creeping up continually during long collections. This mod operation allows
+            # us to create the service both on the first iteration as well as every 100
+            # requests, without an additional test. Yes this is a hack.
+            if pages_fetched % 100 == 0:
+                del service
+                self.logger.debug(
+                    f"Creating a new Google API client after {pages_fetched} requests",
+                    extra=self.log_context,
+                )
+                service = build("admin", "reports_v1", http=http)
 
-                # As both the _entries and activities objects are Lists, we can extend
-                # them in order to support appending more data on any subsequent
-                # iterations (due to paging).
-                try:
-                    results = request.execute()
-                    activities = results.get("items", [])
+            if cursor:
+                self.logger.debug(
+                    "Using pageToken as cursor to request next page of activities.",
+                    extra={"cursor": cursor, **self.log_context},
+                )
+                request = service.activities().list(
+                    userKey="all",
+                    applicationName=self.operation,
+                    startTime=as_rfc3339(start),
+                    endTime=as_rfc3339(end),
+                    pageToken=cursor,
+                )
+            else:
+                self.logger.info(
+                    "Using startTime from pointer to request activity list.",
+                    extra={
+                        "start": as_rfc3339(start),
+                        "end": as_rfc3339(end),
+                        **self.log_context,
+                    },
+                )
+                request = service.activities().list(
+                    userKey="all",
+                    startTime=as_rfc3339(start),
+                    endTime=as_rfc3339(end),
+                    applicationName=self.operation,
+                )
 
-                    self.logger.debug(
-                        "Got activities from the GSuite API.",
-                        extra={
-                            "count": len(activities),
-                            **self.log_context,
-                        },
-                    )
-                    self.save(activities)
-                except (GoogleAuthError, GACError) as err:
-                    raise RequestFailedException(f"Request to GSuite API failed: {err}")
-
-                # Determine whether we're still paging.
-                if "nextPageToken" not in results:
-                    self.logger.debug(
-                        "No nextPageToken, finishing collection.",
-                        extra=self.log_context,
-                    )
-                    more_requests = False
-                    break
+            # As both the _entries and activities objects are Lists, we can extend
+            # them in order to support appending more data on any subsequent
+            # iterations (due to paging).
+            try:
+                results = request.execute()
+                activities = results.get("items", [])
 
                 self.logger.debug(
-                    "nextPageToken is present, paging.", extra=self.log_context
+                    "Got activities from the GSuite API.",
+                    extra={
+                        "count": len(activities),
+                        **self.log_context,
+                    },
                 )
-                cursor = results["nextPageToken"]
-                more_requests = True
+                self.save(activities)
+            except (GoogleAuthError, GACError) as err:
+                raise RequestFailedException(f"Request to GSuite API failed: {err}")
+
+            # Determine whether we're still paging.
+            if "nextPageToken" not in results:
+                self.logger.debug(
+                    "No nextPageToken, finishing collection.",
+                    extra=self.log_context,
+                )
+                more_requests = False
+                break
+
+            self.logger.debug(
+                "nextPageToken is present, paging.", extra=self.log_context
+            )
+            cursor = str(results["nextPageToken"])
+            more_requests = True
+            pages_fetched += 1
 
     def get_http_transport(self):
         """Creates an HTTP object for use by the Google API Client.
