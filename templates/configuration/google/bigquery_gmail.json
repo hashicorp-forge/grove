@@ -8,6 +8,7 @@
     "dataset_name": "activity",
     "table_name": "activity",
     "pointer_path": "gmail.event_info.timestamp_usec",
+    "time_format": "microseconds",
     "encoding": {
         "key": "base64"
     }
