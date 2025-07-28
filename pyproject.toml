@@ -65,7 +65,7 @@ local_daemon = "grove.entrypoints.local_daemon:entrypoint"
 local_process = "grove.entrypoints.local_process:entrypoint"
 
 [project.entry-points."grove.connectors"]
-quay_orgianization_Logs = "grove.connectors.quay.organization_logs:Connector"
+quay_organization_logs = "grove.connectors.quay.organization_logs:Connector"
 fleetdm_host_logs = "grove.connectors.fleetdm.host_logs:Connector"
 atlassian_audit_events = "grove.connectors.atlassian.audit_events:Connector"
 google_bigquery_query = "grove.connectors.google.bigquery_query:Connector"
