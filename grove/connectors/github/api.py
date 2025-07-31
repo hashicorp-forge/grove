@@ -183,6 +183,8 @@ class Client:
 
             # Grab a list of all ruleset identifiers.
             for entry in result.body:
+                entry["owner"] = self.scope # add owner to entry
+
                 rulesets.append(entry.get("id"))
 
                 if after:
