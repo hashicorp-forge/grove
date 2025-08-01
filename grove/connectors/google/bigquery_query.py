@@ -4,6 +4,7 @@
 """Google BigQuery connector for Grove."""
 
 import json
+import time
 from datetime import datetime, timedelta, timezone
 
 from google.auth.exceptions import GoogleAuthError
@@ -17,6 +18,7 @@ from grove.exceptions import (
     NotFoundException,
     RequestFailedException,
 )
+from grove.connectors.google.utils import as_bigquery_timestamp_microseconds
 
 
 class Connector(BaseConnector):
@@ -68,20 +70,36 @@ class Connector(BaseConnector):
 
         self.logger.info("BigQuery connector configured successfully.")
 
-        try:
-            client = bigquery.Client(
-                credentials=self.get_credentials(), project=project_id
-            )
-            self.logger.debug("BigQuery client created successfully.")
-        except Exception as e:
-            self.logger.error(f"Failed to create BigQuery client: {e}")
-            raise
+        # Create BigQuery client with retry logic for auth deadlock
+        max_retries = 3
+        retry_delay = 2  # seconds
+        
+        for attempt in range(max_retries):
+            try:
+                client = bigquery.Client(
+                    credentials=self.get_credentials(), project=project_id
+                )
+                self.logger.debug("BigQuery client created successfully.")
+                break
+            except Exception as e:
+                if "deadlock" in str(e).lower() or "ModuleLock" in str(e):
+                    if attempt < max_retries - 1:
+                        self.logger.warning(f"Google Auth deadlock detected, retrying in {retry_delay} seconds (attempt {attempt + 1}/{max_retries})")
+                        time.sleep(retry_delay)
+                        retry_delay *= 2  # Exponential backoff
+                        continue
+                    else:
+                        self.logger.error(f"Failed to create BigQuery client after {max_retries} attempts: {e}")
+                        raise
+                else:
+                    self.logger.error(f"Failed to create BigQuery client: {e}")
+                    raise
 
         # Handle pointer retrieval based on time_format
         try:
             stored_pointer = self.pointer
             self.logger.debug(
-                f"Stored pointer: {stored_pointer} ({type(stored_pointer)})"
+                f"Pointer found: {stored_pointer} ({type(stored_pointer)})"
             )
 
             # Validate pointer format matches time_format (if pointer exists)
@@ -121,7 +139,7 @@ class Connector(BaseConnector):
                 pointer_epoch_usec = int(week_ago.timestamp() * 1_000_000)
 
             self.logger.debug(
-                f"No valid pointer found. Setting pointer to: {self.pointer}"
+                f"No pointer found. Setting pointer to: {self.pointer}"
             )
 
         # Configuration for batching
@@ -130,13 +148,17 @@ class Connector(BaseConnector):
 
         while True:
             if time_format == "microseconds":
-                query_pointer = pointer_epoch_usec
+                # For microseconds, compare numeric values directly
+                query_pointer = int(self.pointer)
                 self.logger.debug(
-                    f"Pointer for query (microseconds): {query_pointer} ({type(query_pointer)})"
+                    f"Pointer for query: {query_pointer} ({type(query_pointer)})"
                 )
                 where_clause = f"{self.POINTER_PATH} > {query_pointer}"
             else:  # timestamp
-                # Use the original timestamp string directly
+                # For timestamp format, use BigQuery TIMESTAMP function
+                self.logger.debug(
+                    f"Pointer for query: {self.pointer} ({type(self.pointer)})"
+                )
                 where_clause = f"{self.POINTER_PATH} > TIMESTAMP('{self.pointer}')"
 
             query = f"""
@@ -165,6 +187,24 @@ class Connector(BaseConnector):
                 )
                 all_rows.extend(rows)
                 batch_count += 1
+
+                # Update pointer to the latest timestamp from the results
+                if rows:
+                    latest_row = rows[-1]
+                    # Navigate to the timestamp field using the pointer path
+                    timestamp_value = latest_row
+                    for part in self.POINTER_PATH.split('.'):
+                        timestamp_value = timestamp_value.get(part, {})
+                    
+                    if time_format == "microseconds":
+                        # Store the microseconds value directly
+                        self.pointer = str(timestamp_value)
+                    else:  # timestamp
+                        # Convert to BigQuery timestamp format if needed
+                        if isinstance(timestamp_value, (int, float)):
+                            self.pointer = as_bigquery_timestamp_microseconds(timestamp_value)
+                        else:
+                            self.pointer = str(timestamp_value)
 
                 # Save and break if we've collected enough batches or reached the end
                 if batch_count >= max_batches or len(rows) < 1000:
