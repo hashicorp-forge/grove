@@ -49,7 +49,7 @@ def runtime_information() -> Dict[str, str]:
     }
 
 
-def initialise_worker(queue: Queue):
+def initialise_worker(queue: Queue):  # type:ignore
     """Initialise a Grove worker.
 
     Each configured connector is dispatched to a worker by the Grove daemon.
@@ -81,7 +81,7 @@ def entrypoint():
     # Setup a logging destination which will monitor a queue for log messages. This
     # allows for each connector, running as separate processes, to log to a common
     # destination.
-    log_queue = Queue()
+    log_queue = Queue()  # type:ignore
     log_handler = logging.StreamHandler(stream=sys.stderr)
     log_handler.setFormatter(GroveFormatter(context=context))
 
