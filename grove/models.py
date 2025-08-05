@@ -150,7 +150,7 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
         return ".".join(parts)
 
     @validator("key")
-    def _validate_key_or_secret(cls, value, values, field):  # noqa: B902
+    def _validate_key_or_secret(cls, value, values, field):
         """Ensures that 'key' is set directly or a reference is present in 'secrets'.
 
         This is used to ensure that a key is always set, whether directly, or will be
@@ -163,7 +163,7 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
         return value
 
     @root_validator(pre=True)
-    def _decode_fields(cls, values):  # noqa: B902
+    def _decode_fields(cls, values):
         """Automatically decode fields using the specified encoding during data loading.
 
         If a field is listed in both the 'secrets' field and this 'encoding' field,
