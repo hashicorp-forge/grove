@@ -3,25 +3,22 @@
 
 """Grove local daemon entrypoint."""
 
+import copy
 import datetime
-import logging
 import os
 import socket
 import sys
 import time
-from concurrent.futures import ProcessPoolExecutor
-from logging.handlers import QueueHandler, QueueListener
-from multiprocessing import Queue
+from concurrent.futures import ThreadPoolExecutor
 from typing import Dict
+
+from aws_lambda_powertools import Logger
 
 from grove.constants import (
     DEFAULT_CONFIG_REFRESH,
-    DEFAULT_LOG_LEVEL,
     DEFAULT_WORKER_COUNT,
     ENV_GROVE_CONFIG_REFRESH,
-    ENV_GROVE_LOG_LEVEL,
     ENV_GROVE_WORKER_COUNT,
-    GROVE_LOGGER_ROOT,
 )
 from grove.entrypoints import base
 from grove.exceptions import ConcurrencyException, GroveException
@@ -49,20 +46,6 @@ def runtime_information() -> Dict[str, str]:
     }
 
 
-def initialise_worker(queue: Queue):  # type:ignore
-    """Initialise a Grove worker.
-
-    Each configured connector is dispatched to a worker by the Grove daemon.
-    """
-    level = str(os.environ.get(ENV_GROVE_LOG_LEVEL, DEFAULT_LOG_LEVEL)).upper()
-    logger = logging.getLogger(GROVE_LOGGER_ROOT)
-
-    # Push all log messages into a queue, rather than attempting to emit directly.
-    handler = QueueHandler(queue)
-    logger.setLevel(level)
-    logger.addHandler(handler)
-
-
 def entrypoint():
     """Provides the daemon entrypoint for Grove.
 
@@ -73,30 +56,15 @@ def entrypoint():
     It may be possible to rationalise the two in future, but for now, we'll keep
     things separate.
     """
-    context = {
-        "runtime": __file__,
-        **runtime_information(),
-    }
-
-    # Setup a logging destination which will monitor a queue for log messages. This
-    # allows for each connector, running as separate processes, to log to a common
-    # destination.
-    log_queue = Queue()  # type:ignore
-    log_handler = logging.StreamHandler(stream=sys.stderr)
-    log_handler.setFormatter(GroveFormatter(context=context))
-
-    # Setup the logging thread.
-    log_thread = QueueListener(log_queue, log_handler)
-    log_thread.start()
-
-    # Setup a logger for the main thread.
-    logger = logging.getLogger(GROVE_LOGGER_ROOT)
-    logger.setLevel(str(os.environ.get(ENV_GROVE_LOG_LEVEL, DEFAULT_LOG_LEVEL)).upper())
-    logger.addHandler(QueueHandler(log_queue))
-
-    # Get the configuration refresh frequency.
+    context = {"runtime": __file__, **runtime_information()}
+    logger = Logger(
+        "grove",
+        logger_formatter=GroveFormatter(context),
+        stream=sys.stderr,
+    )
     logger.info("Grove started")
 
+    # Get the configuration refresh frequency.
     try:
         refreshed_at = None
         since_refresh = None
@@ -127,11 +95,7 @@ def entrypoint():
     # workers specified by the worker count.
     logger.info("Spawning thread pool for connectors", extra={"workers": workers})
 
-    with ProcessPoolExecutor(
-        max_workers=workers,
-        initializer=initialise_worker,
-        initargs=(log_queue,),
-    ) as pool:
+    with ThreadPoolExecutor(max_workers=workers) as pool:
         runs: Dict[str, Run] = {}
         while True:
             if refreshed_at:
@@ -195,7 +159,7 @@ def entrypoint():
                         continue
 
                     # Sync last run time from connector completion.
-                    run.last = run.future.result()
+                    run.last = copy.copy(run.future.result())
                 except ConcurrencyException:
                     # We don't consider concurrency to be abnormal - as it may indicate
                     # another worker has scheduled the connector before us.

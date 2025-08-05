@@ -17,7 +17,6 @@ from grove.constants import (
     ENV_GROVE_CONFIG_HANDLER,
     ENV_GROVE_SECRET_HANDLER,
     ENV_GROVE_WORKER_COUNT,
-    GROVE_LOGGER_ROOT,
     PLUGIN_GROUP_CONFIG,
     PLUGIN_GROUP_CONNECTOR,
     PLUGIN_GROUP_SECRET,
@@ -87,7 +86,7 @@ def entrypoint(context: Dict[str, Any]):
     :param context: Contextual information relating to the current runtime.
     """
     logger = Logger(
-        GROVE_LOGGER_ROOT,
+        "grove",
         logger_formatter=GroveFormatter(context),
         stream=sys.stderr,
     )
