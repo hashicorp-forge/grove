@@ -23,9 +23,6 @@ LOCK_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 CHRONOLOGICAL = "CHRONOLOGICAL"
 REVERSE_CHRONOLOGICAL = "REVERSE_CHRONOLOGICAL"
 
-# Root logger name.
-GROVE_LOGGER_ROOT = "grove"
-
 # Specify the key under which grove metadata will be appended to a log entry.
 GROVE_METADATA_KEY = "_grove"
 
@@ -38,7 +35,6 @@ ENV_GROVE_TELEMETRY_URI = "GROVE_TELEMETRY_URI"
 ENV_GROVE_WORKER_COUNT = "GROVE_WORKER_COUNT"
 ENV_GROVE_LOCK_DURATION = "GROVE_LOCK_DURATION"
 ENV_GROVE_CONFIG_REFRESH = "GROVE_CONFIG_REFRESH"
-ENV_GROVE_LOG_LEVEL = "LOG_LEVEL"
 
 # Plugin groups (setuptools entrypoints).
 PLUGIN_GROUP_CACHE = "grove.caches"
@@ -52,7 +48,6 @@ PLUGIN_GROUP_CONNECTOR = "grove.connectors"
 DEFAULT_CACHE_HANDLER = "local_memory"
 DEFAULT_OUTPUT_HANDLER = "local_stdout"
 DEFAULT_CONFIG_HANDLER = "local_file"
-DEFAULT_LOG_LEVEL = "INFO"
 
 # Maximum number of connectors to execute concurrently.
 DEFAULT_WORKER_COUNT = 50

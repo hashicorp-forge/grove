@@ -62,11 +62,9 @@ class BaseConnector:
             when configuring this connector.
         :param context: Contextual information relating to the current runtime.
         """
+        self.logger = logging.getLogger(__name__)
         self.configuration = config
         self.runtime_context = context
-
-        # Use the caller provided logger - if present.
-        self.logger = logging.getLogger(__name__)
 
         # Track the time our execution started. We use this quite a lot to ensure we
         # are using a consistent timestamp between executions.
