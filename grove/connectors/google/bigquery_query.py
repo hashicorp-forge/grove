@@ -6,19 +6,20 @@
 import json
 import time
 from datetime import datetime, timedelta, timezone
+from typing import Any
 
 from google.auth.exceptions import GoogleAuthError
 from google.cloud import bigquery
 from google.oauth2 import service_account
 
 from grove.connectors import BaseConnector
+from grove.connectors.google.utils import as_bigquery_timestamp_microseconds
 from grove.constants import CHRONOLOGICAL
 from grove.exceptions import (
     ConfigurationException,
     NotFoundException,
     RequestFailedException,
 )
-from grove.connectors.google.utils import as_bigquery_timestamp_microseconds
 
 
 class Connector(BaseConnector):
@@ -192,9 +193,12 @@ class Connector(BaseConnector):
                 if rows:
                     latest_row = rows[-1]
                     # Navigate to the timestamp field using the pointer path
-                    timestamp_value = latest_row
+                    timestamp_value: Any = latest_row
                     for part in self.POINTER_PATH.split('.'):
-                        timestamp_value = timestamp_value.get(part, {})
+                        if isinstance(timestamp_value, dict):
+                            timestamp_value = timestamp_value.get(part, {})
+                        else:
+                            break
                     
                     if time_format == "microseconds":
                         # Store the microseconds value directly
