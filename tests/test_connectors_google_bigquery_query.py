@@ -360,3 +360,311 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         
         # Check that the query includes the pointer comparison
         self.assertIn("timestamp_usec > 1738500089504000", call_args)
+
+    @patch('grove.connectors.google.bigquery_query.bigquery.Client')
+    @patch.object(Connector, 'get_credentials')
+    def test_nested_json_pointer_navigation(self, mock_get_creds, mock_bigquery_client):
+        """Test pointer navigation through nested JSON structures like real BigQuery data."""
+        # Mock credentials
+        mock_get_creds.return_value = Mock()
+        
+        # Mock BigQuery client and query results
+        mock_client = Mock()
+        mock_bigquery_client.return_value = mock_client
+        
+        mock_query_job = Mock()
+        mock_client.query.return_value = mock_query_job
+        
+        # Mock query results with nested JSON structure (like your real data)
+        mock_rows = [
+            {
+                "gmail": {
+                    "event_info": {
+                        "timestamp_usec": 1752594724674697
+                    },
+                    "message": "Test log 1"
+                }
+            },
+            {
+                "gmail": {
+                    "event_info": {
+                        "timestamp_usec": 1752594724674698
+                    },
+                    "message": "Test log 2"
+                }
+            }
+        ]
+        mock_query_job.result.return_value = mock_rows
+        
+        # Configure connector for nested JSON structure
+        self.connector.configuration.pointer_path = "gmail.event_info.timestamp_usec"
+        self.connector.configuration.columns = ["gmail"]
+        self.connector.configuration.time_format = "microseconds"
+        self.connector._pointer = "1752594724674696"
+        
+        # Run collection
+        self.connector.run()
+        
+        # Verify results
+        self.assertEqual(self.connector._saved["logs"], 2)
+        
+        # Verify the query was called with correct nested path
+        mock_client.query.assert_called_once()
+        call_args = mock_client.query.call_args[0][0]
+        
+        # Check that the query uses the nested path correctly
+        self.assertIn("gmail.event_info.timestamp_usec > 1752594724674696", call_args)
+        self.assertIn("ORDER BY gmail.event_info.timestamp_usec", call_args)
+
+    @patch('grove.connectors.google.bigquery_query.bigquery.Client')
+    @patch.object(Connector, 'get_credentials')
+    def test_query_syntax_validation_microseconds_format(self, mock_get_creds, mock_bigquery_client):
+        """Test that microseconds format generates correct SQL syntax (would catch the bug)."""
+        # Mock credentials
+        mock_get_creds.return_value = Mock()
+        
+        # Mock BigQuery client and query results
+        mock_client = Mock()
+        mock_bigquery_client.return_value = mock_client
+        
+        mock_query_job = Mock()
+        mock_client.query.return_value = mock_query_job
+        
+        # Mock query results
+        mock_rows = [
+            {
+                "gmail": {
+                    "event_info": {
+                        "timestamp_usec": 1752594724674697
+                    }
+                }
+            }
+        ]
+        mock_query_job.result.return_value = mock_rows
+        
+        # Configure connector to match the bug scenario
+        self.connector.configuration.pointer_path = "gmail.event_info.timestamp_usec"
+        self.connector.configuration.columns = ["gmail"]
+        self.connector.configuration.time_format = "microseconds"
+        self.connector._pointer = "1752594724674696"
+        
+        # Capture the actual SQL query being generated
+        captured_query = None
+        def capture_query(query):
+            nonlocal captured_query
+            captured_query = query
+            return mock_query_job
+        
+        mock_client.query.side_effect = capture_query
+        
+        # Run collection
+        self.connector.run()
+        
+        # Verify the query uses numeric comparison (correct)
+        self.assertIn("gmail.event_info.timestamp_usec > 1752594724674696", captured_query)
+        
+        # Verify it does NOT use TIMESTAMP function (which would cause syntax error)
+        self.assertNotIn("TIMESTAMP(", captured_query)
+        
+        # Verify it does NOT use timestamp strings (which would cause syntax error)
+        self.assertNotIn("2025-07-15 15:52:04+00", captured_query)
+        
+        # Verify the query is syntactically correct for BigQuery
+        self.assertIn("SELECT gmail", captured_query)
+        self.assertIn("FROM `test-project.test_dataset.test_table`", captured_query)
+        self.assertIn("ORDER BY gmail.event_info.timestamp_usec ASC", captured_query)
+        self.assertIn("LIMIT 1000", captured_query)
+
+    @patch('grove.connectors.google.bigquery_query.bigquery.Client')
+    @patch.object(Connector, 'get_credentials')
+    def test_query_syntax_validation_timestamp_format(self, mock_get_creds, mock_bigquery_client):
+        """Test that timestamp format generates correct SQL syntax."""
+        # Mock credentials
+        mock_get_creds.return_value = Mock()
+        
+        # Mock BigQuery client and query results
+        mock_client = Mock()
+        mock_bigquery_client.return_value = mock_client
+        
+        mock_query_job = Mock()
+        mock_client.query.return_value = mock_query_job
+        
+        # Mock query results
+        mock_rows = [
+            {
+                "gmail": {
+                    "event_info": {
+                        "timestamp_usec": 1752594724674697
+                    }
+                }
+            }
+        ]
+        mock_query_job.result.return_value = mock_rows
+        
+        # Configure connector for timestamp format
+        self.connector.configuration.pointer_path = "gmail.event_info.timestamp_usec"
+        self.connector.configuration.columns = ["gmail"]
+        self.connector.configuration.time_format = "timestamp"
+        self.connector._pointer = "2025-07-15 15:52:04+00"
+        
+        # Capture the actual SQL query being generated
+        captured_query = None
+        def capture_query(query):
+            nonlocal captured_query
+            captured_query = query
+            return mock_query_job
+        
+        mock_client.query.side_effect = capture_query
+        
+        # Run collection
+        self.connector.run()
+        
+        # Verify the query uses TIMESTAMP function (correct for timestamp format)
+        self.assertIn("gmail.event_info.timestamp_usec > TIMESTAMP('2025-07-15 15:52:04+00')", captured_query)
+        
+        # Verify the query is syntactically correct for BigQuery
+        self.assertIn("SELECT gmail", captured_query)
+        self.assertIn("FROM `test-project.test_dataset.test_table`", captured_query)
+        self.assertIn("ORDER BY gmail.event_info.timestamp_usec ASC", captured_query)
+        self.assertIn("LIMIT 1000", captured_query)
+
+    @patch('grove.connectors.google.bigquery_query.bigquery.Client')
+    @patch.object(Connector, 'get_credentials')
+    def test_pointer_update_with_nested_data(self, mock_get_creds, mock_bigquery_client):
+        """Test that pointer is correctly updated from nested JSON results."""
+        # Mock credentials
+        mock_get_creds.return_value = Mock()
+        
+        # Mock BigQuery client and query results
+        mock_client = Mock()
+        mock_bigquery_client.return_value = mock_client
+        
+        mock_query_job = Mock()
+        mock_client.query.return_value = mock_query_job
+        
+        # Mock query results with nested structure
+        mock_rows = [
+            {
+                "gmail": {
+                    "event_info": {
+                        "timestamp_usec": 1752594724674697
+                    }
+                }
+            },
+            {
+                "gmail": {
+                    "event_info": {
+                        "timestamp_usec": 1752594724674698
+                    }
+                }
+            }
+        ]
+        mock_query_job.result.return_value = mock_rows
+        
+        # Configure connector
+        self.connector.configuration.pointer_path = "gmail.event_info.timestamp_usec"
+        self.connector.configuration.columns = ["gmail"]
+        self.connector.configuration.time_format = "microseconds"
+        self.connector._pointer = "1752594724674696"
+        
+        # Run collection
+        self.connector.run()
+        
+        # Verify results
+        self.assertEqual(self.connector._saved["logs"], 2)
+        
+        # Verify that the pointer was updated to the latest timestamp
+        # The pointer should be updated to the last timestamp in the results
+        self.assertEqual(self.connector._pointer, "1752594724674698")
+
+    @patch('grove.connectors.google.bigquery_query.bigquery.Client')
+    @patch.object(Connector, 'get_credentials')
+    def test_microseconds_with_timestamp_string_bug_scenario(self, mock_get_creds, mock_bigquery_client):
+        """Test the specific bug scenario that was causing the syntax error."""
+        # Mock credentials
+        mock_get_creds.return_value = Mock()
+        
+        # Mock BigQuery client and query results
+        mock_client = Mock()
+        mock_bigquery_client.return_value = mock_client
+        
+        mock_query_job = Mock()
+        mock_client.query.return_value = mock_query_job
+        
+        # Mock query results
+        mock_rows = [
+            {
+                "gmail": {
+                    "event_info": {
+                        "timestamp_usec": 1752594724674697
+                    }
+                }
+            }
+        ]
+        mock_query_job.result.return_value = mock_rows
+        
+        # Configure connector to match the exact bug scenario from logs
+        self.connector.configuration.pointer_path = "gmail.event_info.timestamp_usec"
+        self.connector.configuration.columns = ["gmail"]
+        self.connector.configuration.time_format = "microseconds"
+        self.connector._pointer = "1752594724674696"  # This should stay as microseconds
+        
+        # Capture the actual SQL query being generated
+        captured_query = None
+        def capture_query(query):
+            nonlocal captured_query
+            captured_query = query
+            return mock_query_job
+        
+        mock_client.query.side_effect = capture_query
+        
+        # Run collection
+        self.connector.run()
+        
+        # This test would have caught the bug by verifying:
+        # 1. The query uses numeric comparison (not timestamp string)
+        self.assertIn("gmail.event_info.timestamp_usec > 1752594724674696", captured_query)
+        
+        # 2. The query does NOT contain timestamp strings (which caused the syntax error)
+        self.assertNotIn("2025-07-15 15:52:04+00", captured_query)
+        
+        # 3. The query does NOT use TIMESTAMP function for microseconds format
+        self.assertNotIn("TIMESTAMP(", captured_query)
+        
+        # 4. The query is syntactically valid for BigQuery
+        # (This test would have failed with the original bug, showing the syntax error)
+
+    @patch('grove.connectors.google.bigquery_query.bigquery.Client')
+    @patch.object(Connector, 'get_credentials')
+    def test_google_auth_deadlock_handling(self, mock_get_creds, mock_bigquery_client):
+        """Test that the connector handles Google Auth deadlock errors with retry logic."""
+        # Mock credentials
+        mock_get_creds.return_value = Mock()
+        
+        # Mock BigQuery client that raises deadlock error on first call, succeeds on second
+        mock_client = Mock()
+        mock_bigquery_client.side_effect = [
+            Exception("_frozen_importlib._DeadlockError: deadlock detected by _ModuleLock('google.auth.exceptions')"),
+            mock_client
+        ]
+        
+        mock_query_job = Mock()
+        mock_client.query.return_value = mock_query_job
+        
+        # Mock query results
+        mock_rows = [
+            {"timestamp_usec": 1738500089504000, "message": "Test log 1"}
+        ]
+        mock_query_job.result.return_value = mock_rows
+        
+        # Set initial pointer
+        self.connector._pointer = "1738500089504000"
+        
+        # Run collection - should retry and succeed
+        self.connector.run()
+        
+        # Verify results
+        self.assertEqual(self.connector._saved["logs"], 1)
+        
+        # Verify that BigQuery client was attempted twice (retry logic)
+        self.assertEqual(mock_bigquery_client.call_count, 2)
