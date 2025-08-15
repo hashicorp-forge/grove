@@ -1,0 +1,249 @@
+{
+  "items": [
+    {
+      "_links": {
+        "canonical": {
+          "href": "/api/v2/members/member-abc123",
+          "type": "application/json"
+        },
+        "parent": {
+          "href": "/api/v2/auditlog",
+          "type": "application/json"
+        },
+        "self": {
+          "href": "/api/v2/auditlog/abcd1111",
+          "type": "application/json"
+        },
+        "site": {
+          "href": "/settings/members/member-abc123/permissions",
+          "type": "text/html"
+        }
+      },
+      "_id": "abcd1111",
+      "_accountId": "account-789ghi",
+      "date": 1755305156337,
+      "accesses": [
+        {
+          "action": "activateScimMember",
+          "resource": "member/member-abc123"
+        }
+      ],
+      "kind": "member",
+      "name": "John Doe",
+      "description": "* Activated the member\n",
+      "shortDescription": "",
+      "app": {
+        "_links": {
+          "external": {
+            "href": "https://www.exampleidp.com/",
+            "type": "text/html"
+          },
+          "parent": {
+            "href": "/internal/account/oauth2/applications",
+            "type": "application/json"
+          },
+          "self": {
+            "href": "/internal/account/oauth2/applications/oauth-app-456",
+            "type": "application/json"
+          },
+          "site": {
+            "href": "/settings/authorization/oauth/oauth-app-456/review",
+            "type": "application/json"
+          }
+        },
+        "_id": "oauth-app-456",
+        "isScim": true,
+        "name": "ExampleIDP",
+        "maintainerName": "exampleidp"
+      },
+      "titleVerb": "activated the member",
+      "title": "Activated the member [John Doe](https://app.launchdarkly.com/settings/members/member-abc123/permissions) \\(via API\\)",
+      "target": {
+        "_links": {
+          "canonical": {
+            "href": "/api/v2/members/member-abc123",
+            "type": "application/json"
+          },
+          "site": {
+            "href": "/settings/members/member-abc123/permissions",
+            "type": "text/html"
+          }
+        },
+        "name": "John Doe",
+        "resources": [
+          "member/member-abc123"
+        ]
+      }
+    },
+    {
+      "_links": {
+        "canonical": {
+          "href": "/api/v2/flags/cloud-services/example-billing-check",
+          "type": "application/json"
+        },
+        "parent": {
+          "href": "/api/v2/auditlog",
+          "type": "application/json"
+        },
+        "self": {
+          "href": "/api/v2/auditlog/abcd2222",
+          "type": "application/json"
+        },
+        "site": {
+          "href": "/cloud-services/int/features/example-billing-check",
+          "type": "text/html"
+        }
+      },
+      "_id": "abcd2222",
+      "_accountId": "account-789ghi",
+      "date": 1755300123771,
+      "accesses": [
+        {
+          "action": "updateRules",
+          "resource": "proj/cloud-services:env/int:flag/example-billing-check"
+        }
+      ],
+      "kind": "flag",
+      "name": "example-billing-check",
+      "description": "* Changed the variation from ~~`true`~~ to `false` for the rule 'Example Test Account' \n    > **If** `user` `organization_id` **is one of** `uuid120`  \n    **serve** `false`\n    \n    \n",
+      "shortDescription": "",
+      "comment": "",
+      "member": {
+        "_links": {
+          "parent": {
+            "href": "/api/v2/members",
+            "type": "application/json"
+          },
+          "self": {
+            "href": "/api/v2/members/member-mno012",
+            "type": "application/json"
+          }
+        },
+        "_id": "member-mno012",
+        "email": "jane.smith@example.com",
+        "firstName": "Jane",
+        "lastName": "Smith"
+      },
+      "titleVerb": "updated the flag",
+      "title": "[Jane Smith](mailto:jane.smith@example.com) updated the flag [example-billing-check](https://app.launchdarkly.com/cloud-services/int/features/example-billing-check) in `Integration`",
+      "target": {
+        "_links": {
+          "canonical": {
+            "href": "/api/v2/flags/cloud-services/example-billing-check",
+            "type": "application/json"
+          },
+          "site": {
+            "href": "/cloud-services/int/features/example-billing-check",
+            "type": "text/html"
+          }
+        },
+        "name": "example-billing-check",
+        "resources": [
+          "proj/cloud-services:env/int:flag/example-billing-check"
+        ]
+      },
+      "parent": {
+        "_links": {
+          "canonical": {
+            "href": "/api/v2/projects/cloud-services/environments/int",
+            "type": "application/json"
+          },
+          "site": {
+            "href": "/settings/projects",
+            "type": "text/html"
+          }
+        },
+        "name": "Integration",
+        "resource": "proj/cloud-services:env/int"
+      }
+    },
+    {
+      "_links": {
+        "canonical": {
+          "href": "/api/v2/flags/cloud-services/example-api-gating",
+          "type": "application/json"
+        },
+        "parent": {
+          "href": "/api/v2/auditlog",
+          "type": "application/json"
+        },
+        "self": {
+          "href": "/api/v2/auditlog/abcd3333",
+          "type": "application/json"
+        },
+        "site": {
+          "href": "/cloud-services/int/features/example-api-gating",
+          "type": "text/html"
+        }
+      },
+      "_id": "abcd3333",
+      "_accountId": "account-789ghi",
+      "date": 1755300107719,
+      "accesses": [
+        {
+          "action": "updateRules",
+          "resource": "proj/cloud-services:env/int:flag/example-api-gating"
+        }
+      ],
+      "kind": "flag",
+      "name": "Example API Gating",
+      "description": "* Changed the variation from ~~`false`~~ to `true` for the rule 'Test Example Org' \n    > **If** `user` `organization_id` **is one of** `uuid120`  \n    **serve** `true`\n    \n    \n",
+      "shortDescription": "",
+      "comment": "",
+      "member": {
+        "_links": {
+          "parent": {
+            "href": "/api/v2/members",
+            "type": "application/json"
+          },
+          "self": {
+            "href": "/api/v2/members/member-mno012",
+            "type": "application/json"
+          }
+        },
+        "_id": "member-mno012",
+        "email": "jane.smith@example.com",
+        "firstName": "Jane",
+        "lastName": "Smith"
+      },
+      "titleVerb": "updated the flag",
+      "title": "[Jane Smith](mailto:jane.smith@example.com) updated the flag [Example API Gating](https://app.launchdarkly.com/cloud-services/int/features/example-api-gating) in `Integration`",
+      "target": {
+        "_links": {
+          "canonical": {
+            "href": "/api/v2/flags/cloud-services/example-api-gating",
+            "type": "application/json"
+          },
+          "site": {
+            "href": "/cloud-services/int/features/example-api-gating",
+            "type": "text/html"
+          }
+        },
+        "name": "Example API Gating",
+        "resources": [
+          "proj/cloud-services:env/int:flag/example-api-gating"
+        ]
+      },
+      "parent": {
+        "_links": {
+          "canonical": {
+            "href": "/api/v2/projects/cloud-services/environments/int",
+            "type": "application/json"
+          },
+          "site": {
+            "href": "/settings/projects",
+            "type": "text/html"
+          }
+        },
+        "name": "Integration",
+        "resource": "proj/cloud-services:env/int"
+      }
+    }
+  ],
+  "_links": {
+    "self": {
+      "href": "/api/v2/auditlog?after=1755193754255&before=1755331553385&limit=3",
+      "type": "application/json"
+    }
+  }
+}

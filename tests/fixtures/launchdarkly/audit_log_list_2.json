@@ -1,0 +1,246 @@
+{
+  "items": [
+    {
+      "_links": {
+        "canonical": {
+          "href": "/api/v2/members/member-abc123",
+          "type": "application/json"
+        },
+        "parent": {
+          "href": "/api/v2/auditlog",
+          "type": "application/json"
+        },
+        "self": {
+          "href": "/api/v2/auditlog/entry-def456",
+          "type": "application/json"
+        },
+        "site": {
+          "href": "/settings/members/member-abc123/permissions",
+          "type": "text/html"
+        }
+      },
+      "_id": "entry-def456",
+      "_accountId": "account-789ghi",
+      "date": 1755495197934,
+      "accesses": [
+        {
+          "action": "deactivateScimMember",
+          "resource": "member/member-abc123"
+        }
+      ],
+      "kind": "member",
+      "name": "John Smith",
+      "description": "* Deactivated the member\n",
+      "shortDescription": "",
+      "app": {
+        "_links": {
+          "external": {
+            "href": "https://www.exampleidp.com/",
+            "type": "text/html"
+          },
+          "parent": {
+            "href": "/internal/account/oauth2/applications",
+            "type": "application/json"
+          },
+          "self": {
+            "href": "/internal/account/oauth2/applications/oauth-app-123",
+            "type": "application/json"
+          },
+          "site": {
+            "href": "/settings/authorization/oauth/oauth-app-123/review",
+            "type": "application/json"
+          }
+        },
+        "_id": "oauth-app-123",
+        "isScim": true,
+        "name": "ExampleIDP",
+        "maintainerName": "exampleidp"
+      },
+      "titleVerb": "deactivated the member",
+      "title": "Deactivated the member [John Smith](https://app.launchdarkly.com/settings/members/member-abc123/permissions) \\(via API\\)",
+      "target": {
+        "_links": {
+          "canonical": {
+            "href": "/api/v2/members/member-abc123",
+            "type": "application/json"
+          },
+          "site": {
+            "href": "/settings/members/member-abc123/permissions",
+            "type": "text/html"
+          }
+        },
+        "name": "John Smith",
+        "resources": [
+          "member/member-abc123"
+        ]
+      }
+    },
+    {
+      "_links": {
+        "canonical": {
+          "href": "/api/v2/flags/cloud-services/example-sso-disable-domain-ownership-check",
+          "type": "application/json"
+        },
+        "parent": {
+          "href": "/api/v2/auditlog",
+          "type": "application/json"
+        },
+        "self": {
+          "href": "/api/v2/auditlog/entry-jkl789",
+          "type": "application/json"
+        },
+        "site": {
+          "href": "/cloud-services/dev/features/example-sso-disable-domain-ownership-check",
+          "type": "text/html"
+        }
+      },
+      "_id": "entry-jkl789",
+      "_accountId": "account-789ghi",
+      "date": 1755493065170,
+      "accesses": [
+        {
+          "action": "updateRules",
+          "resource": "proj/cloud-services:env/dev:flag/example-sso-disable-domain-ownership-check"
+        }
+      ],
+      "kind": "flag",
+      "name": "Example SSO Disable Domain Ownership Check",
+      "description": "* Added `uuid120` to the rule \n    > **If** `user` `organization_id` **is one of** `uuid121`, `uuid122`, `uuid123`, `uuid120`  \n    **serve** `true`\n    \n    \n",
+      "shortDescription": "",
+      "comment": "",
+      "member": {
+        "_links": {
+          "parent": {
+            "href": "/api/v2/members",
+            "type": "application/json"
+          },
+          "self": {
+            "href": "/api/v2/members/member-mno456",
+            "type": "application/json"
+          }
+        },
+        "_id": "member-mno456",
+        "email": "jane.doe@example.com",
+        "firstName": "Jane",
+        "lastName": "Doe"
+      },
+      "titleVerb": "updated the flag",
+      "title": "[Jane Doe](mailto:jane.doe@example.com) updated the flag [Example SSO Disable Domain Ownership Check](https://app.launchdarkly.com/cloud-services/dev/features/example-sso-disable-domain-ownership-check) in `Development`",
+      "target": {
+        "_links": {
+          "canonical": {
+            "href": "/api/v2/flags/cloud-services/example-sso-disable-domain-ownership-check",
+            "type": "application/json"
+          },
+          "site": {
+            "href": "/cloud-services/dev/features/example-sso-disable-domain-ownership-check",
+            "type": "text/html"
+          }
+        },
+        "name": "Example SSO Disable Domain Ownership Check",
+        "resources": [
+          "proj/cloud-services:env/dev:flag/example-sso-disable-domain-ownership-check"
+        ]
+      },
+      "parent": {
+        "_links": {
+          "canonical": {
+            "href": "/api/v2/projects/cloud-services/environments/dev",
+            "type": "application/json"
+          },
+          "site": {
+            "href": "/settings/projects",
+            "type": "text/html"
+          }
+        },
+        "name": "Development",
+        "resource": "proj/cloud-services:env/dev"
+      }
+    },
+    {
+      "_links": {
+        "canonical": {
+          "href": "/api/v2/members/member-pqr789",
+          "type": "application/json"
+        },
+        "parent": {
+          "href": "/api/v2/auditlog",
+          "type": "application/json"
+        },
+        "self": {
+          "href": "/api/v2/auditlog/entry-stu012",
+          "type": "application/json"
+        },
+        "site": {
+          "href": "/settings/members/member-pqr789/permissions",
+          "type": "text/html"
+        }
+      },
+      "_id": "entry-stu012",
+      "_accountId": "account-789ghi",
+      "date": 1755331553385,
+      "accesses": [
+        {
+          "action": "deactivateScimMember",
+          "resource": "member/member-pqr789"
+        }
+      ],
+      "kind": "member",
+      "name": "Alex Johnson",
+      "description": "* Deactivated the member\n",
+      "shortDescription": "",
+      "app": {
+        "_links": {
+          "external": {
+            "href": "https://www.exampleidp.com/",
+            "type": "text/html"
+          },
+          "parent": {
+            "href": "/internal/account/oauth2/applications",
+            "type": "application/json"
+          },
+          "self": {
+            "href": "/internal/account/oauth2/applications/oauth-app-123",
+            "type": "application/json"
+          },
+          "site": {
+            "href": "/settings/authorization/oauth/oauth-app-123/review",
+            "type": "application/json"
+          }
+        },
+        "_id": "oauth-app-123",
+        "isScim": true,
+        "name": "ExampleIDP",
+        "maintainerName": "exampleidp"
+      },
+      "titleVerb": "deactivated the member",
+      "title": "Deactivated the member [Alex Johnson](https://app.launchdarkly.com/settings/members/member-pqr789/permissions) \\(via API\\)",
+      "target": {
+        "_links": {
+          "canonical": {
+            "href": "/api/v2/members/member-pqr789",
+            "type": "application/json"
+          },
+          "site": {
+            "href": "/settings/members/member-pqr789/permissions",
+            "type": "text/html"
+          }
+        },
+        "name": "Alex Johnson",
+        "resources": [
+          "member/member-pqr789"
+        ]
+      }
+    }
+  ],
+  "_links": {
+    "next": {
+      "href": "/api/v2/auditlog?after=1755193754255&before=1755331553385&limit=3",
+      "type": "application/json"
+    },
+    "self": {
+      "href": "/api/v2/auditlog?after=1755193754255&limit=3",
+      "type": "application/json"
+    }
+  }
+}

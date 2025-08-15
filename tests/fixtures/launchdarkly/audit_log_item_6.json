@@ -1,0 +1,107 @@
+{
+  "_links": {
+    "canonical": {
+      "href": "/api/v2/members/member666",
+      "type": "application/json"
+    },
+    "parent": {
+      "href": "/api/v2/auditlog",
+      "type": "application/json"
+    },
+    "self": {
+      "href": "/api/v2/auditlog/abc666abc666aaa",
+      "type": "application/json"
+    },
+    "site": {
+      "href": "/settings/members/member666/permissions",
+      "type": "text/html"
+    }
+  },
+  "_id": "abc666abc666aaa",
+  "_accountId": "accountid666",
+  "date": 1755508937736,
+  "accesses": [
+    {
+      "action": "deactivateScimMember",
+      "resource": "member/member666"
+    }
+  ],
+  "kind": "member",
+  "name": "UserFirstName UserLastName1",
+  "description": "* Deactivated the member\n",
+  "shortDescription": "",
+  "app": {
+    "_links": {
+      "external": {
+        "href": "https://www.okta.com/",
+        "type": "text/html"
+      },
+      "parent": {
+        "href": "/internal/account/oauth2/applications",
+        "type": "application/json"
+      },
+      "self": {
+        "href": "/internal/account/oauth2/applications/oath-uuid-1==",
+        "type": "application/json"
+      },
+      "site": {
+        "href": "/settings/authorization/oauth/oath-uuid-1==/review",
+        "type": "application/json"
+      }
+    },
+    "_id": "oath-uuid-1==",
+    "isScim": true,
+    "name": "Okta",
+    "maintainerName": "okta"
+  },
+  "titleVerb": "deactivated the member",
+  "title": "Deactivated the member [UserFirstName UserLastName1](https://app.launchdarkly.com/settings/members/member666/permissions) \\(via API\\)",
+  "target": {
+    "_links": {
+      "canonical": {
+        "href": "/api/v2/members/member666",
+        "type": "application/json"
+      },
+      "site": {
+        "href": "/settings/members/member666/permissions",
+        "type": "text/html"
+      }
+    },
+    "name": "UserFirstName UserLastName1",
+    "resources": [
+      "member/member666"
+    ]
+  },
+  "currentVersion": {
+    "_links": {
+      "parent": {
+        "href": "/api/v2/members",
+        "type": "application/json"
+      },
+      "self": {
+        "href": "/api/v2/members/member666",
+        "type": "application/json"
+      },
+      "sendMfaEnableRequest": {
+        "href": "/api/v2/members/member666/mfa/request",
+        "type": "application/json"
+      }
+    },
+    "_id": "member666",
+    "firstName": "UserFirstName1",
+    "lastName": "UserLastName1",
+    "role": "writer",
+    "email": "UserFirstName1.UserLastName1@example.com",
+    "_pendingInvite": false,
+    "_verified": true,
+    "isBeta": false,
+    "customRoles": [],
+    "mfa": "disabled",
+    "excludedDashboards": [],
+    "_lastSeen": null,
+    "creationDate": 1748471259263,
+    "scimExternalId": "scimExternalId1",
+    "scimUsername": "UserFirstName1.UserLastName1@example.com",
+    "version": 25
+  }
+}

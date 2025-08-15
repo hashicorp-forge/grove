@@ -20,7 +20,7 @@ dependencies = [
     "boto3>=1.26,<2.0",
     "requests>=2.28,<3.0",
     "google-api-python-client>=2.68,<3.0",
-    "simple-salesforce>=1.12,<2.0",
+    "simple-salesforce>=1.12,<1.12.7",
     "snowflake-connector-python>=3.12.2,<4.0",
     "twilio>=7.15,<8.0",
     "pydantic>=1.10,<2.0",
@@ -65,7 +65,6 @@ local_daemon = "grove.entrypoints.local_daemon:entrypoint"
 local_process = "grove.entrypoints.local_process:entrypoint"
 
 [project.entry-points."grove.connectors"]
-quay_organization_logs = "grove.connectors.quay.organization_logs:Connector"
 fleetdm_host_logs = "grove.connectors.fleetdm.host_logs:Connector"
 atlassian_audit_events = "grove.connectors.atlassian.audit_events:Connector"
 google_bigquery_query = "grove.connectors.google.bigquery_query:Connector"
@@ -76,6 +75,7 @@ gsuite_activities = "grove.connectors.gsuite.activities:Connector"
 gsuite_usage = "grove.connectors.gsuite.usage:Connector"
 local_heartbeat = "grove.connectors.local.heartbeat:Connector"
 gsuite_alerts = "grove.connectors.gsuite.alerts:Connector"
+launchdarkly_audit_records = "grove.connectors.launchdarkly.audit_records:Connector"
 okta_system_log = "grove.connectors.okta.system_log:Connector"
 onepassword_events_itemusages = "grove.connectors.onepassword.events_itemusages:Connector"
 onepassword_events_signinattempts = "grove.connectors.onepassword.events_signinattempts:Connector"
