@@ -54,6 +54,7 @@ isn't listed here, support can be added by creating a custom connector!
 * GitHub audit logs
 * GSuite alerts
 * GSuite activity logs
+* LaunchDarkly audit records
 * Okta system logs
 * Oomnitza activity logs
 * 1Password sign-in attempt logs

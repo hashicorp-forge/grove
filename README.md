@@ -51,6 +51,7 @@ isn't listed here, support can be added by creating a custom connector!
 * GSuite alerts
 * GSuite activity logs
 * GSuite Usage Reports
+* LaunchDarkly audit records
 * Okta system logs
 * Oomnitza activity logs
 * 1Password sign-in attempt logs

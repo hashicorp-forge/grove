@@ -159,3 +159,5 @@ cython_debug/
 
 # Debugger configuration.
 .vscode/launch.json
+grove/test_config/*
+grove/output/*
