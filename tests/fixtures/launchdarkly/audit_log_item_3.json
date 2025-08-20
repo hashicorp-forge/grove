@@ -9,7 +9,7 @@
       "type": "application/json"
     },
     "self": {
-      "href": "/api/v2/auditlog/abc333abc333aaa",
+      "href": "/api/v2/auditlog/entry-stu012",
       "type": "application/json"
     },
     "site": {
@@ -17,9 +17,9 @@
       "type": "text/html"
     }
   },
-  "_id": "abc333abc333aaa",
-  "_accountId": "accountid333",
-  "date": 1755508937733,
+  "_id": "entry-stu012",
+  "_accountId": "account-789ghi",
+  "date": 1755690085032,
   "accesses": [
     {
       "action": "deactivateScimMember",

@@ -126,7 +126,7 @@ class LaunchDarklyAuditTestCase(unittest.TestCase):
             content_type="application/json",
             body=bytes(
                 open(
-                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_3.json"),
+                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_1.json"),
                     "r",
                 ).read(),
                 "utf-8",
@@ -153,7 +153,7 @@ class LaunchDarklyAuditTestCase(unittest.TestCase):
             content_type="application/json",
             body=bytes(
                 open(
-                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_1.json"),
+                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_3.json"),
                     "r",
                 ).read(),
                 "utf-8",
@@ -166,7 +166,7 @@ class LaunchDarklyAuditTestCase(unittest.TestCase):
             content_type="application/json",
             body=bytes(
                 open(
-                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_6.json"),
+                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_4.json"),
                     "r",
                 ).read(),
                 "utf-8",
@@ -192,7 +192,7 @@ class LaunchDarklyAuditTestCase(unittest.TestCase):
             content_type="application/json",
             body=bytes(
                 open(
-                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_4.json"),
+                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_6.json"),
                     "r",
                 ).read(),
                 "utf-8",
@@ -203,7 +203,7 @@ class LaunchDarklyAuditTestCase(unittest.TestCase):
         # expected number of logs were returned.
         self.connector.run()
         self.assertEqual(self.connector._saved["logs"], 6)
-        self.assertEqual(self.connector.pointer, "1755508937736")
+        self.assertEqual(self.connector.pointer, "1755692329415")
 
     @responses.activate
     def test_collect_no_pagination(self):
@@ -229,7 +229,7 @@ class LaunchDarklyAuditTestCase(unittest.TestCase):
             content_type="application/json",
             body=bytes(
                 open(
-                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_6.json"),
+                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_4.json"),
                     "r",
                 ).read(),
                 "utf-8",
@@ -255,7 +255,7 @@ class LaunchDarklyAuditTestCase(unittest.TestCase):
             content_type="application/json",
             body=bytes(
                 open(
-                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_4.json"),
+                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_6.json"),
                     "r",
                 ).read(),
                 "utf-8",
@@ -265,4 +265,4 @@ class LaunchDarklyAuditTestCase(unittest.TestCase):
         # Set the chunk size large enough that no chunking is required.
         self.connector.run()
         self.assertEqual(self.connector._saved["logs"], 3)
-        self.assertEqual(self.connector.pointer, "1755508937736")
+        self.assertEqual(self.connector.pointer, "1755689827802")

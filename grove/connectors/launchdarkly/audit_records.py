@@ -8,14 +8,14 @@ from typing import Optional
 
 from grove.connectors import BaseConnector
 from grove.connectors.launchdarkly.api import Client
-from grove.constants import CHRONOLOGICAL
+from grove.constants import REVERSE_CHRONOLOGICAL
 from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
     CONNECTOR = "launchdarkly_audit_records"
     POINTER_PATH = "date"
-    LOG_ORDER = CHRONOLOGICAL
+    LOG_ORDER = REVERSE_CHRONOLOGICAL
 
     def collect(self):
         """Collects launchdarkly audit records from the launchdarkly API.
