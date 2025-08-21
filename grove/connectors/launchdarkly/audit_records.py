@@ -1,0 +1,52 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+"""launchdarkly Audit connector for Grove."""
+
+from time import time
+from typing import Optional
+
+from grove.connectors import BaseConnector
+from grove.connectors.launchdarkly.api import Client
+from grove.constants import REVERSE_CHRONOLOGICAL
+from grove.exceptions import NotFoundException
+
+
+class Connector(BaseConnector):
+    CONNECTOR = "launchdarkly_audit_records"
+    POINTER_PATH = "date"
+    LOG_ORDER = REVERSE_CHRONOLOGICAL
+
+    def collect(self):
+        """Collects launchdarkly audit records from the launchdarkly API.
+
+        https://launchdarkly.com/docs/api/audit-log/get-audit-log-entries
+        https://launchdarkly.com/docs/api/audit-log/get-audit-log-entry
+
+        This will first check whether there are any pointers cached to indicate previous
+        collections. If not, the last week of data will be collected.
+        """
+        client = Client(token=self.key)
+        cursor: Optional[str] = None
+
+        # If no pointer is stored then a previous run hasn't been performed, so set the
+        # pointer to a week ago. In the case of the launchdarkly audit API the pointer is
+        # the value of the "date" field from the latest record retrieved from
+        # the API.
+        try:
+            _ = self.pointer
+        except NotFoundException:
+            since = round((time() * 1000) - 604800000) # Current time minus 7 days in epoch time
+            self.pointer = str(since)
+
+        # Get log data from the upstream API, paging as required.
+        while True:
+            log = client.get_audit_records_list(cursor=cursor, before=None, after=self.pointer, limit="10")
+
+            # Save this batch of log entries.
+            self.save(log.entries)
+
+            # Check if we need to continue paging.
+            cursor = str(log.cursor) if log.cursor is not None else None
+            if cursor is None:
+                break
