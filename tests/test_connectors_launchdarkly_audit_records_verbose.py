@@ -28,7 +28,7 @@ class LaunchDarklyAuditTestCase(unittest.TestCase):
                 key="token",
                 name="test",
                 connector="test",
-                verbose="false"
+                verbose="true"
             ),
             context={
                 "runtime": "test_harness",
@@ -87,6 +87,7 @@ class LaunchDarklyAuditTestCase(unittest.TestCase):
     @responses.activate
     def test_collect_pagination(self):
         """Ensure pagination is working as expected."""
+
         # Succeed with a cursor returned (to indicate paging is required).
         responses.add(
             responses.GET,
@@ -117,6 +118,87 @@ class LaunchDarklyAuditTestCase(unittest.TestCase):
             ),
         )
 
+        # Include item queries
+        responses.add(
+            responses.GET,
+            re.compile(r"https://app.launchdarkly.com/api/v2/auditlog/entry-def456"),
+            status=200,
+            content_type="application/json",
+            body=bytes(
+                open(
+                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_1.json"),
+                    "r",
+                ).read(),
+                "utf-8",
+            ),
+        )
+
+        responses.add(
+            responses.GET,
+            re.compile(r"https://app.launchdarkly.com/api/v2/auditlog/entry-jkl789"),
+            status=200,
+            content_type="application/json",
+            body=bytes(
+                open(
+                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_2.json"),
+                    "r",
+                ).read(),
+                "utf-8",
+                ),
+        )
+        responses.add(
+            responses.GET,
+            re.compile(r"https://app.launchdarkly.com/api/v2/auditlog/entry-stu012"),
+            status=200,
+            content_type="application/json",
+            body=bytes(
+                open(
+                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_3.json"),
+                    "r",
+                ).read(),
+                "utf-8",
+            ),
+        )
+        responses.add(
+            responses.GET,
+            re.compile(r"https://app.launchdarkly.com/api/v2/auditlog/abcd1111"),
+            status=200,
+            content_type="application/json",
+            body=bytes(
+                open(
+                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_4.json"),
+                    "r",
+                ).read(),
+                "utf-8",
+            ),
+        )
+        responses.add(
+            responses.GET,
+            re.compile(r"https://app.launchdarkly.com/api/v2/auditlog/abcd2222"),
+            status=200,
+            content_type="application/json",
+            body=bytes(
+                open(
+                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_5.json"),
+                    "r",
+                ).read(),
+                "utf-8",
+            ),
+        )
+        responses.add(
+            responses.GET,
+            re.compile(r"https://app.launchdarkly.com/api/v2/auditlog/abcd3333"),
+            status=200,
+            content_type="application/json",
+            body=bytes(
+                open(
+                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_6.json"),
+                    "r",
+                ).read(),
+                "utf-8",
+            ),
+        )
+
         # Check the pointer matches the latest execution_time value, and that the
         # expected number of logs were returned.
         self.connector.run()
@@ -126,6 +208,7 @@ class LaunchDarklyAuditTestCase(unittest.TestCase):
     @responses.activate
     def test_collect_no_pagination(self):
         """Ensure collection without pagination is working as expected."""
+
         responses.add(
             responses.GET,
             re.compile(r"https://app.launchdarkly.com/api/v2/auditlog\?"),
@@ -134,6 +217,46 @@ class LaunchDarklyAuditTestCase(unittest.TestCase):
             body=bytes(
                 open(
                     os.path.join(self.dir, "fixtures/launchdarkly/audit_log_list_3.json"),
+                    "r",
+                ).read(),
+                "utf-8",
+            ),
+        )
+
+        responses.add(
+            responses.GET,
+            re.compile(r"https://app.launchdarkly.com/api/v2/auditlog/abcd1111"),
+            status=200,
+            content_type="application/json",
+            body=bytes(
+                open(
+                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_4.json"),
+                    "r",
+                ).read(),
+                "utf-8",
+            ),
+        )
+        responses.add(
+            responses.GET,
+            re.compile(r"https://app.launchdarkly.com/api/v2/auditlog/abcd2222"),
+            status=200,
+            content_type="application/json",
+            body=bytes(
+                open(
+                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_5.json"),
+                    "r",
+                ).read(),
+                "utf-8",
+            ),
+        )
+        responses.add(
+            responses.GET,
+            re.compile(r"https://app.launchdarkly.com/api/v2/auditlog/abcd3333"),
+            status=200,
+            content_type="application/json",
+            body=bytes(
+                open(
+                    os.path.join(self.dir, "fixtures/launchdarkly/audit_log_item_6.json"),
                     "r",
                 ).read(),
                 "utf-8",
