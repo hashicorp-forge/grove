@@ -5,7 +5,7 @@
 
 import logging
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 from jmespath import search
 
 import requests
@@ -85,7 +85,8 @@ class Client:
         after: Optional[str] = None,
         limit: Optional[str] = None,
         q: Optional[str] = None,
-        spec: Optional[str] = None
+        spec: Optional[str] = None,
+        verbose: Optional[str] = "false"
     ) -> AuditLogEntries:
         """Fetches a list of audit logs which match the provided filters.
 
@@ -120,16 +121,23 @@ class Client:
         # Record the cursor, if set.
         cursor = result.body.get("_links", {}).get("next", {}).get("href")
 
-        # Pull the list of ids out of the returned results list
-        ids = search("items[*]._id", result.body)
+        v = str.lower(verbose) if verbose is not None else "false"
+        if(v == "true"):
 
-        # Iterate through the list of IDs to fetch each detailed audit record
-        results: list[dict[str, Any]] = []
+            # Pull the list of ids out of the returned results list
+            ids = search("items[*]._id", result.body)
 
-        for id in ids:
-            record = self.get_audit_record_id(id)
-            results.append(record.body)
+            # Iterate through the list of IDs to fetch each detailed audit record
+            results: List[Dict[str, Any]] = []
+            for id in ids:
+                record = self.get_audit_record_id(id)
+                results.append(record.body)
+            return AuditLogEntries(cursor=cursor, entries=results)
+
+        else:
+            return AuditLogEntries(cursor=cursor, entries=result.body.get("items",[]))
+            
+
 
         # Return the cursor and the results to allow the caller to page as required.
-        return AuditLogEntries(cursor=cursor, entries=results)
 

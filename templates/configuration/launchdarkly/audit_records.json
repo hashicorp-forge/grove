@@ -2,5 +2,6 @@
     "key": "BEARER_TOKEN_HERE",
     "identity": "ORGANIZATION_ID",
     "name": "launchdarkly-audit-records-example",
-    "connector": "launchdarkly_audit_records"
+    "connector": "launchdarkly_audit_records",
+    "verbose": "false"
 }
