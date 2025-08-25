@@ -11,5 +11,10 @@
     "time_format": "microseconds",
     "encoding": {
         "key": "base64"
-    }
+    },
+    "page_size": 5000,
+    "bootstrap_days": 7,
+    "min_lookback_days": 3,
+    "max_lookback_days": 30,
+    "late_buffer_days": 2
 }
