@@ -5,7 +5,7 @@
 
 import json
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, date
 from typing import Any, Optional, Tuple, List, Dict
 
 from google.auth.exceptions import GoogleAuthError
@@ -189,6 +189,9 @@ class Connector(BaseConnector):
                 else:
                     self.logger.error(f"Failed to create BigQuery client: {e}")
                     raise
+        
+        # This should never be reached, but mypy requires it
+        raise RuntimeError("Failed to create BigQuery client after all retry attempts")
 
     def _initialize_watermark(self, time_format: str) -> Optional[int]:
         """Initialize the watermark from stored pointer or set default."""
@@ -231,6 +234,9 @@ class Connector(BaseConnector):
                 f"No pointer found. Setting pointer to: {self.pointer}"
             )
             return pointer_epoch_usec
+        
+        # This should never be reached, but mypy requires it
+        return None
 
     def _compute_lookback_days(
         self, 
@@ -264,9 +270,9 @@ class Connector(BaseConnector):
         time_format: str,
         last_seen_usec: Optional[int],
         page_size: int,
-        min_partition_date: datetime.date,
+        min_partition_date: date,
         ceiling_usec: int
-    ) -> Tuple[List[Dict], Optional[int], Dict]:
+    ) -> Tuple[List[Dict[str, Any]], Optional[int], Dict[str, Any]]:
         """
         Fetch a page of data using optimized BigQuery query with partition pruning.
         
