@@ -86,7 +86,7 @@ class Client:
         limit: Optional[str] = None,
         q: Optional[str] = None,
         spec: Optional[str] = None,
-        verbose: Optional[str] = "false"
+        verbose: bool = False
     ) -> AuditLogEntries:
         """Fetches a list of audit logs which match the provided filters.
 
@@ -121,8 +121,7 @@ class Client:
         # Record the cursor, if set.
         cursor = result.body.get("_links", {}).get("next", {}).get("href")
 
-        v = str.lower(verbose) if verbose is not None else "false"
-        if(v == "true"):
+        if(verbose):
 
             # Pull the list of ids out of the returned results list
             ids = search("items[*]._id", result.body)

@@ -28,7 +28,7 @@ class LaunchDarklyAuditTestCase(unittest.TestCase):
                 key="token",
                 name="test",
                 connector="test",
-                verbose="false"
+                verbose=False
             ),
             context={
                 "runtime": "test_harness",

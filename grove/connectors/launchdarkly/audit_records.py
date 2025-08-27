@@ -9,7 +9,7 @@ from typing import Optional
 from grove.connectors import BaseConnector
 from grove.connectors.launchdarkly.api import Client
 from grove.constants import REVERSE_CHRONOLOGICAL
-from grove.exceptions import NotFoundException
+from grove.exceptions import ConfigurationException, NotFoundException
 
 
 class Connector(BaseConnector):
@@ -18,15 +18,17 @@ class Connector(BaseConnector):
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 
     @property
-    def verbose(self) -> str:
+    def verbose(self) -> bool:
         """Fetches the verbose option from the configuration.
 
         :return: The "verbose" portion of the connector's configuration.
         """
         try:
-            return self.configuration.verbose
+            if not isinstance(self.configuration.verbose, bool):
+                raise ConfigurationException("If set, verbose configuration option must be a boolean")
         except AttributeError:
-            return "False"
+                return False
+        return self.configuration.verbose
 
     def collect(self):
         """Collects launchdarkly audit records from the launchdarkly API.
