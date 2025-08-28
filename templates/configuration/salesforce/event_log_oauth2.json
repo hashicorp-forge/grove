@@ -1,0 +1,8 @@
+{
+    "name": "salesforce-event-log-oauth2-example",
+    "connector": "sf_event_log",
+    "client_id": "YOUR_CONNECTED_APP_CLIENT_ID",
+    "client_secret": "YOUR_CONNECTED_APP_CLIENT_SECRET",
+    "refresh_token": "YOUR_REFRESH_TOKEN",
+    "instance_url": "https://YOUR_INSTANCE.salesforce.com"
+}
