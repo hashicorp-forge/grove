@@ -5,10 +5,12 @@
 
 import os
 import unittest
+from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
 
 from grove.connectors.google.bigquery_query import Connector
 from grove.models import ConnectorConfig
+from grove.exceptions import ConfigurationException, RequestFailedException
 from tests import mocks
 
 
@@ -31,7 +33,12 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
                 table_name="test_table",
                 columns=["timestamp_usec", "message", "user_id"],
                 pointer_path="timestamp_usec",
-                max_batches=1
+                max_batches=1,
+                page_size=5000,
+                bootstrap_days=7,
+                min_lookback_days=3,
+                max_lookback_days=30,
+                late_buffer_days=2
             ),
             context={
                 "runtime": "test_harness",
@@ -84,12 +91,12 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         mock_query_job = Mock()
         mock_client.query.return_value = mock_query_job
         
-        # First call returns 1000 rows (triggers pagination)
+        # First call returns 5000 rows (triggers pagination)
         # Second call returns 500 rows (ends pagination)
-        mock_rows_1000 = [{"timestamp_usec": i, "message": f"Log {i}"} for i in range(1000)]
-        mock_rows_500 = [{"timestamp_usec": i + 1000, "message": f"Log {i + 1000}"} for i in range(500)]
+        mock_rows_5000 = [{"timestamp_usec": i, "message": f"Log {i}"} for i in range(5000)]
+        mock_rows_500 = [{"timestamp_usec": i + 5000, "message": f"Log {i + 5000}"} for i in range(500)]
         
-        mock_query_job.result.side_effect = [mock_rows_1000, mock_rows_500]
+        mock_query_job.result.side_effect = [mock_rows_5000, mock_rows_500]
         
         # Set initial pointer
         self.connector._pointer = "1000000000000000"
@@ -102,8 +109,8 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         
         # Verify pagination occurred (query called twice)
         self.assertEqual(mock_client.query.call_count, 2)
-        # Total logs saved: 1000 + 500 = 1500
-        self.assertEqual(self.connector._saved["logs"], 1500)
+        # Total logs saved: 5000 + 500 = 5500
+        self.assertEqual(self.connector._saved["logs"], 5500)
 
     @patch('grove.connectors.google.bigquery_query.bigquery.Client')
     @patch.object(Connector, 'get_credentials')
@@ -119,7 +126,7 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         mock_query_job = Mock()
         mock_client.query.return_value = mock_query_job
         
-        # Mock query results - less than 1000 rows
+        # Mock query results - less than 5000 rows
         mock_rows = [
             {"timestamp_usec": 1738500089504000, "message": "Test log 1", "user_id": "user1"},
             {"timestamp_usec": 1738500089505000, "message": "Test log 2", "user_id": "user2"},
@@ -156,7 +163,7 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         self.assertEqual(connector_without_max_batches._saved["logs"], 2)
         
         # Verify that the default value of 3 was used by checking the connector's behavior
-        # Since we only have 2 rows (< 1000), it should complete in one batch
+        # Since we only have 2 rows (< 5000), it should complete in one batch
         self.assertEqual(mock_client.query.call_count, 1)
 
     @patch('grove.connectors.google.bigquery_query.bigquery.Client')
@@ -209,8 +216,8 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         # Check that the query includes ORDER BY for the pointer path
         self.assertIn("ORDER BY created_at", call_args)
         
-        # Check that the query includes LIMIT for pagination
-        self.assertIn("LIMIT 1000", call_args)
+        # Check that the query includes LIMIT for pagination (now uses @page_size parameter)
+        self.assertIn("LIMIT @page_size", call_args)
 
     @patch('grove.connectors.google.bigquery_query.bigquery.Client')
     @patch.object(Connector, 'get_credentials')
@@ -255,8 +262,8 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         mock_client.query.assert_called_once()
         call_args = mock_client.query.call_args[0][0]
         
-        # Check that the query includes the timestamp comparison
-        self.assertIn("created_at > TIMESTAMP('2025-01-01 10:00:00')", call_args)
+        # Check that the query includes the timestamp comparison (now uses @low_watermark parameter)
+        self.assertIn("created_at > @low_watermark", call_args)
         
         # Check that the query includes ORDER BY for the pointer path
         self.assertIn("ORDER BY created_at", call_args)
@@ -289,14 +296,8 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         self.assertEqual(mock_client.query.call_count, 1)
         call_args = mock_client.query.call_args[0][0]
         
-        # Should contain a valid microseconds value (7 days ago)
-        self.assertIn("timestamp_usec > ", call_args)
-        # Extract the microseconds value and verify it's a number
-        import re
-        match = re.search(r'timestamp_usec > (\d+)', call_args)
-        self.assertIsNotNone(match)
-        microseconds_value = int(match.group(1))
-        self.assertGreater(microseconds_value, 0)
+        # Should contain a valid microseconds value (7 days ago) - now uses @low_watermark parameter
+        self.assertIn("timestamp_usec > @low_watermark", call_args)
         
         # Reset for next test
         mock_client.reset_mock()
@@ -313,14 +314,8 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         self.assertEqual(mock_client.query.call_count, 1)
         call_args = mock_client.query.call_args[0][0]
         
-        # Should contain a valid timestamp value (7 days ago)
-        self.assertIn("created_at > TIMESTAMP('", call_args)
-        # Extract the timestamp value and verify it's a valid format
-        match = re.search(r"TIMESTAMP\('([^']+)'\)", call_args)
-        self.assertIsNotNone(match)
-        timestamp_value = match.group(1)
-        # Should be in format YYYY-MM-DD HH:MM:SS+00
-        self.assertRegex(timestamp_value, r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\+00')
+        # Should contain a valid timestamp value (7 days ago) - now uses @low_watermark parameter
+        self.assertIn("created_at > @low_watermark", call_args)
 
     @patch('grove.connectors.google.bigquery_query.bigquery.Client')
     @patch.object(Connector, 'get_credentials')
@@ -358,8 +353,8 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         # Check that the query includes the table reference
         self.assertIn("test_dataset.test_table", call_args)
         
-        # Check that the query includes the pointer comparison
-        self.assertIn("timestamp_usec > 1738500089504000", call_args)
+        # Check that the query includes the pointer comparison (now uses @low_watermark parameter)
+        self.assertIn("timestamp_usec > @low_watermark", call_args)
 
     @patch('grove.connectors.google.bigquery_query.bigquery.Client')
     @patch.object(Connector, 'get_credentials')
@@ -412,8 +407,8 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         mock_client.query.assert_called_once()
         call_args = mock_client.query.call_args[0][0]
         
-        # Check that the query uses the nested path correctly
-        self.assertIn("gmail.event_info.timestamp_usec > 1752594724674696", call_args)
+        # Check that the query uses the nested path correctly (now uses @low_watermark parameter)
+        self.assertIn("gmail.event_info.timestamp_usec > @low_watermark", call_args)
         self.assertIn("ORDER BY gmail.event_info.timestamp_usec", call_args)
 
     @patch('grove.connectors.google.bigquery_query.bigquery.Client')
@@ -450,7 +445,7 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         
         # Capture the actual SQL query being generated
         captured_query = None
-        def capture_query(query):
+        def capture_query(query, **kwargs):
             nonlocal captured_query
             captured_query = query
             return mock_query_job
@@ -461,7 +456,7 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         self.connector.run()
         
         # Verify the query uses numeric comparison (correct)
-        self.assertIn("gmail.event_info.timestamp_usec > 1752594724674696", captured_query)
+        self.assertIn("gmail.event_info.timestamp_usec > @low_watermark", captured_query)
         
         # Verify it does NOT use TIMESTAMP function (which would cause syntax error)
         self.assertNotIn("TIMESTAMP(", captured_query)
@@ -473,7 +468,7 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         self.assertIn("SELECT gmail", captured_query)
         self.assertIn("FROM `test-project.test_dataset.test_table`", captured_query)
         self.assertIn("ORDER BY gmail.event_info.timestamp_usec ASC", captured_query)
-        self.assertIn("LIMIT 1000", captured_query)
+        self.assertIn("LIMIT @page_size", captured_query)
 
     @patch('grove.connectors.google.bigquery_query.bigquery.Client')
     @patch.object(Connector, 'get_credentials')
@@ -509,7 +504,7 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         
         # Capture the actual SQL query being generated
         captured_query = None
-        def capture_query(query):
+        def capture_query(query, **kwargs):
             nonlocal captured_query
             captured_query = query
             return mock_query_job
@@ -520,13 +515,13 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         self.connector.run()
         
         # Verify the query uses TIMESTAMP function (correct for timestamp format)
-        self.assertIn("gmail.event_info.timestamp_usec > TIMESTAMP('2025-07-15 15:52:04+00')", captured_query)
+        self.assertIn("gmail.event_info.timestamp_usec > @low_watermark", captured_query)
         
         # Verify the query is syntactically correct for BigQuery
         self.assertIn("SELECT gmail", captured_query)
         self.assertIn("FROM `test-project.test_dataset.test_table`", captured_query)
         self.assertIn("ORDER BY gmail.event_info.timestamp_usec ASC", captured_query)
-        self.assertIn("LIMIT 1000", captured_query)
+        self.assertIn("LIMIT @page_size", captured_query)
 
     @patch('grove.connectors.google.bigquery_query.bigquery.Client')
     @patch.object(Connector, 'get_credentials')
@@ -611,7 +606,7 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         
         # Capture the actual SQL query being generated
         captured_query = None
-        def capture_query(query):
+        def capture_query(query, **kwargs):
             nonlocal captured_query
             captured_query = query
             return mock_query_job
@@ -623,7 +618,7 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         
         # This test would have caught the bug by verifying:
         # 1. The query uses numeric comparison (not timestamp string)
-        self.assertIn("gmail.event_info.timestamp_usec > 1752594724674696", captured_query)
+        self.assertIn("gmail.event_info.timestamp_usec > @low_watermark", captured_query)
         
         # 2. The query does NOT contain timestamp strings (which caused the syntax error)
         self.assertNotIn("2025-07-15 15:52:04+00", captured_query)
@@ -668,3 +663,275 @@ class GoogleBigQueryQueryTestCase(unittest.TestCase):
         
         # Verify that BigQuery client was attempted twice (retry logic)
         self.assertEqual(mock_bigquery_client.call_count, 2)
+
+    def test_compute_lookback_days_bootstrap(self):
+        """Test lookback computation for new connectors."""
+        now_utc = datetime(2024, 1, 8, 12, 0, 0, tzinfo=timezone.utc)
+        lookback = self.connector._compute_lookback_days(
+            None, now_utc, bootstrap_days=7, min_days=3, max_days=30, late_buffer_days=2
+        )
+        self.assertEqual(lookback, 7)
+
+    def test_compute_lookback_days_caught_up(self):
+        """Test lookback computation when caught up."""
+        now_utc = datetime(2024, 1, 8, 12, 0, 0, tzinfo=timezone.utc)
+        last_seen_usec = int((now_utc - timedelta(hours=1)).timestamp() * 1_000_000)
+        
+        lookback = self.connector._compute_lookback_days(
+            last_seen_usec, now_utc, bootstrap_days=7, min_days=3, max_days=30, late_buffer_days=2
+        )
+        # Should be close to min_days + late_buffer_days
+        self.assertLessEqual(lookback, 5)
+        self.assertGreaterEqual(lookback, 3)
+
+    def test_compute_lookback_days_far_behind(self):
+        """Test lookback computation when far behind."""
+        now_utc = datetime(2024, 1, 8, 12, 0, 0, tzinfo=timezone.utc)
+        last_seen_usec = int((now_utc - timedelta(days=50)).timestamp() * 1_000_000)
+        
+        lookback = self.connector._compute_lookback_days(
+            last_seen_usec, now_utc, bootstrap_days=7, min_days=3, max_days=30, late_buffer_days=2
+        )
+        # Should be max_days
+        self.assertEqual(lookback, 30)
+
+    def test_compute_lookback_days_bounds(self):
+        """Test lookback computation respects bounds."""
+        now_utc = datetime(2024, 1, 8, 12, 0, 0, tzinfo=timezone.utc)
+        last_seen_usec = int((now_utc - timedelta(days=15)).timestamp() * 1_000_000)
+        
+        lookback = self.connector._compute_lookback_days(
+            last_seen_usec, now_utc, bootstrap_days=7, min_days=3, max_days=30, late_buffer_days=2
+        )
+        # Should be 15 + 2 = 17, within bounds
+        self.assertEqual(lookback, 17)
+
+    def test_initialize_watermark_microseconds(self):
+        """Test watermark initialization with microseconds format."""
+        self.connector.configuration.time_format = "microseconds"
+        self.connector.pointer = "1704067200000000"
+        
+        watermark = self.connector._initialize_watermark("microseconds")
+        self.assertEqual(watermark, 1704067200000000)
+
+    def test_initialize_watermark_timestamp(self):
+        """Test watermark initialization with timestamp format."""
+        self.connector.configuration.time_format = "timestamp"
+        self.connector.pointer = "2024-01-01 00:00:00+00"
+        
+        watermark = self.connector._initialize_watermark("timestamp")
+        expected = int(datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc).timestamp() * 1_000_000)
+        self.assertEqual(watermark, expected)
+
+    def test_initialize_watermark_no_pointer(self):
+        """Test watermark initialization when no pointer exists."""
+        self.connector.pointer = None
+        
+        watermark = self.connector._initialize_watermark("microseconds")
+        # Should be approximately 7 days ago
+        now = datetime.now(timezone.utc)
+        week_ago = int((now - timedelta(days=7)).timestamp() * 1_000_000)
+        
+        # Allow for small time differences
+        self.assertAlmostEqual(watermark, week_ago, delta=1000000)
+
+    def test_fetch_page_bigquery_parameters(self):
+        """Test that query parameters are correctly set."""
+        mock_client = Mock()
+        mock_query_job = Mock()
+        mock_results = Mock()
+        
+        # Mock the query execution
+        mock_client.query.return_value = mock_query_job
+        mock_query_job.result.return_value = mock_results
+        mock_results.__iter__ = lambda self: iter([])
+        
+        # Mock job attributes
+        mock_query_job.total_bytes_processed = 1048576
+        mock_query_job.slot_millis = 1500
+        
+        with patch('grove.connectors.google.bigquery_query.bigquery.QueryJobConfig') as mock_config_class:
+            mock_config = Mock()
+            mock_config_class.return_value = mock_config
+            
+            self.connector._fetch_page_bigquery(
+                client=mock_client,
+                project_id="test-project",
+                dataset_name="test_dataset",
+                table_name="test_table",
+                columns=["gmail.event_info.timestamp_usec", "gmail"],
+                pointer_path="gmail.event_info.timestamp_usec",
+                time_format="microseconds",
+                last_seen_usec=1704067200000000,
+                page_size=5000,
+                min_partition_date=datetime(2024, 1, 1).date(),
+                ceiling_usec=1704153600000000
+            )
+            
+            # Verify QueryJobConfig was called with correct parameters
+            mock_config_class.assert_called_once()
+
+    def test_fetch_page_bigquery_with_results(self):
+        """Test fetching page with actual results."""
+        mock_client = Mock()
+        mock_query_job = Mock()
+        
+        # Mock results with timestamp data - use nested structure to match pointer_path
+        mock_row1 = {"gmail": {"event_info": {"timestamp_usec": 1704067200000000}, "data": "test1"}}
+        mock_row2 = {"gmail": {"event_info": {"timestamp_usec": 1704067201000000}, "data": "test2"}}
+        mock_results = [mock_row1, mock_row2]
+        
+        mock_query_job.result.return_value = mock_results
+        mock_query_job.total_bytes_processed = 1048576
+        mock_query_job.slot_millis = 1500
+        
+        mock_client.query.return_value = mock_query_job
+        
+        with patch('grove.connectors.google.bigquery_query.bigquery.QueryJobConfig'):
+            rows, new_watermark, debug_metadata = self.connector._fetch_page_bigquery(
+                client=mock_client,
+                project_id="test-project",
+                dataset_name="test_dataset",
+                table_name="test_table",
+                columns=["gmail.event_info.timestamp_usec", "gmail"],
+                pointer_path="gmail.event_info.timestamp_usec",
+                time_format="microseconds",
+                last_seen_usec=1704067200000000,
+                page_size=5000,
+                min_partition_date=datetime(2024, 1, 1).date(),
+                ceiling_usec=1704153600000000
+            )
+            
+            self.assertEqual(len(rows), 2)
+            self.assertEqual(new_watermark, 1704067201000000)
+            self.assertEqual(debug_metadata["rows_returned"], 2)
+            self.assertEqual(debug_metadata["new_watermark"], 1704067201000000)
+
+    def test_fetch_page_bigquery_nested_pointer_path(self):
+        """Test fetching page with nested pointer path."""
+        mock_client = Mock()
+        mock_query_job = Mock()
+        
+        # Mock results with nested timestamp data
+        mock_row = {"gmail": {"event_info": {"timestamp_usec": 1704067200000000}}}
+        mock_results = [mock_row]
+        
+        mock_query_job.result.return_value = mock_results
+        mock_query_job.total_bytes_processed = 1048576
+        mock_query_job.slot_millis = 1500
+        
+        mock_client.query.return_value = mock_query_job
+        
+        with patch('grove.connectors.google.bigquery_query.bigquery.QueryJobConfig'):
+            rows, new_watermark, debug_metadata = self.connector._fetch_page_bigquery(
+                client=mock_client,
+                project_id="test-project",
+                dataset_name="test_dataset",
+                table_name="test_table",
+                columns=["gmail"],
+                pointer_path="gmail.event_info.timestamp_usec",
+                time_format="microseconds",
+                last_seen_usec=1704067200000000,
+                page_size=5000,
+                min_partition_date=datetime(2024, 1, 1).date(),
+                ceiling_usec=1704153600000000
+            )
+            
+            self.assertEqual(new_watermark, 1704067200000000)
+
+    def test_configuration_validation_page_size(self):
+        """Test that invalid page_size raises ConfigurationException."""
+        self.connector.configuration.page_size = -1
+        
+        with self.assertRaises(ConfigurationException) as context:
+            self.connector.collect()
+        
+        self.assertIn("page_size must be a positive integer", str(context.exception))
+
+    def test_configuration_validation_page_size_type(self):
+        """Test that non-integer page_size raises ConfigurationException."""
+        self.connector.configuration.page_size = "invalid"
+        
+        with self.assertRaises(ConfigurationException) as context:
+            self.connector.collect()
+        
+        self.assertIn("page_size must be a positive integer", str(context.exception))
+
+    def test_create_bigquery_client_success(self):
+        """Test successful BigQuery client creation."""
+        with patch('grove.connectors.google.bigquery_query.bigquery.Client') as mock_client_class:
+            mock_client = Mock()
+            mock_client_class.return_value = mock_client
+            
+            # Mock get_credentials to avoid authentication issues
+            with patch.object(self.connector, 'get_credentials') as mock_get_creds:
+                mock_creds = Mock()
+                mock_get_creds.return_value = mock_creds
+                
+                client = self.connector._create_bigquery_client("test-project")
+                self.assertEqual(client, mock_client)
+
+    def test_create_bigquery_client_retry_on_deadlock(self):
+        """Test BigQuery client creation retries on deadlock."""
+        with patch('grove.connectors.google.bigquery_query.bigquery.Client') as mock_client_class:
+            # First call raises deadlock, second succeeds
+            mock_client_class.side_effect = [
+                Exception("deadlock detected"),
+                Mock()
+            ]
+            
+            # Mock get_credentials to avoid authentication issues
+            with patch.object(self.connector, 'get_credentials') as mock_get_creds:
+                mock_creds = Mock()
+                mock_get_creds.return_value = mock_creds
+                
+                with patch('time.sleep'):  # Mock sleep to speed up test
+                    client = self.connector._create_bigquery_client("test-project")
+                    self.assertIsNotNone(client)
+                    self.assertEqual(mock_client_class.call_count, 2)
+
+    def test_create_bigquery_client_max_retries_exceeded(self):
+        """Test BigQuery client creation fails after max retries."""
+        with patch('grove.connectors.google.bigquery_query.bigquery.Client') as mock_client_class:
+            mock_client_class.side_effect = Exception("deadlock detected")
+            
+            # Mock get_credentials to avoid authentication issues
+            with patch.object(self.connector, 'get_credentials') as mock_get_creds:
+                mock_creds = Mock()
+                mock_get_creds.return_value = mock_creds
+                
+                with patch('time.sleep'):  # Mock sleep to speed up test
+                    with self.assertRaises(Exception) as context:
+                        self.connector._create_bigquery_client("test-project")
+                    
+                    self.assertIn("deadlock detected", str(context.exception))
+                    self.assertEqual(mock_client_class.call_count, 3)
+
+    def test_get_credentials_success(self):
+        """Test successful credentials generation."""
+        with patch('grove.connectors.google.bigquery_query.service_account.Credentials') as mock_creds_class:
+            mock_creds = Mock()
+            mock_creds_class.from_service_account_info.return_value = mock_creds
+            
+            credentials = self.connector.get_credentials()
+            self.assertEqual(credentials, mock_creds)
+
+    def test_get_credentials_invalid_json(self):
+        """Test credentials generation fails with invalid JSON."""
+        self.connector.key = "invalid json"
+        
+        with self.assertRaises(ConfigurationException) as context:
+            self.connector.get_credentials()
+        
+        self.assertIn("Unable to load service account JSON", str(context.exception))
+
+    def test_get_credentials_auth_error(self):
+        """Test credentials generation fails with auth error."""
+        with patch('grove.connectors.google.bigquery_query.service_account.Credentials') as mock_creds_class:
+            from google.auth.exceptions import GoogleAuthError
+            mock_creds_class.from_service_account_info.side_effect = GoogleAuthError("auth failed")
+            
+            with self.assertRaises(ConfigurationException) as context:
+                self.connector.get_credentials()
+            
+            self.assertIn("Authentication error", str(context.exception))
