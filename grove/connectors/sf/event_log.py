@@ -41,6 +41,18 @@ class Connector(BaseConnector):
     POINTER_PATH = "TIMESTAMP_DERIVED"
     LOG_ORDER = CHRONOLOGICAL
 
+    def __init__(self, config: Any, context: Dict[str, Any]) -> None:
+        """Initialize the connector with a configuration and context.
+
+        :param config: Configuration options from the connector configuration file.
+        :param context: Context about the connector's execution environment.
+        """
+        super().__init__(config, context)
+        
+        # Store configuration attributes that the base class expects
+        self.key = getattr(self.configuration, "key", None)
+        self.identity = getattr(self.configuration, "identity", None)
+
     @property
     def client_id(self):
         """Fetches the Salesforce client ID from the configuration.
@@ -80,6 +92,7 @@ class Connector(BaseConnector):
         except AttributeError:
             return None
 
+
     @property
     def token(self):
         """Fetches the SalesForce security token from the configuration.
@@ -93,97 +106,10 @@ class Connector(BaseConnector):
         except AttributeError:
             return None
 
-<<<<<<< HEAD
-    @property
-    def client_id(self) -> Optional[str]:
-        """Fetches the OAuth2 client ID from the configuration.
-
-        :return: The "client_id" portion of the connector's configuration.
-        """
-        try:
-            return self.configuration.client_id
-        except AttributeError:
-            return None
-
-    @property
-    def client_secret(self) -> Optional[str]:
-        """Fetches the OAuth2 client secret from the configuration.
-
-        :return: The "client_secret" portion of the connector's configuration.
-        """
-        try:
-            return self.configuration.client_secret
-        except AttributeError:
-            return None
-
-    @property
-    def refresh_token(self) -> Optional[str]:
-        """Fetches the OAuth2 refresh token from the configuration.
-
-        :return: The "refresh_token" portion of the connector's configuration.
-        """
-        try:
-            return self.configuration.refresh_token
-        except AttributeError:
-            return None
-
-    @property
-    def instance_url(self) -> Optional[str]:
-        """Fetches the Salesforce instance URL from the configuration.
-
-        :return: The "instance_url" portion of the connector's configuration.
-        """
-        try:
-            return self.configuration.instance_url
-        except AttributeError:
-            return None
-
-    @property
-    def use_oauth2(self) -> bool:
-        """Determines if OAuth2 authentication should be used.
-
-        :return: True if OAuth2 credentials are available, False otherwise.
-        """
-        return all([
-            self.client_id is not None,
-            self.client_secret is not None,
-            self.refresh_token is not None,
-            self.instance_url is not None
-        ])
-
-    def _authenticate_oauth2(self) -> Salesforce:
-        """Authenticates with Salesforce using OAuth2.
-
-        :raises RequestFailedException: OAuth2 authentication failed.
-        :return: Authenticated Salesforce client.
-        """
-        try:
-            client = Salesforce(
-                instance_url=self.instance_url,
-                session_id=None,
-                oauth2={
-                    'client_id': self.client_id,
-                    'client_secret': self.client_secret,
-                    'refresh_token': self.refresh_token,
-                }
-            )
-            return client
-        except (SalesforceError, requests.exceptions.RequestException) as err:
-            raise RequestFailedException(
-                f"Unable to authenticate with SalesForce using OAuth2: {err}"
-            )
-
-    def _authenticate_username_password(self) -> Salesforce:
-        """Authenticates with Salesforce using username/password.
-
-        :raises RequestFailedException: Username/password authentication failed.
-        :return: Authenticated Salesforce client.
-=======
     def _is_oauth_configured(self) -> bool:
         """Determines if OAuth 2.0 credentials are configured.
 
         :return: True if OAuth credentials are present, False otherwise.
->>>>>>> 0aeb5c4 (Add OAuth 2.0 client credentials flow support to Salesforce connector)
         """
         return bool(self.client_id and self.client_secret)
 
@@ -328,17 +254,6 @@ class Connector(BaseConnector):
                 password=self.key,
                 security_token=self.token,
             )
-<<<<<<< HEAD
-            client = Salesforce(
-                instance=sf_instance,
-                session_id=sf_session,
-                version=SF_VERSION,
-            )
-            return client
-        except (SalesforceError, requests.exceptions.RequestException) as err:
-            raise RequestFailedException(
-                f"Unable to authenticate with SalesForce using username/password: {err}"
-=======
             return sf_session, sf_instance
         except (SalesforceError, requests.exceptions.RequestException) as err:
             raise RequestFailedException(
@@ -350,9 +265,6 @@ class Connector(BaseConnector):
 
         This will first check whether there are any pointers cached to indicate previous
         collections. If not, the last week of data will be collected.
-
-        Supports both OAuth 2.0 client credentials flow and traditional username/password
-        authentication. OAuth 2.0 is preferred if both are configured.
 
         :raises RequestFailedException: An HTTP request failed.
         :raises ConfigurationException: An issue was found with the configuration for
@@ -382,24 +294,7 @@ class Connector(BaseConnector):
         except SalesforceError as err:
             raise RequestFailedException(
                 f"Unable to create Salesforce client: {err}"
->>>>>>> 0aeb5c4 (Add OAuth 2.0 client credentials flow support to Salesforce connector)
             )
-
-    def collect(self):  # noqa: C901
-        """Collects EventLogs from the SF Cloud API.
-
-        This will first check whether there are any pointers cached to indicate previous
-        collections. If not, the last week of data will be collected.
-
-        :raises RequestFailedException: An HTTP request failed.
-        :raises ConfigurationException: An issue was found with the configuration for
-            this connector.
-        """
-        # Authenticate using the appropriate method
-        if self.use_oauth2:
-            client = self._authenticate_oauth2()
-        else:
-            client = self._authenticate_username_password()
 
         # If no pointer is stored then a previous run hasn't been performed, so set the
         # pointer to a week ago.
@@ -491,26 +386,15 @@ class Connector(BaseConnector):
                 # from our authentication session. It doesn't appear that Simple Salesforce
                 # has a nice way to handle this for us.
                 try:
-                    # For OAuth2, we need to use the access token from the client
-                    if self.use_oauth2:
-                        auth_header = f"Bearer {client.access_token}"
-                        base_url = self.instance_url
-                    else:
-                        auth_header = f"Bearer {client.session_id}"
-                        base_url = f"https://{client.sf_instance}"
-
+                    # Ensure the instance_url has a proper scheme
+                    if not instance_url.startswith(('http://', 'https://')):
+                        instance_url = f"https://{instance_url}"
+                    
                     request = requests.get(
-<<<<<<< HEAD
-                        f"{base_url}/{log_file.get('LogFile')}",
-                        headers={
-                            "Content-Type": "application/json",
-                            "Authorization": auth_header,
-=======
                         f"{instance_url}/{log_file.get('LogFile')}",
                         headers={
                             "Content-Type": "application/json",
                             "Authorization": f"Bearer {session_id}",
->>>>>>> 0aeb5c4 (Add OAuth 2.0 client credentials flow support to Salesforce connector)
                         },
                     )
                 except requests.exceptions.RequestException as err:
