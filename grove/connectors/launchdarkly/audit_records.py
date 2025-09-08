@@ -9,7 +9,7 @@ from typing import Optional
 from grove.connectors import BaseConnector
 from grove.connectors.launchdarkly.api import Client
 from grove.constants import REVERSE_CHRONOLOGICAL
-from grove.exceptions import NotFoundException
+from grove.exceptions import ConfigurationException, NotFoundException
 
 
 class Connector(BaseConnector):
@@ -17,10 +17,28 @@ class Connector(BaseConnector):
     POINTER_PATH = "date"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 
+    @property
+    def verbose(self) -> bool:
+        """Fetches the verbose option from the configuration.
+
+        :return: The "verbose" portion of the connector's configuration.
+        """
+        try:
+            if not isinstance(self.configuration.verbose, bool):
+                raise ConfigurationException("If set, verbose configuration option must be a boolean")
+        except AttributeError:
+                return False
+        return self.configuration.verbose
+
     def collect(self):
         """Collects launchdarkly audit records from the launchdarkly API.
 
+        If the configuration option "verbose" is false or unset, the collector returns
+        the information from the audit log entries list.
         https://launchdarkly.com/docs/api/audit-log/get-audit-log-entries
+
+        If it is set to "true", then it iterates over each log entry and returns the
+        detailed information about each entry.
         https://launchdarkly.com/docs/api/audit-log/get-audit-log-entry
 
         This will first check whether there are any pointers cached to indicate previous
@@ -41,7 +59,7 @@ class Connector(BaseConnector):
 
         # Get log data from the upstream API, paging as required.
         while True:
-            log = client.get_audit_records_list(cursor=cursor, before=None, after=self.pointer, limit="10")
+            log = client.get_audit_records_list(cursor=cursor, before=None, after=self.pointer, limit="10", verbose=self.verbose)
 
             # Save this batch of log entries.
             self.save(log.entries)

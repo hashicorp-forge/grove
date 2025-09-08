@@ -3,7 +3,7 @@
     "identity": "your-service-account.iam.gserviceaccount.com",
     "name": "bigquery_query_gmail",
     "connector": "bigquery_query",
-    "columns" : ["gmail"],
+    "columns": ["gmail"],
     "project_id": "your-project-id",
     "dataset_name": "activity",
     "table_name": "activity",
@@ -11,5 +11,11 @@
     "time_format": "microseconds",
     "encoding": {
         "key": "base64"
-    }
+    },
+    "max_batches": 50,
+    "page_size": 50000,
+    "bootstrap_days": 3,
+    "min_lookback_days": 1,
+    "max_lookback_days": 14,
+    "late_buffer_days": 1
 }
