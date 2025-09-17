@@ -1,0 +1,30 @@
+{
+    "totalSize": 1,
+    "done": true,
+    "records": [{
+        "attributes": {
+            "type": "SessionHijackingEventStore",
+            "url": "/services/data/v51.0/sobjects/SessionHijackingEventStore/ZZZ4v000002CCCCCC0"
+        },
+        "Id": "ZZZ4v000002CCCCCC0",
+        "Score": 95.2,
+        "UserId": "005000000000000CCC",
+        "EventDate": "2024-01-15T14:20:00.000+0000",
+        "SecurityEventData": "{\"hijacking_type\":\"concurrent_session\",\"details\":\"Multiple concurrent sessions from different locations\"}",
+        "Summary": "Potential session hijacking detected",
+        "CreatedDate": "2024-01-15T14:25:00.000+0000",
+        "LastModifiedDate": "2024-01-15T14:25:00.000+0000",
+        "EventType": "SessionHijacking",
+        "RiskLevel": "Critical",
+        "SourceIP": "203.0.113.1",
+        "UserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "SessionId": "session_hijacked_123",
+        "DeviceId": "device_456",
+        "DeviceType": "Desktop",
+        "Browser": "Chrome",
+        "Platform": "macOS",
+        "Country": "US",
+        "LoginTime": "2024-01-15T14:15:00.000+0000",
+        "LogoutTime": "2024-01-15T14:30:00.000+0000"
+    }]
+}

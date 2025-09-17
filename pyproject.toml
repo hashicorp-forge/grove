@@ -83,6 +83,7 @@ onepassword_events_signinattempts = "grove.connectors.onepassword.events_signina
 onepassword_events_audit = "grove.connectors.onepassword.events_audit:Connector"
 pagerduty_audit_records = "grove.connectors.pagerduty.audit_records:Connector"
 sf_event_log = "grove.connectors.sf.event_log:Connector"
+sf_threat_detection = "grove.connectors.sf.threat_detection:Connector"
 sfmc_audit_events = "grove.connectors.sfmc.audit_events:Connector"
 sfmc_security_events = "grove.connectors.sfmc.security_events:Connector"
 slack_audit_logs = "grove.connectors.slack.audit_logs:Connector"
