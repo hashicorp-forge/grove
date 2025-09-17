@@ -41,17 +41,6 @@ class Connector(BaseConnector):
     POINTER_PATH = "TIMESTAMP_DERIVED"
     LOG_ORDER = CHRONOLOGICAL
 
-    def __init__(self, config: Any, context: Dict[str, Any]) -> None:
-        """Initialize the connector with a configuration and context.
-
-        :param config: Configuration options from the connector configuration file.
-        :param context: Context about the connector's execution environment.
-        """
-        super().__init__(config, context)
-        
-        # Store configuration attributes that the base class expects
-        self.key = getattr(self.configuration, "key", None)
-        self.identity = getattr(self.configuration, "identity", None)
 
     @property
     def client_id(self):
@@ -163,8 +152,7 @@ class Connector(BaseConnector):
         )
         
         self.logger.debug(
-            f"OAuth credentials - Client ID: {self.client_id[:8]}... (length: {len(self.client_id) if self.client_id else 0}), "
-            f"Client Secret: {'*' * 8}... (length: {len(self.client_secret) if self.client_secret else 0})",
+            f"OAuth credentials - Client ID: {self.client_id} (length: {len(self.client_id) if self.client_id else 0})",
             extra=self.log_context,
         )
         
@@ -203,7 +191,7 @@ class Connector(BaseConnector):
                     extra={
                         **self.log_context,
                         "oauth_url": oauth_token_url,
-                        "client_id": self.client_id[:8] + "..." if self.client_id else None,
+                        "client_id": self.client_id,
                         "response_status": err.response.status_code,
                         "response_body": error_response,
                     }
@@ -215,7 +203,7 @@ class Connector(BaseConnector):
                     extra={
                         **self.log_context,
                         "oauth_url": oauth_token_url,
-                        "client_id": self.client_id[:8] + "..." if self.client_id else None,
+                        "client_id": self.client_id,
                         "response_status": err.response.status_code,
                         "response_text": err.response.text,
                     }
