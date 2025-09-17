@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "grove"
 readme = "README.md"
 description = "A Software as a Service (SaaS) log collection framework."
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dynamic = ["version"]
 authors = [{name = "HashiCorp Security (TDR)"}]
 license = {text = "MPL-2.0"}
