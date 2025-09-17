@@ -71,28 +71,14 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         with self.assertRaises(RequestFailedException):
             self.connector.collect()
 
-
-    # Commented out other event type tests for now - focusing on ApiAnomalyEvent only
-    # @responses.activate
-    # def test_collect_session_hijacking_events(self):
-    #     """Ensure collection of session hijacking events works as expected."""
-    #     # Test implementation would go here when we add other event types
-    #     pass
-
-    # @responses.activate
-    # def test_collect_credential_stuffing_events(self):
-    #     """Ensure collection of credential stuffing events works as expected."""
-    #     # Test implementation would go here when we add other event types
-    #     pass
-
     def test_oauth_configuration_detection(self):
         """Test OAuth 2.0 configuration detection."""
         oauth_connector = Connector(
             config=ConnectorConfig(
                 client_id="test_client_id",
                 client_secret="test_client_secret",
-                identity="test@example.com",
-                instance_url="https://test.my.salesforce.com",
+                identity="testuser@example.com",
+                instance_url="https://testorg.my.salesforce.com",
                 name="test-oauth",
                 connector="sf_threat_detection",
                 operation="ApiAnomaly",
@@ -104,14 +90,14 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         self.assertFalse(oauth_connector._is_legacy_configured())
         self.assertEqual(oauth_connector.client_id, "test_client_id")
         self.assertEqual(oauth_connector.client_secret, "test_client_secret")
-        self.assertEqual(oauth_connector.instance_url, "https://test.my.salesforce.com")
+        self.assertEqual(oauth_connector.instance_url, "https://testorg.my.salesforce.com")
 
     def test_legacy_configuration_detection(self):
         """Test legacy username/password configuration detection."""
         legacy_connector = Connector(
             config=ConnectorConfig(
                 key="test_password",
-                identity="test@example.com",
+                identity="testuser@example.com",
                 token="test_security_token",
                 name="test-legacy",
                 connector="sf_threat_detection",
@@ -123,7 +109,7 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         self.assertFalse(legacy_connector._is_oauth_configured())
         self.assertTrue(legacy_connector._is_legacy_configured())
         self.assertEqual(legacy_connector.key, "test_password")
-        self.assertEqual(legacy_connector.identity, "test@example.com")
+        self.assertEqual(legacy_connector.identity, "testuser@example.com")
         self.assertEqual(legacy_connector.token, "test_security_token")
 
     def test_mixed_configuration_oauth_preferred(self):
@@ -131,11 +117,11 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         mixed_connector = Connector(
             config=ConnectorConfig(
                 key="test_password",
-                identity="test@example.com",
+                identity="testuser@example.com",
                 token="test_security_token",
                 client_id="test_client_id",
                 client_secret="test_client_secret",
-                instance_url="https://test.my.salesforce.com",
+                instance_url="https://testorg.my.salesforce.com",
                 name="test-mixed",
                 connector="sf_threat_detection",
                 operation="ApiAnomaly",
@@ -150,7 +136,7 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         """Test that missing credentials raise appropriate exception."""
         invalid_connector = Connector(
             config=ConnectorConfig(
-                identity="test@example.com",
+                identity="testuser@example.com",
                 name="test-invalid",
                 connector="sf_threat_detection",
                 operation="ApiAnomaly",
@@ -172,8 +158,8 @@ class SFThreatDetectionTestCase(unittest.TestCase):
             config=ConnectorConfig(
                 client_id="test_client_id",
                 client_secret="test_client_secret",
-                identity="test@example.com",
-                instance_url="https://test.my.salesforce.com",
+                identity="testuser@example.com",
+                instance_url="https://testorg.my.salesforce.com",
                 name="test-oauth",
                 connector="sf_threat_detection",
                 operation="ApiAnomaly",
@@ -188,7 +174,7 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         )
         responses.add(
             responses.POST,
-            "https://test.my.salesforce.com/services/oauth2/token",
+            "https://testorg.my.salesforce.com/services/oauth2/token",
             status=200,
             body=oauth_response,
             content_type="application/json",
@@ -197,7 +183,7 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         # Mock Shield availability check (test query)
         responses.add(
             responses.GET,
-            re.compile(r"https://.*/services/data/v51.0/query.*SELECT Id FROM ApiAnomalyEventStore LIMIT 1"),
+            re.compile(r"https://.*/services/data/v51.0/query.*ApiAnomalyEventStore.*LIMIT"),
             status=200,
             body='{"totalSize": 0, "done": true, "records": []}',
             content_type="application/json",
@@ -228,8 +214,8 @@ class SFThreatDetectionTestCase(unittest.TestCase):
             config=ConnectorConfig(
                 client_id="test_client_id",
                 client_secret="test_client_secret",
-                identity="test@example.com",
-                instance_url="https://test.my.salesforce.com",
+                identity="testuser@example.com",
+                instance_url="https://testorg.my.salesforce.com",
                 name="test-oauth",
                 connector="sf_threat_detection",
                 operation="ApiAnomaly",
@@ -255,8 +241,8 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         oauth_connector = Connector(
             config=ConnectorConfig(
                 client_secret="test_client_secret",
-                identity="test@example.com",
-                instance_url="https://test.my.salesforce.com",
+                identity="testuser@example.com",
+                instance_url="https://testorg.my.salesforce.com",
                 name="test-oauth",
                 connector="sf_threat_detection",
                 operation="ApiAnomaly",
@@ -273,8 +259,8 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         oauth_connector = Connector(
             config=ConnectorConfig(
                 client_id="test_client_id",
-                identity="test@example.com",
-                instance_url="https://test.my.salesforce.com",
+                identity="testuser@example.com",
+                instance_url="https://testorg.my.salesforce.com",
                 name="test-oauth",
                 connector="sf_threat_detection",
                 operation="ApiAnomaly",
@@ -290,7 +276,7 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         """Test legacy authentication with missing password."""
         legacy_connector = Connector(
             config=ConnectorConfig(
-                identity="test@example.com",
+                identity="testuser@example.com",
                 token="test_security_token",
                 name="test-legacy",
                 connector="sf_threat_detection",
@@ -309,7 +295,7 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         legacy_connector = Connector(
             config=ConnectorConfig(
                 key="test_password",
-                identity="test@example.com",  # Required by ConnectorConfig
+                identity="testuser@example.com",  # Required by ConnectorConfig
                 token="test_security_token",
                 name="test-legacy",
                 connector="sf_threat_detection",
@@ -330,7 +316,7 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         legacy_connector = Connector(
             config=ConnectorConfig(
                 key="test_password",
-                identity="test@example.com",
+                identity="testuser@example.com",
                 name="test-legacy",
                 connector="sf_threat_detection",
                 operation="ApiAnomaly",
@@ -349,8 +335,8 @@ class SFThreatDetectionTestCase(unittest.TestCase):
             config=ConnectorConfig(
                 client_id="test_client_id",
                 client_secret="test_client_secret",
-                identity="test@example.com",
-                instance_url="https://test.my.salesforce.com",
+                identity="testuser@example.com",
+                instance_url="https://testorg.my.salesforce.com",
                 name="test-custom",
                 connector="sf_threat_detection",
                 operation="ApiAnomaly",
@@ -359,14 +345,14 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         )
         
         # Should use instance-specific OAuth endpoint
-        self.assertEqual(custom_connector._get_oauth_token_url(), "https://test.my.salesforce.com/services/oauth2/token")
+        self.assertEqual(custom_connector._get_oauth_token_url(), "https://testorg.my.salesforce.com/services/oauth2/token")
         
         # Test sandbox URL selection
         sandbox_connector = Connector(
             config=ConnectorConfig(
                 client_id="test_client_id",
                 client_secret="test_client_secret",
-                identity="test@example.com",
+                identity="testuser@example.com",
                 instance_url="https://test.salesforce.com",
                 name="test-sandbox",
                 connector="sf_threat_detection",
@@ -382,8 +368,8 @@ class SFThreatDetectionTestCase(unittest.TestCase):
             config=ConnectorConfig(
                 client_id="test_client_id",
                 client_secret="test_client_secret",
-                identity="test@example.com",
-                instance_url="https://company.lightning.force.com",
+                identity="testuser@example.com",
+                instance_url="https://testcompany.lightning.force.com",
                 name="test-production",
                 connector="sf_threat_detection",
                 operation="ApiAnomaly",
@@ -391,14 +377,14 @@ class SFThreatDetectionTestCase(unittest.TestCase):
             context={"runtime": "test_harness", "runtime_id": "NA"},
         )
         
-        self.assertEqual(prod_connector._get_oauth_token_url(), "https://company.lightning.force.com/services/oauth2/token")
+        self.assertEqual(prod_connector._get_oauth_token_url(), "https://testcompany.lightning.force.com/services/oauth2/token")
         
         # Test default to production when no instance URL
         no_instance_connector = Connector(
             config=ConnectorConfig(
                 client_id="test_client_id",
                 client_secret="test_client_secret",
-                identity="test@example.com",
+                identity="testuser@example.com",
                 name="test-no-instance",
                 connector="sf_threat_detection",
                 operation="ApiAnomaly",
@@ -413,7 +399,7 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         invalid_connector = Connector(
             config=ConnectorConfig(
                 key="test_password",
-                identity="test@example.com",
+                identity="testuser@example.com",
                 token="test_security_token",
                 name="test-invalid-op",
                 connector="sf_threat_detection",
@@ -460,7 +446,7 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         # Mock Shield availability check (test query)
         responses.add(
             responses.GET,
-            re.compile(r"https://.*/services/data/v51.0/query.*SELECT Id FROM ApiAnomalyEventStore LIMIT 1"),
+            re.compile(r"https://.*/services/data/v51.0/query.*ApiAnomalyEventStore.*LIMIT"),
             status=200,
             body='{"totalSize": 0, "done": true, "records": []}',
             content_type="application/json",
@@ -482,6 +468,63 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         # Should not raise an exception
         credential_connector.collect()
         self.assertEqual(credential_connector._saved["logs"], 1)
+
+    @responses.activate
+    def test_collect_report_anomaly_events(self):
+        """Test collection of report anomaly events with SecurityEventData field."""
+        report_connector = Connector(
+            config=ConnectorConfig(
+                identity="Someuser",
+                key="token",
+                name="test-report",
+                connector="test",
+                token="12345",
+                operation="ReportAnomaly",
+            ),
+            context={
+                "runtime": "test_harness",
+                "runtime_id": "NA",
+            },
+        )
+
+        # Ensure authentication succeeds (POST to SF).
+        login_response = bytes(
+            open(os.path.join(self.dir, "fixtures/sf/event_log/login.xml"), "r").read(),
+            "utf-8",
+        )
+        responses.add(
+            responses.POST,
+            re.compile(r"https://.*"),
+            status=200,
+            body=login_response,
+            content_type="application/xml",
+        )
+
+        # Mock Shield availability check (test query)
+        responses.add(
+            responses.GET,
+            re.compile(r"https://.*/services/data/v51.0/query.*ReportAnomalyEventStore.*LIMIT"),
+            status=200,
+            body='{"totalSize": 0, "done": true, "records": []}',
+            content_type="application/json",
+        )
+
+        # Mock ReportAnomalyEventStore query response
+        query_response = bytes(
+            open(os.path.join(self.dir, "fixtures/sf/threat_detection/report_anomaly_direct.json"), "r").read(),
+            "utf-8",
+        )
+        responses.add(
+            responses.GET,
+            re.compile(r"https://.*/services/data/v51.0/query.*"),
+            status=200,
+            body=query_response,
+            content_type="application/json",
+        )
+
+        # Should not raise an exception
+        report_connector.collect()
+        self.assertEqual(report_connector._saved["logs"], 1)
 
     def test_backfill_configuration(self):
         """Test backfill mode with start_date configuration."""
@@ -546,7 +589,7 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         # Mock Shield availability check failure (INVALID_TYPE)
         responses.add(
             responses.GET,
-            re.compile(r"https://.*/services/data/v51.0/query.*SELECT Id FROM ApiAnomalyEventStore LIMIT 1"),
+            re.compile(r"https://.*/services/data/v51.0/query.*ApiAnomalyEventStore.*LIMIT"),
             status=400,
             body='[{"errorCode": "INVALID_TYPE", "message": "sObject type \'ApiAnomalyEventStore\' is not supported"}]',
             content_type="application/json",
@@ -575,7 +618,7 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         # Mock Shield availability check success
         responses.add(
             responses.GET,
-            re.compile(r"https://.*/services/data/v51.0/query.*SELECT Id FROM ApiAnomalyEventStore LIMIT 1"),
+            re.compile(r"https://.*/services/data/v51.0/query.*ApiAnomalyEventStore.*LIMIT"),
             status=200,
             body='{"totalSize": 0, "done": true, "records": []}',
             content_type="application/json",
@@ -614,7 +657,7 @@ class SFThreatDetectionTestCase(unittest.TestCase):
         # Mock Shield availability check success
         responses.add(
             responses.GET,
-            re.compile(r"https://.*/services/data/v51.0/query.*SELECT Id FROM ApiAnomalyEventStore LIMIT 1"),
+            re.compile(r"https://.*/services/data/v51.0/query.*ApiAnomalyEventStore.*LIMIT"),
             status=200,
             body='{"totalSize": 0, "done": true, "records": []}',
             content_type="application/json",
