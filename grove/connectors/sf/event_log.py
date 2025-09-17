@@ -5,7 +5,7 @@
 
 import csv
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import requests
 from simple_salesforce import Salesforce, SalesforceLogin
@@ -40,7 +40,6 @@ class Connector(BaseConnector):
     CONNECTOR = "sf_event_log"
     POINTER_PATH = "TIMESTAMP_DERIVED"
     LOG_ORDER = CHRONOLOGICAL
-
 
     @property
     def client_id(self):
@@ -81,7 +80,6 @@ class Connector(BaseConnector):
         except AttributeError:
             return None
 
-
     @property
     def token(self):
         """Fetches the SalesForce security token from the configuration.
@@ -120,12 +118,12 @@ class Connector(BaseConnector):
         if not self.instance_url:
             # If no instance URL is provided, use default production endpoint
             return SF_OAUTH_TOKEN_URL_DEFAULT
-        
+
         # Extract the base domain from the instance URL and construct OAuth endpoint
         # e.g., https://klaviyo.my.salesforce.com -> https://klaviyo.my.salesforce.com/services/oauth2/token
-        instance_url = self.instance_url.rstrip('/')
+        instance_url = self.instance_url.rstrip("/")
         oauth_url = f"{instance_url}/services/oauth2/token"
-        
+
         return oauth_url
 
     def get_oauth_access_token(self) -> Tuple[str, str]:
@@ -139,23 +137,27 @@ class Connector(BaseConnector):
         :raises RequestFailedException: If authentication fails
         """
         if not self.client_id:
-            raise ConfigurationException("client_id is required for OAuth 2.0 authentication")
+            raise ConfigurationException(
+                "client_id is required for OAuth 2.0 authentication"
+            )
         if not self.client_secret:
-            raise ConfigurationException("client_secret is required for OAuth 2.0 authentication")
+            raise ConfigurationException(
+                "client_secret is required for OAuth 2.0 authentication"
+            )
 
         session = requests.session()
         oauth_token_url = self._get_oauth_token_url()
-        
+
         self.logger.debug(
             f"Using OAuth token URL: {oauth_token_url} for instance: {self.instance_url}",
             extra=self.log_context,
         )
-        
+
         self.logger.debug(
             f"OAuth credentials - Client ID: {self.client_id} (length: {len(self.client_id) if self.client_id else 0})",
             extra=self.log_context,
         )
-        
+
         try:
             response = session.post(
                 oauth_token_url,
@@ -169,23 +171,25 @@ class Connector(BaseConnector):
                 },
             )
             response.raise_for_status()
-            
+
             token_data = response.json()
             access_token = token_data.get("access_token")
             instance_url = token_data.get("instance_url")
-            
+
             if not access_token:
                 raise RequestFailedException("No access token received from Salesforce")
             if not instance_url:
                 raise RequestFailedException("No instance URL received from Salesforce")
-                
+
             return access_token, instance_url
-            
+
         except requests.exceptions.HTTPError as err:
             # Enhanced error logging for OAuth failures
             try:
                 error_response = err.response.json()
-                error_details = error_response.get("error_description", error_response.get("error", "Unknown error"))
+                error_details = error_response.get(
+                    "error_description", error_response.get("error", "Unknown error")
+                )
                 self.logger.error(
                     f"OAuth authentication failed: {error_details}",
                     extra={
@@ -194,7 +198,7 @@ class Connector(BaseConnector):
                         "client_id": self.client_id,
                         "response_status": err.response.status_code,
                         "response_body": error_response,
-                    }
+                    },
                 )
             except (ValueError, KeyError):
                 # If we can't parse the error response, log the raw response
@@ -206,9 +210,9 @@ class Connector(BaseConnector):
                         "client_id": self.client_id,
                         "response_status": err.response.status_code,
                         "response_text": err.response.text,
-                    }
+                    },
                 )
-            
+
             raise RequestFailedException(
                 f"Unable to authenticate with Salesforce using OAuth 2.0: {err}"
             )
@@ -228,11 +232,17 @@ class Connector(BaseConnector):
         :raises RequestFailedException: If authentication fails
         """
         if not self.key:
-            raise ConfigurationException("key (password) is required for legacy authentication")
+            raise ConfigurationException(
+                "key (password) is required for legacy authentication"
+            )
         if not self.identity:
-            raise ConfigurationException("identity (username) is required for legacy authentication")
+            raise ConfigurationException(
+                "identity (username) is required for legacy authentication"
+            )
         if not self.token:
-            raise ConfigurationException("token (security token) is required for legacy authentication")
+            raise ConfigurationException(
+                "token (security token) is required for legacy authentication"
+            )
 
         session = requests.session()
         try:
@@ -271,7 +281,7 @@ class Connector(BaseConnector):
                 "Either OAuth 2.0 credentials (client_id, client_secret) or legacy "
                 "credentials (key, identity, token) must be provided"
             )
-        
+
         # Create Salesforce client using obtained credentials
         try:
             client = Salesforce(
@@ -280,9 +290,7 @@ class Connector(BaseConnector):
                 version=SF_VERSION,
             )
         except SalesforceError as err:
-            raise RequestFailedException(
-                f"Unable to create Salesforce client: {err}"
-            )
+            raise RequestFailedException(f"Unable to create Salesforce client: {err}")
 
         # If no pointer is stored then a previous run hasn't been performed, so set the
         # pointer to a week ago.
@@ -328,7 +336,7 @@ class Connector(BaseConnector):
                             event=self.operation,
                             pointer=pointer_native.strftime("%Y-%m-%dT00:00:00.00Z"),
                         )
-                    
+
                     records = client.query_all(soql_query)
             except (SalesforceError, requests.exceptions.RequestException) as err:
                 raise RequestFailedException(
@@ -344,7 +352,11 @@ class Connector(BaseConnector):
                     log_files[record_type] = []
 
                 # For "all" operation, organize by EventType; for specific operations, use operation name
-                log_key = record_type if self.operation == DEFAULT_OPERATION else self.operation
+                log_key = (
+                    record_type
+                    if self.operation == DEFAULT_OPERATION
+                    else self.operation
+                )
                 if log_key not in log_files:
                     log_files[log_key] = []
 
@@ -375,9 +387,9 @@ class Connector(BaseConnector):
                 # has a nice way to handle this for us.
                 try:
                     # Ensure the instance_url has a proper scheme
-                    if not instance_url.startswith(('http://', 'https://')):
+                    if not instance_url.startswith(("http://", "https://")):
                         instance_url = f"https://{instance_url}"
-                    
+
                     request = requests.get(
                         f"{instance_url}/{log_file.get('LogFile')}",
                         headers={
