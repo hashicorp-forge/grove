@@ -1,0 +1,8 @@
+{
+    "client_id": "CONSUMER_KEY_HERE",
+    "client_secret": "CONSUMER_SECRET_HERE",
+    "identity": "USERNAME_HERE",
+    "instance_url": "https://your-instance.my.salesforce.com",
+    "name": "salesforce-event-log-oauth-example",
+    "connector": "sf_event_log"
+}
