@@ -1,0 +1,10 @@
+{
+  "key": "PASSWORD_HERE",
+  "identity": "USERNAME_HERE",
+  "token": "SECURITY_TOKEN_HERE",
+  "name": "salesforce-setup-audit-trail-legacy-example",
+  "connector": "sf_setup_audit_trail",
+  "start_date": "2024-01-01T00:00:00.000Z",
+  "max_retries": 3,
+  "retry_delay": 1
+}
