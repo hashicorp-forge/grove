@@ -387,7 +387,7 @@ class SFEventLogTestCase(unittest.TestCase):
                 client_id="test_client_id",
                 client_secret="test_client_secret",
                 identity="test@example.com",
-                instance_url="https://klaviyo.my.salesforce.com",
+                instance_url="https://testorg.my.salesforce.com",
                 name="test-custom",
                 connector="sf_event_log",
                 operation="Login",
@@ -396,7 +396,7 @@ class SFEventLogTestCase(unittest.TestCase):
         )
         
         # Should use instance-specific OAuth endpoint
-        self.assertEqual(custom_connector._get_oauth_token_url(), "https://klaviyo.my.salesforce.com/services/oauth2/token")
+        self.assertEqual(custom_connector._get_oauth_token_url(), "https://testorg.my.salesforce.com/services/oauth2/token")
         
         # Test sandbox URL selection
         sandbox_connector = Connector(

@@ -120,7 +120,7 @@ class Connector(BaseConnector):
             return SF_OAUTH_TOKEN_URL_DEFAULT
 
         # Extract the base domain from the instance URL and construct OAuth endpoint
-        # e.g., https://klaviyo.my.salesforce.com -> https://klaviyo.my.salesforce.com/services/oauth2/token
+        # e.g., https://testorg.my.salesforce.com -> https://testorg.my.salesforce.com/services/oauth2/token
         instance_url = self.instance_url.rstrip("/")
         oauth_url = f"{instance_url}/services/oauth2/token"
 
