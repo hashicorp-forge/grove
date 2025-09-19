@@ -1,0 +1,8 @@
+{
+    "access_token": "XXXXXXXXXXXXXXX!TOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKEN",
+    "instance_url": "https://example.my.salesforce.com",
+    "id": "https://login.salesforce.com/id/00D000000000000EAA/005000000000000AAA",
+    "token_type": "Bearer",
+    "issued_at": "1234567890123",
+    "signature": "XXXXXXXXXXXXXXX"
+}

@@ -1,0 +1,16 @@
+{
+  "totalSize": 1,
+  "done": true,
+  "records": [
+    {
+      "Id": "a0X000000000001",
+      "Score": 0.85,
+      "UserId": "005000000000001",
+      "EventDate": "2025-09-15T08:45:00.000+0000",
+      "SecurityEventData": "{\"apiType\":\"REST\",\"endpoint\":\"/services/data/v51.0/sobjects/Account\"}",
+      "Summary": "TEST: API anomaly detected - unusual API usage pattern"
+    }
+  ]
+}
+
+
