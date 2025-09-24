@@ -641,25 +641,7 @@ class Connector(BaseConnector):
                 extra=self.log_context,
             )
 
-            # Start with basic metadata
-            entry = {
-                "_grove_operation": self.operation,
-                "_grove_connector": self.name,
-            }
-
-            # Add the threat detection event fields (common fields)
-            entry["Id"] = record.get("Id")
-            entry["Score"] = record.get("Score")
-            entry["UserId"] = record.get("UserId")
-            entry["EventDate"] = record.get("EventDate")
-            entry["Summary"] = record.get("Summary")
-
-            # Add all fields from the record dynamically
-            # Since we're using FIELDS(ALL), we include all available fields
-            for field_name, field_value in record.items():
-                if field_name not in ["Id", "Score", "UserId", "EventDate", "Summary"]:
-                    # Add any additional fields that aren't already included
-                    entry[field_name] = field_value
+            entry = dict(record)
 
             # Only include entries that are after the pointer timestamp
             if record.get("EventDate"):
