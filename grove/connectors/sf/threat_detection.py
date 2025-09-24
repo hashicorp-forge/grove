@@ -101,13 +101,6 @@ class Connector(BaseConnector):
         self.key = getattr(self.configuration, "key", None) or ""
         self.identity = getattr(self.configuration, "identity", None) or ""
 
-        # Backfill configuration
-        self.start_date = getattr(self.configuration, "start_date", None)
-
-        # Rate limiting configuration
-        self.max_retries = getattr(self.configuration, "max_retries", 3)
-        self.retry_delay = getattr(self.configuration, "retry_delay", 1)
-
     @property
     def client_id(self):
         """Fetches the Salesforce client ID from the configuration.
@@ -159,6 +152,45 @@ class Connector(BaseConnector):
             return self.configuration.token
         except AttributeError:
             return None
+
+    @property
+    def start_date(self):
+        """Fetches the start_date from the configuration.
+
+        This is used for backfill configuration to specify when to start collecting data.
+
+        :return: The "start_date" portion of the connector's configuration.
+        """
+        try:
+            return self.configuration.start_date
+        except AttributeError:
+            return None
+
+    @property
+    def max_retries(self):
+        """Fetches the max_retries from the configuration.
+
+        This is used for rate limiting configuration to specify maximum retry attempts.
+
+        :return: The "max_retries" portion of the connector's configuration.
+        """
+        try:
+            return self.configuration.max_retries
+        except AttributeError:
+            return 3
+
+    @property
+    def retry_delay(self):
+        """Fetches the retry_delay from the configuration.
+
+        This is used for rate limiting configuration to specify delay between retries.
+
+        :return: The "retry_delay" portion of the connector's configuration.
+        """
+        try:
+            return self.configuration.retry_delay
+        except AttributeError:
+            return 1
 
     def _is_oauth_configured(self) -> bool:
         """Determines if OAuth 2.0 credentials are configured.

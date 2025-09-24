@@ -429,6 +429,9 @@ class SFThreatDetectionTestCase(unittest.TestCase):
                 "runtime_id": "NA",
             },
         )
+        
+        # Set a pointer to allow test data from 2025-09-15 to be included
+        credential_connector.pointer = "2025-09-14T00:00:00.000Z"
 
         # Ensure authentication succeeds (POST to SF).
         login_response = bytes(
@@ -486,6 +489,9 @@ class SFThreatDetectionTestCase(unittest.TestCase):
                 "runtime_id": "NA",
             },
         )
+        
+        # Set a pointer to allow test data from 2025-09-15 to be included
+        report_connector.pointer = "2025-09-14T00:00:00.000Z"
 
         # Ensure authentication succeeds (POST to SF).
         login_response = bytes(
