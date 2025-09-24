@@ -253,8 +253,7 @@ class Connector(BaseConnector):
         )
 
         self.logger.debug(
-            f"OAuth credentials - Client ID: {self.client_id[:8]}... (length: {len(self.client_id) if self.client_id else 0}), "
-            f"Client Secret: {'*' * 8}... (length: {len(self.client_secret) if self.client_secret else 0})",
+            f"OAuth credentials - Client ID: {self.client_id}",
             extra=self.log_context,
         )
 
@@ -297,9 +296,7 @@ class Connector(BaseConnector):
                     extra={
                         **self.log_context,
                         "oauth_url": oauth_token_url,
-                        "client_id": (
-                            self.client_id[:8] + "..." if self.client_id else None
-                        ),
+                        "client_id": self.client_id,
                         "response_status": err.response.status_code,
                         "response_body": error_response,
                     },
@@ -311,9 +308,7 @@ class Connector(BaseConnector):
                     extra={
                         **self.log_context,
                         "oauth_url": oauth_token_url,
-                        "client_id": (
-                            self.client_id[:8] + "..." if self.client_id else None
-                        ),
+                        "client_id": self.client_id,
                         "response_status": err.response.status_code,
                         "response_text": err.response.text,
                     },
