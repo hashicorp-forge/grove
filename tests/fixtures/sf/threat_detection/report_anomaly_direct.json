@@ -1,0 +1,14 @@
+{
+  "totalSize": 1,
+  "done": true,
+  "records": [
+    {
+      "Id": "0Z7Nu0000000gAXKAY",
+      "Score": 0.9269394082215815,
+      "UserId": "0053o000009QUWBAA4",
+      "EventDate": "2025-09-15T13:23:28.000+0000",
+      "Summary": "Report was run with unusually high value for number of rows (1091043), unusually high value for number of filters (0), unusually high value for number of columns (26)",
+      "SecurityEventData": "[{\"featureName\":\"rowCount\",\"featureValue\":\"1091043\",\"featureContribution\":\"93.37 %\"},{\"featureName\":\"numberFilters\",\"featureValue\":\"0\",\"featureContribution\":\"6.00 %\"},{\"featureName\":\"numberColumns\",\"featureValue\":\"26\",\"featureContribution\":\"0.49 %\"},{\"featureName\":\"windowSize\",\"featureValue\":\"788x1440\",\"featureContribution\":\"0.09 %\"},{\"featureName\":\"screenResolution\",\"featureValue\":\"900x1440\",\"featureContribution\":\"0.04 %\"},{\"featureName\":\"autonomousSystem\",\"featureValue\":\"null\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"weekdayOrWeekend\",\"featureValue\":\"weekday\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"periodOfDay\",\"featureValue\":\"Afternoon\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"userAgent\",\"featureValue\":\"python-requests/2.32.4\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"isAnonymousProxy\",\"featureValue\":\"0\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"isSatelliteProvider\",\"featureValue\":\"0\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"webSocketsEnabled\",\"featureValue\":\"true\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"browserColor\",\"featureValue\":\"24-24\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"acceptedLanguages\",\"featureValue\":\"[\\\"en-US\\\",\\\"en\\\"]\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"timezoneOffset\",\"featureValue\":\"240\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"browserCodecs\",\"featureValue\":\"-----\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"browserFonts\",\"featureValue\":\"-----\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"platform\",\"featureValue\":\"MacIntel\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"localStorageEnabled\",\"featureValue\":\"true\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"drmEnabled\",\"featureValue\":\"1\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"browserPlugins\",\"featureValue\":\"PDF Viewer:Portable Document FormatChrome PDF Viewer:Portable Document FormatChromium PDF Viewer:Portable Document FormatMicrosoft Edge PDF Viewer:Portable Document FormatWebKit built-in PDF:Portable Document Format\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"browserIndexingEnabled\",\"featureValue\":\"true\",\"featureContribution\":\"0.00 %\"},{\"featureName\":\"sessionStorageEnabled\",\"featureValue\":\"true\",\"featureContribution\":\"0.00 %\"}]"
+    }
+  ]
+}
