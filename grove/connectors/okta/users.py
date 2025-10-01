@@ -3,12 +3,10 @@
 
 """Okta Users connector for Grove."""
 
-from datetime import datetime, timezone
-
 from grove.connectors import BaseConnector
 from grove.connectors.okta.api import Client
 from grove.constants import CHRONOLOGICAL
-from grove.exceptions import ConfigurationException, NotFoundException
+from grove.exceptions import NotFoundException
 
 
 class Connector(BaseConnector):
@@ -31,29 +29,6 @@ class Connector(BaseConnector):
         except AttributeError:
             return "okta.com"
 
-    @property
-    def interval_hours(self):
-        """Fetches the minimum interval between collections from the configuration.
-
-        This field controls how often the connector should collect user data. Since user
-        data doesn't change frequently, this prevents unnecessary API calls. The default
-        is 24 hours (daily collection).
-
-        :return: The minimum hours between collections.
-        """
-        try:
-            candidate = self.configuration.interval_hours
-        except AttributeError:
-            return 24
-
-        try:
-            candidate = int(candidate)
-        except ValueError as err:
-            raise ConfigurationException(
-                f"Configured 'interval_hours' is not valid. Value must be an integer. {err}"
-            )
-
-        return candidate
 
     def collect(self):
         """Collects all users from the Okta Users API.
@@ -61,30 +36,9 @@ class Connector(BaseConnector):
         This will collect all users from the Okta organization. Since user data
         doesn't change frequently, this connector is designed to be run daily to
         capture the current state of all users in the organization.
+        
+        Grove's built-in frequency mechanism handles when to run this connector.
         """
-        # Check if we should skip collection based on interval
-        try:
-            last_collection = self.pointer
-            if last_collection and last_collection != "":
-                # Parse the last collection time from the pointer (stored as ISO timestamp)
-                last_time = datetime.fromisoformat(last_collection.replace('Z', '+00:00'))
-                time_since_last = datetime.now(timezone.utc) - last_time
-                
-                if time_since_last.total_seconds() < (self.interval_hours * 3600):
-                    self.logger.info(
-                        f"Skipping collection - last run was {time_since_last.total_seconds()/3600:.1f} hours ago, "
-                        f"interval is {self.interval_hours} hours",
-                        extra=self.log_context
-                    )
-                    return
-        except NotFoundException:
-            # No pointer exists yet, proceed with collection
-            pass
-        except (ValueError, TypeError) as err:
-            self.logger.warning(
-                f"Could not parse last collection time from pointer: {err}. Proceeding with collection.",
-                extra=self.log_context
-            )
 
         client = Client(identity=self.identity, token=self.key, domain=self.domain)
         cursor = None
@@ -110,5 +64,3 @@ class Connector(BaseConnector):
             # Ensure cursor is a string for the next iteration
             cursor = str(cursor) if cursor is not None else None
 
-        # Update pointer with current timestamp for interval tracking
-        self.pointer = datetime.now(timezone.utc).isoformat()
