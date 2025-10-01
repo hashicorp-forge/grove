@@ -59,6 +59,8 @@ isn't listed here, support can be added by creating a custom connector!
 * 1Password audit logs
 * PagerDuty audit records
 * SalesForce Cloud event logs
+* Salesforce Shield Threat Detection Event Monitoring logs
+* Salesforce Shield Field Audit Trail & Setup Audit Trail logs
 * SalesForce Marketing Cloud audit event logs
 * SalesForce Marketing Cloud security event logs
 * Slack audit logs
