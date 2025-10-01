@@ -1,0 +1,8 @@
+{
+    "key": "FAKE_API_TOKEN_67890ghijkl",
+    "identity": "fake-org-subdomain",
+    "domain": "okta-emea.com",
+    "name": "okta-users-emea-example",
+    "connector": "okta_users",
+    "frequency": 86400
+}

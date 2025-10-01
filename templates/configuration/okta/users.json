@@ -1,0 +1,7 @@
+{
+    "key": "FAKE_API_TOKEN_12345abcdef",
+    "identity": "fake-org-subdomain",
+    "name": "okta-users-example",
+    "connector": "okta_users",
+    "frequency": 86400
+}
