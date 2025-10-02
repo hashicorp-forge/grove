@@ -179,3 +179,42 @@ class Client:
 
         # Return the cursor and the results to allow the caller to page as required.
         return AuditLogEntries(cursor=cursor, entries=result.body)  # type: ignore
+
+    def get_users(
+        self,
+        cursor: Optional[str] = None,
+    ) -> AuditLogEntries:
+        """Get user data from the upstream API.
+
+        The Okta Users API supports pagination and has a request limit of 1000 per minute:
+
+            https://developer.okta.com/docs/reference/api/users/#list-users
+
+        :param cursor: Cursor to use when fetching results. Supersedes other
+            parameters.
+
+        :return: AuditLogEntries object containing a pagination cursor, and user entries.
+        """
+        # Use the cursor URL if set, otherwise construct the initial query.
+        if cursor is not None:
+            self.logger.debug(
+                "Collecting next page using Okta provided cursor",
+                extra={"cursor": cursor},
+            )
+            result = self._get(cursor)
+        else:
+            result = self._get(
+                f"{self._api_base_uri}/api/v1/users",
+                params={
+                    "limit": str(API_PAGE_SIZE),
+                },
+            )
+
+        # Track the results.
+        try:
+            cursor = self._parse_link_header(result.headers.get("Link", ""))
+        except ValueError:
+            cursor = None
+
+        # Return the cursor and the results to allow the caller to page as required.
+        return AuditLogEntries(cursor=cursor, entries=result.body)  # type: ignore

@@ -1,0 +1,8 @@
+{
+    "key": "FAKE_API_TOKEN_preview123",
+    "identity": "fake-org-subdomain",
+    "domain": "oktapreview.com",
+    "name": "okta-users-preview-example",
+    "connector": "okta_users",
+    "frequency": 86400
+}
