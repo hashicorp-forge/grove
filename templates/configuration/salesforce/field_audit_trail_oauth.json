@@ -1,0 +1,12 @@
+{
+  "client_id": "YOUR_CONNECTED_APP_CLIENT_ID",
+  "client_secret": "YOUR_CONNECTED_APP_CLIENT_SECRET",
+  "identity": "USERNAME_HERE",
+  "instance_url": "https://your-instance.my.salesforce.com",
+  "name": "salesforce-field-audit-trail-oauth-example",
+  "connector": "sf_field_audit_trail",
+  "object_type": "Account",
+  "start_date": "2024-01-01T00:00:00.000Z",
+  "max_retries": 3,
+  "retry_delay": 1
+}
