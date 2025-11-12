@@ -1,0 +1,7 @@
+{
+    "key": "API_TOKEN_HERE",
+    "identity": "ATLASSIAN_SITE_HERE",
+    "username": "ATLASSIAN_USER_HERE",
+    "name": "atlassian-site-audit-events-example",
+    "connector": "atlassian_site_audit_events"
+}

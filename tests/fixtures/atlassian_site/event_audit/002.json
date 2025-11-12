@@ -1,0 +1,41 @@
+{
+    "offset": 0,
+    "limit": 1000,
+    "total": 328,
+        "records": [
+            {
+                "id": 10359,
+                "summary": "Custom field created",
+                "remoteAddress": "10.23.182.215",
+                "authorKey": "77315d07-ebb9-44db-a5d0-57da39fd3720",
+                "authorAccountId": "5c481cfe5f6f554665c123dc",
+                "created": "2025-11-12T16:28:36.943+0000",
+                "category": "fields",
+                "eventSource": "",
+                "objectItem": {"id": "customfield_10082",
+                "name": "Responders",
+                "typeName": "CUSTOM_FIELD"},
+                "changedValues": [{"fieldName": "Name", "changedTo": "Responders"},
+                {"fieldName": "Description", "changedTo": "Add responders to an incident."},
+                {"fieldName": "Type", "changedTo": "Responders Field"}]},
+            {
+                "id": 10358,
+                "summary": "Field context created",
+                "remoteAddress": "10.23.182.215",
+                "authorKey": "77315d07-ebb9-44db-a5d0-57da39fd3720",
+                "authorAccountId": "5c481cfe5f6f554665c123dc",
+                "created": "2025-11-12T16:28:36.918+0000",
+                "category": "custom field context",
+                "eventSource": "",
+                "objectItem": {"id": "customfield_10082",
+                "name": "customfield_10082",
+                "typeName": "CUSTOM_FIELD"},
+                "changedValues": [{"fieldName": "Associated to project(s)",
+                    "changedFrom": "None",
+                    "changedTo": "All projects"},
+                {"fieldName": "Associated to issue type(s)",
+                    "changedFrom": "None",
+                    "changedTo": "All issue types"}]
+                }
+                ]
+}
