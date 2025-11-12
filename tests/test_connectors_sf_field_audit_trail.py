@@ -112,7 +112,7 @@ class TestSFFieldAuditTrailConnector:
         with pytest.raises(ConfigurationException):
             connector.collect()
 
-    @patch("grove.connectors.sf.field_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_oauth_authentication_success(self, mock_session, connector):
         """Test successful OAuth authentication."""
         # Mock the OAuth response
@@ -129,7 +129,7 @@ class TestSFFieldAuditTrailConnector:
         assert access_token == "test_access_token"
         assert instance_url == "https://testorg.my.salesforce.com"
 
-    @patch("grove.connectors.sf.field_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_oauth_authentication_failure(self, mock_session, connector):
         """Test OAuth authentication failure."""
         # Mock the OAuth response with error
@@ -144,7 +144,7 @@ class TestSFFieldAuditTrailConnector:
         with pytest.raises(Exception):
             connector.get_oauth_access_token()
 
-    @patch("grove.connectors.sf.field_audit_trail.SalesforceLogin")
+    @patch("grove.connectors.sf.base.SalesforceLogin")
     def test_legacy_authentication_success(self, mock_salesforce_login, legacy_connector):
         """Test successful legacy authentication."""
         mock_salesforce_login.return_value = ("test_session_id", "https://testorg.my.salesforce.com")
@@ -154,7 +154,7 @@ class TestSFFieldAuditTrailConnector:
         assert session_id == "test_session_id"
         assert instance_url == "https://testorg.my.salesforce.com"
 
-    @patch("grove.connectors.sf.field_audit_trail.SalesforceLogin")
+    @patch("grove.connectors.sf.base.SalesforceLogin")
     def test_legacy_authentication_failure(self, mock_salesforce_login, legacy_connector):
         """Test legacy authentication failure."""
         mock_salesforce_login.side_effect = SalesforceError("Invalid credentials", 400, "test", "test")
@@ -163,7 +163,7 @@ class TestSFFieldAuditTrailConnector:
             legacy_connector.get_legacy_credentials()
 
     @patch("grove.connectors.sf.field_audit_trail.Salesforce")
-    @patch("grove.connectors.sf.field_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_collect_oauth_success(self, mock_session, mock_salesforce, connector):
         """Test successful data collection with OAuth."""
         # Mock OAuth response
@@ -228,7 +228,7 @@ class TestSFFieldAuditTrailConnector:
         assert saved_entries[0]["NewValue"] == "New Account Name"
 
     @patch("grove.connectors.sf.field_audit_trail.Salesforce")
-    @patch("grove.connectors.sf.field_audit_trail.SalesforceLogin")
+    @patch("grove.connectors.sf.base.SalesforceLogin")
     def test_collect_legacy_success(self, mock_salesforce_login, mock_salesforce, legacy_connector):
         """Test successful data collection with legacy authentication."""
         # Mock legacy authentication
@@ -269,7 +269,7 @@ class TestSFFieldAuditTrailConnector:
         legacy_connector.save.assert_called_once()
 
     @patch("grove.connectors.sf.field_audit_trail.Salesforce")
-    @patch("grove.connectors.sf.field_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_collect_invalid_type_error(self, mock_session, mock_salesforce, connector):
         """Test handling of INVALID_TYPE error (Shield licensing issue)."""
         # Mock OAuth response
@@ -296,7 +296,7 @@ class TestSFFieldAuditTrailConnector:
         assert "Field Audit Trail license" in str(exc_info.value)
 
     @patch("grove.connectors.sf.field_audit_trail.Salesforce")
-    @patch("grove.connectors.sf.field_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_collect_invalid_field_error(self, mock_session, mock_salesforce, connector):
         """Test handling of INVALID_FIELD error (permissions issue)."""
         # Mock OAuth response
@@ -323,7 +323,7 @@ class TestSFFieldAuditTrailConnector:
         assert "FieldHistoryArchive" in str(exc_info.value)
 
     @patch("grove.connectors.sf.field_audit_trail.Salesforce")
-    @patch("grove.connectors.sf.field_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_collect_rate_limit_retry(self, mock_session, mock_salesforce, connector):
         """Test rate limit handling with retry logic."""
         # Mock OAuth response
@@ -361,7 +361,7 @@ class TestSFFieldAuditTrailConnector:
         assert mock_client.query_all.call_count == 2
 
     @patch("grove.connectors.sf.field_audit_trail.Salesforce")
-    @patch("grove.connectors.sf.field_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_collect_no_records(self, mock_session, mock_salesforce, connector):
         """Test handling when no records are returned."""
         # Mock OAuth response
@@ -443,7 +443,7 @@ class TestSFFieldAuditTrailConnector:
         assert timestamp.minute == 30
 
     @patch("grove.connectors.sf.field_audit_trail.Salesforce")
-    @patch("grove.connectors.sf.field_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_pointer_update(self, mock_session, mock_salesforce, connector):
         """Test pointer update after successful collection."""
         # Mock OAuth response
@@ -481,8 +481,13 @@ class TestSFFieldAuditTrailConnector:
 
         connector.collect()
 
-        # Verify pointer was updated
-        assert connector.pointer == "2024-01-15T10:30:00.000Z"
+        # Verify save was called with entries containing the expected CreatedDate
+        # Grove's save() method will automatically update the pointer from the last entry
+        assert connector.save.called
+        saved_entries = connector.save.call_args[0][0]
+        assert len(saved_entries) > 0
+        # Grove uses the last entry for pointer updates in chronological order
+        assert saved_entries[-1]["CreatedDate"] == "2024-01-15T10:30:00.000Z"
 
     def test_supported_object_types_warning(self):
         """Test warning for unsupported object types."""
@@ -506,7 +511,7 @@ class TestSFFieldAuditTrailConnector:
         assert connector.object_type == "CustomObject__c"
 
     @patch("grove.connectors.sf.field_audit_trail.Salesforce")
-    @patch("grove.connectors.sf.field_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_field_audit_trail_availability_check(self, mock_session, mock_salesforce, connector):
         """Test Field Audit Trail availability check."""
         # Mock OAuth response

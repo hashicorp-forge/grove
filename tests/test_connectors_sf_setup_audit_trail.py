@@ -95,7 +95,7 @@ class TestSFSetupAuditTrailConnector:
         with pytest.raises(ConfigurationException):
             connector.collect()
 
-    @patch("grove.connectors.sf.setup_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_oauth_authentication_success(self, mock_session, connector):
         """Test successful OAuth authentication."""
         # Mock the OAuth response
@@ -112,7 +112,7 @@ class TestSFSetupAuditTrailConnector:
         assert access_token == "test_access_token"
         assert instance_url == "https://testorg.my.salesforce.com"
 
-    @patch("grove.connectors.sf.setup_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_oauth_authentication_failure(self, mock_session, connector):
         """Test OAuth authentication failure."""
         # Mock the OAuth response with error
@@ -127,7 +127,7 @@ class TestSFSetupAuditTrailConnector:
         with pytest.raises(Exception):
             connector.get_oauth_access_token()
 
-    @patch("grove.connectors.sf.setup_audit_trail.SalesforceLogin")
+    @patch("grove.connectors.sf.base.SalesforceLogin")
     def test_legacy_authentication_success(self, mock_salesforce_login, legacy_connector):
         """Test successful legacy authentication."""
         mock_salesforce_login.return_value = ("test_session_id", "https://testorg.my.salesforce.com")
@@ -137,7 +137,7 @@ class TestSFSetupAuditTrailConnector:
         assert session_id == "test_session_id"
         assert instance_url == "https://testorg.my.salesforce.com"
 
-    @patch("grove.connectors.sf.setup_audit_trail.SalesforceLogin")
+    @patch("grove.connectors.sf.base.SalesforceLogin")
     def test_legacy_authentication_failure(self, mock_salesforce_login, legacy_connector):
         """Test legacy authentication failure."""
         mock_salesforce_login.side_effect = SalesforceError("Invalid credentials", 400, "test", "test")
@@ -146,7 +146,7 @@ class TestSFSetupAuditTrailConnector:
             legacy_connector.get_legacy_credentials()
 
     @patch("grove.connectors.sf.setup_audit_trail.Salesforce")
-    @patch("grove.connectors.sf.setup_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_collect_oauth_success(self, mock_session, mock_salesforce, connector):
         """Test successful data collection with OAuth."""
         # Mock OAuth response
@@ -159,19 +159,11 @@ class TestSFSetupAuditTrailConnector:
         mock_session.return_value.post.return_value = mock_oauth_response
 
         # Mock Salesforce client and query results
+        # Query returns DESC order (newest first), so "modify" (11:00) comes before "create" (10:30)
         mock_client = MagicMock()
         mock_client.query_all.return_value = {
             "totalSize": 2,
             "records": [
-                {
-                    "Id": "test_id_1",
-                    "Action": "create",
-                    "Section": "User",
-                    "CreatedDate": "2024-01-15T10:30:00.000Z",
-                    "Display": "Created user testuser@example.com",
-                    "CreatedBy": {"Username": "admin@example.com"},
-                    "DelegateUser": None,
-                },
                 {
                     "Id": "test_id_2",
                     "Action": "modify",
@@ -180,6 +172,15 @@ class TestSFSetupAuditTrailConnector:
                     "Display": "Modified profile System Administrator",
                     "CreatedBy": {"Username": "admin@example.com"},
                     "DelegateUser": "delegate@example.com",
+                },
+                {
+                    "Id": "test_id_1",
+                    "Action": "create",
+                    "Section": "User",
+                    "CreatedDate": "2024-01-15T10:30:00.000Z",
+                    "Display": "Created user testuser@example.com",
+                    "CreatedBy": {"Username": "admin@example.com"},
+                    "DelegateUser": None,
                 },
             ],
         }
@@ -208,7 +209,7 @@ class TestSFSetupAuditTrailConnector:
         assert saved_entries[0]["CreatedByUsername"] == "admin@example.com"
 
     @patch("grove.connectors.sf.setup_audit_trail.Salesforce")
-    @patch("grove.connectors.sf.setup_audit_trail.SalesforceLogin")
+    @patch("grove.connectors.sf.base.SalesforceLogin")
     def test_collect_legacy_success(self, mock_salesforce_login, mock_salesforce, legacy_connector):
         """Test successful data collection with legacy authentication."""
         # Mock legacy authentication
@@ -249,7 +250,7 @@ class TestSFSetupAuditTrailConnector:
         legacy_connector.save.assert_called_once()
 
     @patch("grove.connectors.sf.setup_audit_trail.Salesforce")
-    @patch("grove.connectors.sf.setup_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_collect_invalid_type_error(self, mock_session, mock_salesforce, connector):
         """Test handling of INVALID_TYPE error (permissions issue)."""
         # Mock OAuth response
@@ -276,7 +277,7 @@ class TestSFSetupAuditTrailConnector:
         assert "View Setup and Configuration" in str(exc_info.value)
 
     @patch("grove.connectors.sf.setup_audit_trail.Salesforce")
-    @patch("grove.connectors.sf.setup_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_collect_rate_limit_retry(self, mock_session, mock_salesforce, connector):
         """Test rate limit handling with retry logic."""
         # Mock OAuth response
@@ -314,7 +315,7 @@ class TestSFSetupAuditTrailConnector:
         assert mock_client.query_all.call_count == 2
 
     @patch("grove.connectors.sf.setup_audit_trail.Salesforce")
-    @patch("grove.connectors.sf.setup_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_collect_no_records(self, mock_session, mock_salesforce, connector):
         """Test handling when no records are returned."""
         # Mock OAuth response
@@ -395,7 +396,7 @@ class TestSFSetupAuditTrailConnector:
         assert timestamp.minute == 30
 
     @patch("grove.connectors.sf.setup_audit_trail.Salesforce")
-    @patch("grove.connectors.sf.setup_audit_trail.requests.session")
+    @patch("grove.connectors.sf.base.requests.session")
     def test_pointer_update(self, mock_session, mock_salesforce, connector):
         """Test pointer update after successful collection."""
         # Mock OAuth response
@@ -433,5 +434,10 @@ class TestSFSetupAuditTrailConnector:
 
         connector.collect()
 
-        # Verify pointer was updated
-        assert connector.pointer == "2024-01-15T10:30:00.000Z"
+        # Verify save was called with entries containing the expected CreatedDate
+        # Grove's save() method will automatically update the pointer from the last entry
+        assert connector.save.called
+        saved_entries = connector.save.call_args[0][0]
+        assert len(saved_entries) > 0
+        # Since we reverse entries for setup_audit_trail, the last entry should have the latest date
+        assert saved_entries[-1]["CreatedDate"] == "2024-01-15T10:30:00.000Z"

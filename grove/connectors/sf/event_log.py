@@ -5,13 +5,17 @@
 
 import csv
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 import requests
-from simple_salesforce import Salesforce, SalesforceLogin
+from simple_salesforce import Salesforce
 from simple_salesforce.exceptions import SalesforceError
 
-from grove.connectors import BaseConnector
+from grove.connectors.sf.base import (
+    SF_TIMESTAMP_FORMAT,
+    SF_VERSION,
+    BaseSalesforceConnector,
+)
 from grove.constants import CHRONOLOGICAL, DEFAULT_OPERATION
 from grove.exceptions import (
     ConfigurationException,
@@ -19,13 +23,7 @@ from grove.exceptions import (
     RequestFailedException,
 )
 
-# TODO: Make this dynamic?
-SF_VERSION = "51.0"
 SF_OPERATIONS = ["Login", DEFAULT_OPERATION]
-SF_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f%z"
-
-# Default OAuth 2.0 endpoint for Salesforce (fallback only)
-SF_OAUTH_TOKEN_URL_DEFAULT = "https://login.salesforce.com/services/oauth2/token"
 
 # SOQL query templates for use when accessing logs.
 SOQL_EVENTLOGFILE = (
@@ -36,227 +34,10 @@ SOQL_EVENTLOGFILE = (
 )
 
 
-class Connector(BaseConnector):
+class Connector(BaseSalesforceConnector):
     CONNECTOR = "sf_event_log"
     POINTER_PATH = "TIMESTAMP_DERIVED"
     LOG_ORDER = CHRONOLOGICAL
-
-    @property
-    def client_id(self):
-        """Fetches the Salesforce client ID from the configuration.
-
-        This is required for OAuth 2.0 client credentials flow.
-
-        :return: The "client_id" portion of the connector's configuration.
-        """
-        try:
-            return self.configuration.client_id
-        except AttributeError:
-            return None
-
-    @property
-    def client_secret(self):
-        """Fetches the Salesforce client secret from the configuration.
-
-        This is required for OAuth 2.0 client credentials flow.
-
-        :return: The "client_secret" portion of the connector's configuration.
-        """
-        try:
-            return self.configuration.client_secret
-        except AttributeError:
-            return None
-
-    @property
-    def instance_url(self):
-        """Fetches the Salesforce instance URL from the configuration.
-
-        This is the Salesforce instance URL where the API calls will be made.
-
-        :return: The "instance_url" portion of the connector's configuration.
-        """
-        try:
-            return self.configuration.instance_url
-        except AttributeError:
-            return None
-
-    @property
-    def token(self):
-        """Fetches the SalesForce security token from the configuration.
-
-        This is required for traditional username/password authentication.
-
-        :return: The "token" portion of the connector's configuration.
-        """
-        try:
-            return self.configuration.token
-        except AttributeError:
-            return None
-
-    def _is_oauth_configured(self) -> bool:
-        """Determines if OAuth 2.0 credentials are configured.
-
-        :return: True if OAuth credentials are present, False otherwise.
-        """
-        return bool(self.client_id and self.client_secret)
-
-    def _is_legacy_configured(self) -> bool:
-        """Determines if legacy username/password credentials are configured.
-
-        :return: True if legacy credentials are present, False otherwise.
-        """
-        return bool(self.key and self.identity and self.token)
-
-    def _get_oauth_token_url(self) -> str:
-        """Determines the OAuth token URL based on the instance URL.
-
-        Uses the instance URL to construct the OAuth endpoint, falling back to
-        the default production endpoint if no instance URL is provided.
-
-        :return: The OAuth token URL for the Salesforce environment.
-        """
-        if not self.instance_url:
-            # If no instance URL is provided, use default production endpoint
-            return SF_OAUTH_TOKEN_URL_DEFAULT
-
-        # Extract the base domain from the instance URL and construct OAuth endpoint
-        # e.g., https://testorg.my.salesforce.com -> https://testorg.my.salesforce.com/services/oauth2/token
-        instance_url = self.instance_url.rstrip("/")
-        oauth_url = f"{instance_url}/services/oauth2/token"
-
-        return oauth_url
-
-    def get_oauth_access_token(self) -> Tuple[str, str]:
-        """Obtains an access token using OAuth 2.0 client credentials flow.
-
-        This method authenticates with Salesforce using the client credentials flow
-        and returns an access token for API calls.
-
-        :return: A tuple containing (access_token, instance_url)
-        :raises ConfigurationException: If required configuration is missing
-        :raises RequestFailedException: If authentication fails
-        """
-        if not self.client_id:
-            raise ConfigurationException(
-                "client_id is required for OAuth 2.0 authentication"
-            )
-        if not self.client_secret:
-            raise ConfigurationException(
-                "client_secret is required for OAuth 2.0 authentication"
-            )
-
-        session = requests.session()
-        oauth_token_url = self._get_oauth_token_url()
-
-        self.logger.debug(
-            f"Using OAuth token URL: {oauth_token_url} for instance: {self.instance_url}",
-            extra=self.log_context,
-        )
-
-        self.logger.debug(
-            f"OAuth credentials - Client ID: {self.client_id} (length: {len(self.client_id) if self.client_id else 0})",
-            extra=self.log_context,
-        )
-
-        try:
-            response = session.post(
-                oauth_token_url,
-                data={
-                    "grant_type": "client_credentials",
-                    "client_id": self.client_id,
-                    "client_secret": self.client_secret,
-                },
-                headers={
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-            )
-            response.raise_for_status()
-
-            token_data = response.json()
-            access_token = token_data.get("access_token")
-            instance_url = token_data.get("instance_url")
-
-            if not access_token:
-                raise RequestFailedException("No access token received from Salesforce")
-            if not instance_url:
-                raise RequestFailedException("No instance URL received from Salesforce")
-
-            return access_token, instance_url
-
-        except requests.exceptions.HTTPError as err:
-            # Enhanced error logging for OAuth failures
-            try:
-                error_response = err.response.json()
-                error_details = error_response.get(
-                    "error_description", error_response.get("error", "Unknown error")
-                )
-                self.logger.error(
-                    f"OAuth authentication failed: {error_details}",
-                    extra={
-                        **self.log_context,
-                        "oauth_url": oauth_token_url,
-                        "client_id": self.client_id,
-                        "response_status": err.response.status_code,
-                        "response_body": error_response,
-                    },
-                )
-            except (ValueError, KeyError):
-                # If we can't parse the error response, log the raw response
-                self.logger.error(
-                    f"OAuth authentication failed with unparseable response: {err}",
-                    extra={
-                        **self.log_context,
-                        "oauth_url": oauth_token_url,
-                        "client_id": self.client_id,
-                        "response_status": err.response.status_code,
-                        "response_text": err.response.text,
-                    },
-                )
-
-            raise RequestFailedException(
-                f"Unable to authenticate with Salesforce using OAuth 2.0: {err}"
-            )
-        except requests.exceptions.RequestException as err:
-            raise RequestFailedException(
-                f"Unable to authenticate with Salesforce using OAuth 2.0: {err}"
-            )
-
-    def get_legacy_credentials(self) -> Tuple[str, str]:
-        """Obtains credentials using traditional username/password authentication.
-
-        This method authenticates with Salesforce using the legacy username/password
-        flow and returns session credentials for API calls.
-
-        :return: A tuple containing (session_id, instance_url)
-        :raises ConfigurationException: If required configuration is missing
-        :raises RequestFailedException: If authentication fails
-        """
-        if not self.key:
-            raise ConfigurationException(
-                "key (password) is required for legacy authentication"
-            )
-        if not self.identity:
-            raise ConfigurationException(
-                "identity (username) is required for legacy authentication"
-            )
-        if not self.token:
-            raise ConfigurationException(
-                "token (security token) is required for legacy authentication"
-            )
-
-        session = requests.session()
-        try:
-            (sf_session, sf_instance) = SalesforceLogin(
-                session=session,
-                username=self.identity,
-                password=self.key,
-                security_token=self.token,
-            )
-            return sf_session, sf_instance
-        except (SalesforceError, requests.exceptions.RequestException) as err:
-            raise RequestFailedException(
-                f"Unable to authenticate with Salesforce using legacy authentication: {err}"
-            )
 
     def collect(self):  # noqa: C901
         """Collects EventLogs from the SF Cloud API.
