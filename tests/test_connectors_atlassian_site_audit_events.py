@@ -76,39 +76,8 @@ class AtlassianSiteEventAuditTestCase(unittest.TestCase):
             mock_sleep.assert_called_with(1)
 
     @responses.activate
-    def test_get_token_fail_on_server_error(self):
-        """Ensure server errors raise an appropriate exception."""
-        # Setup an fake HTTP 400 response from Atlassian site.
-        responses.add(
-            responses.POST,
-            re.compile(r"https://.*"),
-            status=400,
-            content_type="application/json",
-            body=bytes(),
-        )
-
-        with self.assertRaises(RequestFailedException):
-            self.connector.collect()
-
-    @responses.activate
     def test_collect_fail_on_server_error(self):
         """Ensure server errors raise an appropriate exception."""
-        # Get bearer token
-        responses.add(
-            responses.POST,
-            re.compile(r"https://.*"),
-            status=200,
-            content_type="application/json",
-            body=bytes(
-                open(
-                    os.path.join(
-                        self.dir, "fixtures/atlassian_site/event_audit/001.json"
-                    ),
-                    "r",
-                ).read(),
-                "utf-8",
-            ),
-        )
         # Setup an fake HTTP 500 response from Atlassian site.
         responses.add(
             responses.GET,
@@ -149,7 +118,7 @@ class AtlassianSiteEventAuditTestCase(unittest.TestCase):
             body=bytes(
                 open(
                     os.path.join(
-                        self.dir, "fixtures/atlassian_site/event_audit/004.json"
+                        self.dir, "fixtures/atlassian_site/event_audit/001.json"
                     ),
                     "r",
                 ).read(),
@@ -174,7 +143,7 @@ class AtlassianSiteEventAuditTestCase(unittest.TestCase):
             body=bytes(
                 open(
                     os.path.join(
-                        self.dir, "fixtures/atlassian_site/event_audit/004.json"
+                        self.dir, "fixtures/atlassian_site/event_audit/003.json"
                     ),
                     "r",
                 ).read(),
@@ -198,7 +167,7 @@ class AtlassianSiteEventAuditTestCase(unittest.TestCase):
             body=bytes(
                 open(
                     os.path.join(
-                        self.dir, "fixtures/atlassian_site/event_audit/003.json"
+                        self.dir, "fixtures/atlassian_site/event_audit/001.json"
                     ),
                     "r",
                 ).read(),
