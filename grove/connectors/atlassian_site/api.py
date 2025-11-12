@@ -77,34 +77,6 @@ class Client:
 
         return HTTPResponse(headers=response.headers, body=response.json())
 
-    def _post(
-        self,
-        url: str,
-        headers: Optional[Dict[str, Any]] = None,
-        data: Optional[Dict[str, Optional[str]]] = None,
-    ) -> Dict[str, Any]:
-        """A POST wrapper to handle retries for the caller.
-
-        :param url: URL to perform the HTTP POST against.
-        :param headers: Dictionary of headers to add to the request.
-        :param data: HTTP parameters to add to the request.
-
-        :raises RequestFailedException: An HTTP request failed.
-
-        :return: The response to the request in JSON.
-        """
-        try:
-            response = requests.post(
-                url,
-                headers=headers,
-                data=data,
-            )
-            response.raise_for_status()
-        except requests.exceptions.RequestException as err:
-            raise RequestFailedException(err)
-
-        return response.json()
-
     def get_audit(
         self,
         cursor: int = 0,
