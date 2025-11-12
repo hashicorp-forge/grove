@@ -44,6 +44,7 @@ Currently the following log sources are supported by Grove out of the box. If a 
 isn't listed here, support can be added by creating a custom connector!
 
 * Atlassian audit events (e.g. Confluence, Jira)
+* Atlassian site audit events (e.g. Confluence, Jira)
 * FleetDM host logs
 * Dropbox team event logs
 * GitHub audit logs
