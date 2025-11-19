@@ -3,8 +3,6 @@
 
 """Tests for the Salesforce Setup Audit Trail connector."""
 
-import json
-import os
 from unittest.mock import MagicMock, patch
 
 import pytest

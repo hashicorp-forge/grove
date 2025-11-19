@@ -216,7 +216,7 @@ class Connector(BaseSalesforceConnector):
             # Handle CreatedBy.Username (nested object)
             # Handle case where CreatedBy is None (not just missing)
             created_by = record.get("CreatedBy") or {}
-            entry["CreatedByUsername"] = created_by.get("Username")
+            entry["CreatedByUsername"] = created_by.get("Username")  # type: ignore[assignment]
 
             # Handle DelegateUser (may be null)
             entry["DelegateUser"] = record.get("DelegateUser")
