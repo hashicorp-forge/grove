@@ -3,8 +3,6 @@
 
 """Tests for the Salesforce Setup Audit Trail connector."""
 
-import json
-import os
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -441,3 +439,67 @@ class TestSFSetupAuditTrailConnector:
         assert len(saved_entries) > 0
         # Since we reverse entries for setup_audit_trail, the last entry should have the latest date
         assert saved_entries[-1]["CreatedDate"] == "2024-01-15T10:30:00.000Z"
+
+    @patch("grove.connectors.sf.setup_audit_trail.Salesforce")
+    @patch("grove.connectors.sf.base.requests.session")
+    def test_collect_with_null_created_by(self, mock_session, mock_salesforce, connector):
+        """Test handling of records where CreatedBy is None (production issue fix)."""
+        # Mock OAuth response
+        mock_oauth_response = MagicMock()
+        mock_oauth_response.json.return_value = {
+            "access_token": "test_access_token",
+            "instance_url": "https://testorg.my.salesforce.com",
+        }
+        mock_oauth_response.raise_for_status.return_value = None
+        mock_session.return_value.post.return_value = mock_oauth_response
+
+        # Mock Salesforce client with records including one with CreatedBy = None
+        mock_client = MagicMock()
+        mock_client.query_all.return_value = {
+            "totalSize": 2,
+            "records": [
+                {
+                    "Id": "test_id_1",
+                    "Action": "create",
+                    "Section": "User",
+                    "CreatedDate": "2024-01-15T10:30:00.000Z",
+                    "Display": "Created user testuser@example.com",
+                    "CreatedBy": None,  # This is the problematic case from production
+                    "DelegateUser": None,
+                },
+                {
+                    "Id": "test_id_2",
+                    "Action": "modify",
+                    "Section": "Profile",
+                    "CreatedDate": "2024-01-15T11:00:00.000Z",
+                    "Display": "Modified profile System Administrator",
+                    "CreatedBy": {"Username": "admin@example.com"},
+                    "DelegateUser": None,
+                },
+            ],
+        }
+        mock_salesforce.return_value = mock_client
+
+        # Mock the save method
+        connector.save = MagicMock()
+
+        # Mock pointer handling
+        connector.pointer = "2024-01-01T00:00:00.000Z"
+
+        # This should not raise an exception
+        connector.collect()
+
+        # Verify save was called
+        assert connector.save.called
+        saved_entries = connector.save.call_args[0][0]
+        assert len(saved_entries) == 2
+        
+        # Find entries by ID to avoid order assumptions
+        entry_with_none = next(e for e in saved_entries if e["Id"] == "test_id_1")
+        entry_with_username = next(e for e in saved_entries if e["Id"] == "test_id_2")
+        
+        # Verify the record with CreatedBy = None has CreatedByUsername = None
+        assert entry_with_none["CreatedByUsername"] is None
+        
+        # Verify the record with CreatedBy object has the username
+        assert entry_with_username["CreatedByUsername"] == "admin@example.com"
