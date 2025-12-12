@@ -62,6 +62,11 @@ class Connector(BaseSalesforceConnector):
                 "Either OAuth 2.0 credentials (client_id, client_secret) or legacy "
                 "credentials (key, identity, token) must be provided"
             )
+        
+        # Ensure the instance_url has a proper scheme
+        # This check needs to be done here because sf client code does not append
+        if not instance_url.startswith(("http://", "https://")):
+            instance_url = f"https://{instance_url}"
 
         # Create Salesforce client using obtained credentials
         try:
@@ -167,10 +172,6 @@ class Connector(BaseSalesforceConnector):
                 # from our authentication session. It doesn't appear that Simple Salesforce
                 # has a nice way to handle this for us.
                 try:
-                    # Ensure the instance_url has a proper scheme
-                    if not instance_url.startswith(("http://", "https://")):
-                        instance_url = f"https://{instance_url}"
-
                     request = requests.get(
                         f"{instance_url}/{log_file.get('LogFile')}",
                         headers={
