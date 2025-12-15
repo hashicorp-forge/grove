@@ -59,7 +59,7 @@ class Connector(BaseConnector):
         batch_size = 1000
 
         try:
-            events = client.monitor.events.stream(start_date=self.pointer)
+            events = client.monitor.v1.events.stream(start_date=self.pointer)
         except TwilioException as err:
             raise RequestFailedException(err)
 
