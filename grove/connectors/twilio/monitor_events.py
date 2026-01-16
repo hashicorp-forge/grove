@@ -59,7 +59,7 @@ class Connector(BaseConnector):
         batch_size = 1000
 
         try:
-            events = client.monitor.events.stream(start_date=self.pointer)
+            events = client.monitor.v1.events.stream(start_date=self.pointer)
         except TwilioException as err:
             raise RequestFailedException(err)
 
@@ -68,7 +68,7 @@ class Connector(BaseConnector):
             # for the event_date, and does not expose a way to return the entire set
             # of properties we'll need to break encapsulation to get all of the data
             # mapped into the object.
-            candidate = event._properties
+            candidate = {k: v for k, v in vars(event).items() if not k.startswith("_")}
             candidate["event_date"] = event.event_date.strftime("%Y-%m-%dT%H:%M:%S%z")
 
             # Track the event.
