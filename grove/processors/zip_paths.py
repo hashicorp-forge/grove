@@ -28,7 +28,7 @@ Making this data considerably easier to work with during creation of indexes, an
 creation of detection content.
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 import jmespath
 from pydantic import Extra
@@ -56,17 +56,17 @@ class Handler(BaseProcessor):
         # dictionary. If multiple are provided, the sources are processed in order with
         # the first match winning. This must be the path relative to the source, not the
         # absolute path.
-        values: List[str] = []
+        values: list[str] = []
 
-    def process(self, entry: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def process(self, entry: dict[str, Any]) -> list[dict[str, Any]]:
         """Extract and zip configured paths, replacing the source.
 
         :param entry: A collected log entry.
 
         :return: The processed log entry with fields zipped.
         """
-        result: Dict[str, Any] = {}
-        children: List[Any] = []
+        result: dict[str, Any] = {}
+        children: list[Any] = []
 
         # If the source field cannot be found, just pass the record back to the caller
         # as we don't want to drop it. We also want to make sure we can always iterate

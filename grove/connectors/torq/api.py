@@ -5,7 +5,7 @@
 
 import base64
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 import requests
 
@@ -19,11 +19,11 @@ API_PAGE_SIZE = 100
 class Client:
     def __init__(
         self,
-        base_url: Optional[str] = API_BASE_URI,
-        identity: Optional[str] = None,
-        key: Optional[str] = None,
-        bearer_token: Optional[str] = None,
-        retry: Optional[bool] = True,
+        base_url: str | None = API_BASE_URI,
+        identity: str | None = None,
+        key: str | None = None,
+        bearer_token: str | None = None,
+        retry: bool | None = True,
     ) -> None:
         """Setup a new client.
 
@@ -53,7 +53,7 @@ class Client:
         }
 
     def _get(
-        self, url: str, params: Optional[Dict[str, Optional[str]]] = None
+        self, url: str, params: dict[str, str | None] | None = None
     ) -> HTTPResponse:
         """A GET wrapper to handle retries for the caller.
 
@@ -76,9 +76,9 @@ class Client:
     def _post(
         self,
         url: str,
-        headers: Optional[Dict[str, Any]] = None,
-        data: Optional[Dict[str, Optional[str]]] = None,
-    ) -> Dict[str, Any]:
+        headers: dict[str, Any] | None = None,
+        data: dict[str, str | None] | None = None,
+    ) -> dict[str, Any]:
         """A POST wrapper to handle retries for the caller.
 
         :param url: URL to perform the HTTP POST against.
@@ -138,9 +138,9 @@ class Client:
         self,
         endpoint: str,
         result_field: str,
-        start_time: Optional[str] = None,
-        limit: Optional[int] = API_PAGE_SIZE,
-        cursor: Optional[str] = None,
+        start_time: str | None = None,
+        limit: int | None = API_PAGE_SIZE,
+        cursor: str | None = None,
     ) -> AuditLogEntries:
         """Fetches a list of logs from Torq which match the provided filters.
 
@@ -174,7 +174,7 @@ class Client:
         return AuditLogEntries(cursor=cursor, entries=data)
 
     def get_audit_logs(
-        self, start_time: Optional[str] = None, cursor: Optional[str] = None
+        self, start_time: str | None = None, cursor: str | None = None
     ) -> AuditLogEntries:
         """Fetches a list of audit logs from Torq which match the provided filters.
 
@@ -193,7 +193,7 @@ class Client:
         )
 
     def get_activity_logs(
-        self, start_time: Optional[str] = None, cursor: Optional[str] = None
+        self, start_time: str | None = None, cursor: str | None = None
     ) -> AuditLogEntries:
         """Fetches a list of activity logs from Torq which match the provided filters.
 

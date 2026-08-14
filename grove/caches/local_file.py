@@ -5,7 +5,6 @@
 
 import logging
 import os
-from typing import Optional
 
 from pydantic import BaseSettings, Field, ValidationError
 
@@ -72,7 +71,7 @@ class Handler(BaseCache):
         try:
             os.makedirs(os.path.dirname(path), exist_ok=True)
 
-            with open(path, "r") as hndl:
+            with open(path) as hndl:
                 value = hndl.read()
         except FileNotFoundError:
             # If the file isn't found, we treat this as the cache is empty for this
@@ -94,7 +93,7 @@ class Handler(BaseCache):
         sk: str,
         value: str,
         not_set: bool = False,
-        constraint: Optional[str] = None,
+        constraint: str | None = None,
     ):
         """Stores the value for the given key in a local file backed cache.
 
@@ -139,7 +138,7 @@ class Handler(BaseCache):
         except OSError as err:
             raise AccessException(f"Unable to write cache entry to {path}. {err}")
 
-    def delete(self, pk: str, sk: str, constraint: Optional[str] = None):
+    def delete(self, pk: str, sk: str, constraint: str | None = None):
         """Deletes an entry from local file backed cache that has the given key.
 
         :param pk: Partition key of the value to delete.

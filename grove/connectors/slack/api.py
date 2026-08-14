@@ -9,7 +9,6 @@ created in the interim.
 
 import logging
 import time
-from typing import Dict, Optional
 
 import requests
 
@@ -22,8 +21,8 @@ API_BASE_URI = "https://api.slack.com/audit/v1"
 class Client:
     def __init__(
         self,
-        token: Optional[str] = None,
-        retry: Optional[bool] = True,
+        token: str | None = None,
+        retry: bool | None = True,
     ):
         """Setup a new Slack audit API client.
 
@@ -41,7 +40,7 @@ class Client:
     def _get(
         self,
         url: str,
-        params: Optional[Dict[str, Optional[str]]] = None,
+        params: dict[str, str | None] | None = None,
     ) -> HTTPResponse:
         """A GET wrapper to handle retries for the caller.
 
@@ -74,10 +73,10 @@ class Client:
 
     def get_logs(
         self,
-        latest: Optional[str] = None,
-        oldest: Optional[str] = None,
-        action: Optional[str] = None,
-        cursor: Optional[str] = None,
+        latest: str | None = None,
+        oldest: str | None = None,
+        action: str | None = None,
+        cursor: str | None = None,
     ) -> AuditLogEntries:
         """Fetches a list of audit logs which match the provided filters.
 

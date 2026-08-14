@@ -8,7 +8,7 @@ import binascii
 import datetime
 import hashlib
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Extra, Field, root_validator, validator
 
@@ -70,6 +70,63 @@ class OutputStream(str, Enum):
     processed = "processed"
 
 
+class ObserverEventType(str, Enum):
+    """Defines the types of event which the observability layer may emit."""
+
+    # A connector encountered an error during collection.
+    error = "error"
+
+    # A connector has not completed a collection within the expected window.
+    stale = "stale"
+
+    # A connector completed successfully but returned no data for a number of
+    # consecutive runs.
+    zero_volume = "zero_volume"
+
+
+class ObserverEventSeverity(str, Enum):
+    """Defines the severity levels associated with observer events."""
+
+    info = "info"
+    warning = "warning"
+    critical = "critical"
+
+
+class ObserverEvent(BaseModel, extra=Extra.allow):
+    """Defines the payload emitted by the observability layer.
+
+    An observer event is a small, discrete control-plane message describing the health
+    of a connector - such as an error, a stale (overdue) collection, or a run which
+    returned no data. This is distinct from collected log data, which is handled by
+    output handlers.
+    """
+
+    # The type of event, and its severity.
+    event: ObserverEventType
+    severity: ObserverEventSeverity = ObserverEventSeverity.warning
+
+    # Identifying information for the connector the event relates to.
+    connector: str
+    name: str
+    identity: str
+    operation: str
+
+    # A human readable message describing the event, and an optional error string.
+    message: str | None = None
+    error: str | None = None
+
+    # Contextual information about the collection at the time of the event.
+    saved: int | None = None
+    pointer: str | None = None
+    frequency: int | None = None
+    last_run_age_seconds: int | None = None
+
+    # Runtime and versioning information.
+    runtime: dict[str, Any] = Field(default_factory=dict)
+    collection_time: str | None = None
+    version: str | None = None
+
+
 class ConnectorConfig(BaseModel, extra=Extra.allow):
     """Defines the connector configuration structure.
 
@@ -96,12 +153,12 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
 
     # Secrets is used to mark which fields are considered to be secrets, and their
     # associated location in the configured secrets backend.
-    secrets: Dict[str, str] = Field({})
+    secrets: dict[str, str] = Field({})
 
     # Similar to secrets, Encoding is used to mark fields which are encoded due in some
     # form which must be decoded before use. This is often used for base64 encoding
     # binary data or nested JSON.
-    encoding: Dict[str, str] = Field({})
+    encoding: dict[str, str] = Field({})
 
     # Operations allow connectors and users to filter which 'type' of events to collect
     # from API endpoints which allow filtering records to return.
@@ -111,19 +168,19 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
     frequency: int = Field(DEFAULT_CONFIG_FREQUENCY)
 
     # Processors allow processing of data during collection.
-    processors: List[ProcessorConfig] = Field([])
+    processors: list[ProcessorConfig] = Field([])
 
     # Outputs allows specification of what type of data to output, and with what
     # descriptor. By default, any processed logs will be output with a descriptor of
     # 'processed', and raw logs with a descriptor of 'logs'.
-    outputs: Dict[str, OutputStream] = Field(
+    outputs: dict[str, OutputStream] = Field(
         {
             "logs": OutputStream.raw,
             "processed": OutputStream.processed,
         }
     )
 
-    def reference(self, suffix: Optional[str] = None) -> str:
+    def reference(self, suffix: str | None = None) -> str:
         """Attempt to generate a unique reference for this connector instance.
 
         This is used during creation of cache keys, and other values which should be
@@ -150,7 +207,7 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
         return ".".join(parts)
 
     @validator("key")
-    def _validate_key_or_secret(cls, value, values, field):  # noqa: B902
+    def _validate_key_or_secret(cls, value, values, field):
         """Ensures that 'key' is set directly or a reference is present in 'secrets'.
 
         This is used to ensure that a key is always set, whether directly, or will be
@@ -163,7 +220,7 @@ class ConnectorConfig(BaseModel, extra=Extra.allow):
         return value
 
     @root_validator(pre=True)
-    def _decode_fields(cls, values):  # noqa: B902
+    def _decode_fields(cls, values):
         """Automatically decode fields using the specified encoding during data loading.
 
         If a field is listed in both the 'secrets' field and this 'encoding' field,
@@ -211,10 +268,10 @@ class Run(BaseModel, extra=Extra.forbid):
     """
 
     # The future associated with the dispatched thread, or runtime element.
-    future: Optional[Any] = None
+    future: Any | None = None
 
     # The connector configuration for this run.
     configuration: ConnectorConfig
 
     # A date-time object representing the last time this was dispatched.
-    last: Optional[datetime.datetime] = None
+    last: datetime.datetime | None = None

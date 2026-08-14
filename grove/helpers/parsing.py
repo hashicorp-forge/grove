@@ -5,7 +5,7 @@
 
 import json
 import re
-from typing import Any, Dict, List
+from typing import Any
 
 from pydantic import ValidationError
 
@@ -48,7 +48,7 @@ def quick_copy(value: Any):
     return json.loads(json.dumps(value, default=str))
 
 
-def quote_aware_split(value: str, delimiter=".") -> List[str]:
+def quote_aware_split(value: str, delimiter=".") -> list[str]:
     """Splits a value by delimiter, returning a list.
 
     This function is quote aware, ensuring that splitting will not occur inside of a
@@ -74,11 +74,11 @@ def quote_aware_split(value: str, delimiter=".") -> List[str]:
 
 
 def update_path(
-    candidate: Dict[str, Any],
-    path: List[str],
+    candidate: dict[str, Any],
+    path: list[str],
     value: Any,
     replace: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Updates or deletes values under the specified path for the provided candidate.
 
     A path is a list of strings delimited string which express a location within the

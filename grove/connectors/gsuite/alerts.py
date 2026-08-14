@@ -49,7 +49,7 @@ class Connector(BaseConnector):
 
         :raises RequestFailedException: An HTTP request failed.
         """
-        cursor = str()
+        cursor = ""
         http = google_auth_httplib2.AuthorizedHttp(
             self.get_credentials(),
             http=self.get_http_transport(),

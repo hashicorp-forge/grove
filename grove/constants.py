@@ -10,6 +10,7 @@ CACHE_KEY_SEEN = "deduplication"
 CACHE_KEY_POINTER = "pointer"
 CACHE_KEY_POINTER_NEXT = "pointer_next"
 CACHE_KEY_POINTER_PREV = "pointer_previous"
+CACHE_KEY_ZERO_VOLUME = "zero_volume_runs"
 
 # The prefix for window start pointers.
 CACHE_KEY_WINDOW_START = "window_start"
@@ -29,8 +30,9 @@ GROVE_METADATA_KEY = "_grove"
 # Environment variable names, used to override runtime settings.
 ENV_GROVE_CACHE_HANDLER = "GROVE_CACHE_HANDLER"
 ENV_GROVE_OUTPUT_HANDLER = "GROVE_OUTPUT_HANDLER"
+ENV_GROVE_OBSERVER_HANDLER = "GROVE_OBSERVER_HANDLER"
 ENV_GROVE_CONFIG_HANDLER = "GROVE_CONFIG_HANDLER"
-ENV_GROVE_SECRET_HANDLER = "GROVE_SECRET_HANDLER"  # noqa: S105
+ENV_GROVE_SECRET_HANDLER = "GROVE_SECRET_HANDLER"
 ENV_GROVE_TELEMETRY_URI = "GROVE_TELEMETRY_URI"
 ENV_GROVE_WORKER_COUNT = "GROVE_WORKER_COUNT"
 ENV_GROVE_LOCK_DURATION = "GROVE_LOCK_DURATION"
@@ -39,9 +41,10 @@ ENV_GROVE_CONFIG_REFRESH = "GROVE_CONFIG_REFRESH"
 # Plugin groups (setuptools entrypoints).
 PLUGIN_GROUP_CACHE = "grove.caches"
 PLUGIN_GROUP_OUTPUT = "grove.outputs"
+PLUGIN_GROUP_OBSERVER = "grove.observers"
 PLUGIN_GROUP_CONFIG = "grove.configs"
 PLUGIN_GROUP_PROCESSOR = "grove.processors"
-PLUGIN_GROUP_SECRET = "grove.secrets"  # noqa: S105
+PLUGIN_GROUP_SECRET = "grove.secrets"
 PLUGIN_GROUP_CONNECTOR = "grove.connectors"
 
 # Define defines for unset environment variables.
@@ -61,3 +64,12 @@ DEFAULT_CONFIG_REFRESH = 300  # seconds.
 
 # Run connectors every 10 minutes by default.
 DEFAULT_CONFIG_FREQUENCY = 600  # seconds.
+
+# The default multiple of a connector's frequency after which a collection is considered
+# stale (i.e. overdue) by the observability layer. A value of 3 means a connector is
+# flagged as stale once it has not completed for three times its configured frequency.
+DEFAULT_STALENESS_FACTOR = 3
+
+# The default number of consecutive zero-volume runs before an observer event is emitted.
+# A value of 0 disables zero-volume alerting.
+DEFAULT_ZERO_VOLUME_RUNS = 0

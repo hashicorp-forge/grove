@@ -5,7 +5,7 @@
 
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List
+from typing import Any
 
 
 from grove.connectors import BaseConnector
@@ -71,7 +71,7 @@ class Connector(BaseConnector):
     @property
     def delay_minutes(self) -> int:
         """Number of minutes to delay collection to ensure data consistency.
-        
+
         This accounts for potential delays in Zendesk's data pipeline.
         """
         try:
@@ -82,7 +82,7 @@ class Connector(BaseConnector):
     @property
     def batch_size(self) -> int:
         """Number of tickets to process in each batch.
-        
+
         Smaller batches provide better progress tracking and allow for
         intermediate saves, but may increase overall runtime slightly.
         """
@@ -91,7 +91,7 @@ class Connector(BaseConnector):
         except (AttributeError, ValueError):
             return 50  # Default batch size
 
-    def _get_tickets_since(self, start_time: datetime) -> List[Dict[str, Any]]:
+    def _get_tickets_since(self, start_time: datetime) -> list[dict[str, Any]]:
         """Get all tickets updated since the specified time using ZendeskClient."""
         tickets = []
         start_timestamp = int(start_time.timestamp())
@@ -108,11 +108,11 @@ class Connector(BaseConnector):
             time.sleep(1)
         return tickets
 
-    def _get_ticket_comments(self, ticket_id: int) -> List[Dict[str, Any]]:
+    def _get_ticket_comments(self, ticket_id: int) -> list[dict[str, Any]]:
         """Get all comments for a specific ticket using ZendeskClient."""
         return self._client.get_ticket_comments(ticket_id, include_inline_images=self.include_attachments)
 
-    def _filter_closed_tickets(self, tickets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _filter_closed_tickets(self, tickets: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Filter tickets to only include closed ones.
 
         :param tickets: List of all tickets.
@@ -120,50 +120,50 @@ class Connector(BaseConnector):
         """
         closed_statuses = ["closed", "solved"]
         closed_tickets = [
-            ticket for ticket in tickets 
+            ticket for ticket in tickets
             if ticket.get("status") in closed_statuses
         ]
-        
+
         self.logger.info(
             f"Filtered to {len(closed_tickets)} closed tickets from {len(tickets)} total",
             extra=self.log_context
         )
-        
+
         return closed_tickets
 
-    def _enrich_tickets_with_comments(self, tickets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _enrich_tickets_with_comments(self, tickets: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Enrich tickets with their comments and attachments.
 
         :param tickets: List of tickets to enrich.
         :return: List of enriched tickets.
         """
         enriched_tickets = []
-        
+
         for i, ticket in enumerate(tickets):
             ticket_id = ticket["id"]
-            
+
             self.logger.debug(
                 f"Enriching ticket {ticket_id} with comments ({i+1}/{len(tickets)})",
                 extra={
-                    "ticket_id": ticket_id, 
+                    "ticket_id": ticket_id,
                     "progress": f"{i+1}/{len(tickets)}",
                     "progress_percent": round((i+1)/len(tickets)*100, 1),
                     **self.log_context
                 }
             )
-            
+
             # Get comments for this ticket
             if self.include_comments:
                 try:
                     comments = self._get_ticket_comments(ticket_id)
                     ticket["comments"] = comments
-                    
+
                     # Count attachments if present
                     attachment_count = 0
                     for comment in comments:
                         attachments = comment.get("attachments", [])
                         attachment_count += len(attachments)
-                    
+
                     self.logger.debug(
                         f"Retrieved {len(comments)} comments with {attachment_count} attachments",
                         extra={
@@ -173,7 +173,7 @@ class Connector(BaseConnector):
                             **self.log_context
                         }
                     )
-                    
+
                 except Exception as err:
                     self.logger.warning(
                         f"Failed to get comments for ticket {ticket_id}: {err}",
@@ -181,13 +181,13 @@ class Connector(BaseConnector):
                     )
                     # Continue without comments rather than failing
                     ticket["comments"] = []
-            
+
             enriched_tickets.append(ticket)
-            
+
             # Reduced rate limiting - only sleep every 5 requests
             if (i + 1) % 5 == 0:
                 time.sleep(0.1)  # Reduced from 0.2s per request
-        
+
         return enriched_tickets
 
     def collect(self):
@@ -199,7 +199,7 @@ class Connector(BaseConnector):
         # Calculate start time with delay for data consistency
         now = datetime.now(timezone.utc)
         delayed_now = now - timedelta(minutes=self.delay_minutes)
-        
+
         # Determine the start time for collection
         try:
             # Try to get existing pointer from cache
@@ -233,7 +233,7 @@ class Connector(BaseConnector):
 
         # Get all tickets since start time
         all_tickets = self._get_tickets_since(start_time)
-        
+
         if not all_tickets:
             self.logger.info(
                 "No tickets found in time range",
@@ -243,7 +243,7 @@ class Connector(BaseConnector):
 
         # Filter to only closed tickets
         closed_tickets = self._filter_closed_tickets(all_tickets)
-        
+
         if not closed_tickets:
             self.logger.info(
                 "No closed tickets found in time range",
@@ -256,7 +256,7 @@ class Connector(BaseConnector):
         # Process tickets in batches for better progress tracking and intermediate saves
         batch_size = self.batch_size
         total_batches = (len(closed_tickets) + batch_size - 1) // batch_size
-        
+
         self.logger.info(
             f"Processing {len(closed_tickets)} closed tickets in {total_batches} batches of {batch_size}",
             extra={
@@ -268,12 +268,12 @@ class Connector(BaseConnector):
         )
 
         all_enriched_tickets = []
-        
+
         for batch_num in range(total_batches):
             start_idx = batch_num * batch_size
             end_idx = min(start_idx + batch_size, len(closed_tickets))
             batch_tickets = closed_tickets[start_idx:end_idx]
-            
+
             self.logger.info(
                 f"Processing batch {batch_num + 1}/{total_batches} ({len(batch_tickets)} tickets)",
                 extra={
@@ -283,11 +283,11 @@ class Connector(BaseConnector):
                     **self.log_context
                 }
             )
-            
+
             # Enrich this batch with comments and attachments
             enriched_batch = self._enrich_tickets_with_comments(batch_tickets)
             all_enriched_tickets.extend(enriched_batch)
-            
+
             # Save intermediate progress every batch
             if enriched_batch:
                 self.save(enriched_batch)

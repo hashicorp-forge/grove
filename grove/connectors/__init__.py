@@ -9,7 +9,7 @@ import hashlib
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import jmespath
 
@@ -23,11 +23,13 @@ from grove.constants import (
     CACHE_KEY_SEEN,
     CACHE_KEY_WINDOW_END,
     CACHE_KEY_WINDOW_START,
+    CACHE_KEY_ZERO_VOLUME,
     CHRONOLOGICAL,
     DATESTAMP_FORMAT,
     DEFAULT_CACHE_HANDLER,
     DEFAULT_LOCK_DURATION,
     DEFAULT_OUTPUT_HANDLER,
+    DEFAULT_ZERO_VOLUME_RUNS,
     ENV_GROVE_CACHE_HANDLER,
     ENV_GROVE_LOCK_DURATION,
     ENV_GROVE_OUTPUT_HANDLER,
@@ -47,7 +49,14 @@ from grove.exceptions import (
     ProcessorError,
 )
 from grove.helpers import parsing, plugin
-from grove.models import ConnectorConfig, OutputStream
+from grove.models import (
+    ConnectorConfig,
+    ObserverEvent,
+    ObserverEventSeverity,
+    ObserverEventType,
+    OutputStream,
+)
+from grove import observers
 
 
 class BaseConnector:
@@ -55,7 +64,7 @@ class BaseConnector:
     POINTER_PATH = "NOT_SET"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 
-    def __init__(self, config: ConnectorConfig, context: Dict[str, str]):
+    def __init__(self, config: ConnectorConfig, context: dict[str, str]):
         """Sets up a Grove connector.
 
         :param config: A valid ConnectorConfig object containing information to use
@@ -101,6 +110,18 @@ class BaseConnector:
         )
         self._output.setup()
 
+        # Observability is optional. When no observer handler is configured, connector
+        # health events are simply not emitted. A failure to load or setup the observer
+        # must never prevent collection, so this is best-effort.
+        try:
+            self._observer = observers.load()
+        except GroveException as err:
+            self.logger.warning(
+                "Failed to load observer handler, observability is disabled.",
+                extra={"exception": err, **self.log_context},
+            )
+            self._observer = None
+
         # Processors are only setup once for each connector instance.
         self._processors = {}
 
@@ -118,7 +139,7 @@ class BaseConnector:
                 )
 
         # The time that our current lock expires, if we have one.
-        self._lock_expiry: Optional[datetime.datetime] = None
+        self._lock_expiry: datetime.datetime | None = None
 
         try:
             self._lock_duration = int(
@@ -134,8 +155,8 @@ class BaseConnector:
         # This is used to track windows which span multiple pages of results and is only
         # applicable for logs collected in reverse chronological order.
         self._window_passed = False
-        self._window_start = str()
-        self._window_end = str()
+        self._window_start = ""
+        self._window_end = ""
 
         # Paginated / chunked data needs an incrementing identifier to keep things
         # orderly.
@@ -148,14 +169,14 @@ class BaseConnector:
             self._saved[descriptor] = 0
 
         # Tracks hashes of unique log entries, keyed by their pointer value.
-        self._hashes: Dict[str, set[str]] = {}
+        self._hashes: dict[str, set[str]] = {}
 
         # Pointers track the last collected record in order for collection to continue
         # at the correct place between runs. A "next" pointer is only applicable for
         # logs collected in reverse chronological order.
-        self._pointer = str()
-        self._pointer_next = str()
-        self._pointer_previous = str()
+        self._pointer = ""
+        self._pointer_next = ""
+        self._pointer_previous = ""
 
     def due(self) -> bool:
         """Checks whether a collection is (over)due.
@@ -227,6 +248,15 @@ class BaseConnector:
                 f"Connector '{self.kind}' could not complete collection successfully.",
                 extra={"exception": err, **self.log_context},
             )
+            self.notify(
+                ObserverEventType.error,
+                ObserverEventSeverity.critical,
+                message=(
+                    f"Connector '{self.kind}' could not complete collection "
+                    "successfully."
+                ),
+                error=str(err),
+            )
             self.last = self._started
             self.unlock()
             return
@@ -237,6 +267,11 @@ class BaseConnector:
 
         if self.LOG_ORDER == REVERSE_CHRONOLOGICAL:
             self._run_reverse_chronological()
+
+        # Emit an observability event if the connector has returned no data for a
+        # configured number of consecutive runs. This helps detect connectors which
+        # appear healthy but are silently no longer collecting.
+        self._check_zero_volume()
 
         # TODO: The use of a context manager for lock management would be best.
         self.last = self._started
@@ -301,7 +336,7 @@ class BaseConnector:
             )
         except AccessException as err:
             self.logger.error(
-                f"Connector '{self.kind}' failed to clean up windows and next pointer from cache.",  # noqa: E501
+                f"Connector '{self.kind}' failed to clean up windows and next pointer from cache.",
                 extra={"exception": err, **self.log_context},
             )
             return
@@ -323,9 +358,8 @@ class BaseConnector:
     @abc.abstractmethod
     def collect(self):
         """Provides a stub for a connector to initiate a collection."""
-        pass
 
-    def process_and_write(self, entries: List[Any]):
+    def process_and_write(self, entries: list[Any]):
         """Write log entries them to the configured output handler.
 
         :param entries: List of log entries to process.
@@ -383,7 +417,7 @@ class BaseConnector:
                 )
             except AccessException as err:
                 self.logger.error(
-                    f"Connector '{self.kind}' failed to write logs to output, cannot continue.",  # noqa: E501
+                    f"Connector '{self.kind}' failed to write logs to output, cannot continue.",
                     extra={
                         "part": self._part,
                         "exception": err,
@@ -394,7 +428,7 @@ class BaseConnector:
                 )
                 raise
 
-    def save(self, entries: List[Any]):
+    def save(self, entries: list[Any]):
         """Saves log entries, and updates the pointer in the cache.
 
         :param entries: List of log entries to save.
@@ -423,7 +457,7 @@ class BaseConnector:
 
         self.finalize()
 
-    def _save_chronological(self, entries: List[Any]):
+    def _save_chronological(self, entries: list[Any]):
         """Saves log entries when retrieved logs are in chronological order.
 
         :param entries: List of log entries to save.
@@ -451,7 +485,7 @@ class BaseConnector:
             )
         except AccessException as err:
             self.logger.error(
-                f"Connector '{self.kind}' failed to save pointer to cache, cannot continue.",  # noqa: E501
+                f"Connector '{self.kind}' failed to save pointer to cache, cannot continue.",
                 extra={"exception": err, **self.log_context},
             )
             raise
@@ -459,7 +493,7 @@ class BaseConnector:
         # Get ready for the next batch of candidate log entries (if required).
         self._part += 1
 
-    def _save_reverse_chronological(self, candidates: List[Any]):  # noqa: C901
+    def _save_reverse_chronological(self, candidates: list[Any]):
         """Save log entries when logs are in reverse chronological order.
 
         Data returned in reverse chronological order is more complicated to handle,
@@ -547,7 +581,7 @@ class BaseConnector:
 
         self.save_window_end()
 
-    def metadata(self) -> Dict[str, Any]:
+    def metadata(self) -> dict[str, Any]:
         """Returns contextual metadata associated with this collection.
 
         :return: A dictionary of metadata for storing with log entries.
@@ -569,6 +603,119 @@ class BaseConnector:
             "runtime": self.runtime_context,
             "version": __version__,
         }
+
+    @property
+    def zero_volume_runs(self) -> int:
+        """Defines the number of consecutive zero-volume runs before alerting.
+
+        This is used by the observability layer to detect connectors which complete
+        successfully but return no data over a number of runs. A value of 0 (the
+        default) disables zero-volume alerting.
+
+        :return: The "zero_volume_runs" component of the connector configuration.
+        """
+        try:
+            candidate = self.configuration.zero_volume_runs
+        except AttributeError:
+            return DEFAULT_ZERO_VOLUME_RUNS
+
+        try:
+            return int(candidate)
+        except (ValueError, TypeError):
+            return DEFAULT_ZERO_VOLUME_RUNS
+
+    def notify(
+        self,
+        event: ObserverEventType,
+        severity: ObserverEventSeverity,
+        message: str | None = None,
+        error: str | None = None,
+    ):
+        """Builds and emits an observability event via the configured observer.
+
+        This is a no-op if no observer is configured. Emission is best-effort and will
+        never raise, to ensure observability cannot interfere with collection.
+
+        :param event: The type of event to emit.
+        :param severity: The severity associated with the event.
+        :param message: An optional human readable message describing the event.
+        :param error: An optional error string associated with the event.
+        """
+        if self._observer is None:
+            return
+
+        try:
+            pointer = self.pointer
+        except NotFoundException:
+            pointer = None
+
+        payload = ObserverEvent(
+            event=event,
+            severity=severity,
+            connector=self.kind,
+            name=self.name,
+            identity=self.identity,
+            operation=self.operation,
+            message=message,
+            error=error,
+            saved=sum(self._saved.values()) if self._saved else 0,
+            pointer=pointer,
+            frequency=self.frequency,
+            runtime=self.runtime_context,
+            collection_time=datetime.datetime.utcnow().strftime(DATESTAMP_FORMAT),
+            version=__version__,
+        )
+
+        observers.emit(self._observer, payload)
+
+    def _check_zero_volume(self):
+        """Tracks consecutive zero-volume runs and emits an event when the threshold is
+        reached.
+
+        A "zero-volume" run is one which completed successfully but saved no log entries
+        to any output. The consecutive count is tracked in the cache so that transient
+        empty polls (which are normal for many sources) do not trigger alerts.
+        """
+        threshold = self.zero_volume_runs
+        if threshold < 1:
+            return
+
+        key = self.cache_key(CACHE_KEY_ZERO_VOLUME)
+        total = sum(self._saved.values()) if self._saved else 0
+
+        # If data was collected, reset the consecutive counter and return.
+        if total > 0:
+            try:
+                self._cache.delete(key, self.operation)
+            except (NotFoundException, AccessException):
+                pass
+            return
+
+        # Otherwise, increment the consecutive zero-volume counter.
+        try:
+            count = int(self._cache.get(key, self.operation))
+        except (NotFoundException, ValueError, TypeError):
+            count = 0
+
+        count += 1
+
+        try:
+            self._cache.set(key, self.operation, str(count))
+        except AccessException as err:
+            self.logger.warning(
+                f"Connector '{self.kind}' failed to save zero-volume counter to cache.",
+                extra={"exception": err, **self.log_context},
+            )
+
+        if count >= threshold:
+            self.notify(
+                ObserverEventType.zero_volume,
+                ObserverEventSeverity.warning,
+                message=(
+                    f"Connector '{self.kind}' returned no data for {count} consecutive "
+                    "runs."
+                ),
+            )
 
     def cache_key(self, prefix: str = CACHE_KEY_POINTER) -> str:
         """Generates a cache key which uniquely identifies this connector.
@@ -601,7 +748,7 @@ class BaseConnector:
 
         return hashlib.md5(content).hexdigest()
 
-    def hash_entries(self, entries: List[Any]) -> Dict[str, set[str]]:
+    def hash_entries(self, entries: list[Any]) -> dict[str, set[str]]:
         """Hashes a list of log entries.
 
         :param entries: List of log entries to hash
@@ -609,7 +756,7 @@ class BaseConnector:
         :return: A dictionary containing a set of log hashes, keyed by the pointer of
             each event.
         """
-        hashes: Dict[str, set[str]] = {}
+        hashes: dict[str, set[str]] = {}
 
         for entry in entries:
             # If we can't find a pointer in the log entry, just skip it.
@@ -624,7 +771,7 @@ class BaseConnector:
 
         return hashes
 
-    def deduplicate_by_hash(self, candidates: List[Any]):
+    def deduplicate_by_hash(self, candidates: list[Any]):
         """Deduplicate log entries by their hash.
 
         This is performed by generating a hash of the log entry, and comparing these
@@ -641,7 +788,7 @@ class BaseConnector:
         """
         entries = []
         old_hashes = self.hashes
-        new_hashes: Dict[str, set[str]] = {}
+        new_hashes: dict[str, set[str]] = {}
 
         # Check whether these log entries have been seen already.
         for candidate in candidates:
@@ -670,7 +817,7 @@ class BaseConnector:
 
         return entries
 
-    def deduplicate_by_pointer(self, entries: List[Any]):
+    def deduplicate_by_pointer(self, entries: list[Any]):
         """Deduplicate log entries by pointer values.
 
         Deduplicates records which occur before or after a pointer on the current
@@ -692,7 +839,7 @@ class BaseConnector:
         if self.LOG_ORDER == REVERSE_CHRONOLOGICAL:
             return self._deduplicate_by_pointer_reverse_chronological(entries)
 
-    def _deduplicate_by_pointer_chronological(self, entries: List[Any]):
+    def _deduplicate_by_pointer_chronological(self, entries: list[Any]):
         """Deduplicates chronological log entries by their pointer.
 
         :param entries: A list of log entries to deduplicate.
@@ -721,7 +868,7 @@ class BaseConnector:
 
         return results
 
-    def _deduplicate_by_pointer_reverse_chronological(self, entries: List[Any]):
+    def _deduplicate_by_pointer_reverse_chronological(self, entries: list[Any]):
         """Deduplicates reverse chronological log entries by their pointer.
 
         :param entries: A list of log entries to deduplicate.
@@ -753,7 +900,7 @@ class BaseConnector:
 
         return results
 
-    def process(self, entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def process(self, entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Process log entries prior to saving.
 
         :param entries: A list of log entries to process.
@@ -847,12 +994,12 @@ class BaseConnector:
         )
 
     @property
-    def hashes(self) -> Dict[str, set[str]]:
+    def hashes(self) -> dict[str, set[str]]:
         """Return hashes for the most recently seen log entries.
 
         :return: A dictionary of log entry hashes, keyed by their pointer.
         """
-        default: Dict[str, set[str]] = {}
+        default: dict[str, set[str]] = {}
         if self._hashes:
             return self._hashes
 
@@ -877,7 +1024,7 @@ class BaseConnector:
         return self._hashes
 
     @hashes.setter
-    def hashes(self, value: Dict[str, set[str]]):
+    def hashes(self, value: dict[str, set[str]]):
         """Sets recent log entry hashes in memory.
 
         :param value: A dictionary of sets to save.
@@ -907,7 +1054,7 @@ class BaseConnector:
                 self.cache_key(CACHE_KEY_POINTER_PREV), self.operation
             )
         except NotFoundException:
-            self._pointer_previous = str()
+            self._pointer_previous = ""
 
         return self._pointer_previous
 
@@ -1012,7 +1159,7 @@ class BaseConnector:
                 self.cache_key(CACHE_KEY_WINDOW_START), self.operation
             )
         except NotFoundException:
-            return str()
+            return ""
 
         return self._window_start
 
@@ -1031,7 +1178,7 @@ class BaseConnector:
         )
 
     @property
-    def window_end(self) -> Optional[str]:
+    def window_end(self) -> str | None:
         """Return the window end location from cache, if set.
 
         :return: The window end location.

@@ -8,7 +8,7 @@ log entries. This may be used after a processing stage to remove the original so
 data, or used to prune down a log entry from a particularly verbose vendor.
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 from pydantic import Extra
 
@@ -25,9 +25,9 @@ class Handler(BaseProcessor):
 
         # Source defines a list of paths to field to drop (delete). These should be
         # defined as a JMESPaths.
-        sources: List[str]
+        sources: list[str]
 
-    def process(self, entry: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def process(self, entry: dict[str, Any]) -> list[dict[str, Any]]:
         """Attempt to drop a configured field from the log entry.
 
         :param entry: A collected log entry.

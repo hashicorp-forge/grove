@@ -5,12 +5,11 @@
 
 import os
 import socket
-from typing import Dict
 
 from grove.entrypoints import base
 
 
-def runtime_information() -> Dict[str, str]:
+def runtime_information() -> dict[str, str]:
     """Attempts to determine the runtime, returning the relevant runtime data.
 
     :return: A dictionary of runtime data.

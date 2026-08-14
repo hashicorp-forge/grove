@@ -121,6 +121,10 @@ local_file = "grove.outputs.local_file:Handler"
 local_stdout = "grove.outputs.local_stdout:Handler"
 remote_http = "grove.outputs.remote_http:Handler"
 
+[project.entry-points."grove.observers"]
+aws_sns = "grove.observers.aws_sns:Handler"
+webhook = "grove.observers.webhook:Handler"
+
 [project.entry-points."grove.configs"]
 aws_ssm = "grove.configs.aws_ssm:Handler"
 local_file = "grove.configs.local_file:Handler"
@@ -159,6 +163,28 @@ warn_unused_ignores = true
 warn_redundant_casts = true
 warn_unused_configs = true
 warn_unreachable = true
+
+[tool.ruff.lint]
+# Explicitly pin the rule set so ruff version upgrades don't silently add
+# new failing rules to CI. Rules here are the full set we want enforced.
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "W",    # pycodestyle warnings
+    "UP",   # pyupgrade
+    "PIE",  # flake8-pie
+    "RUF",  # ruff-specific rules
+]
+# Ignore opinionated rules that require invasive restructuring:
+# E501  - line-too-long: formatter handles this, not ruff
+# SIM102 - collapsible-if: nested ifs can be clearer with context
+# SIM105 - suppressible-exception: explicit try/except/pass is clearer
+ignore = [
+    "E501",
+    "RUF012",
+    "SIM102",
+    "SIM105",
+]
 
 [tool.isort]
 multi_line_output = 3

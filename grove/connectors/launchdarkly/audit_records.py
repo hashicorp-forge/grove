@@ -4,7 +4,6 @@
 """launchdarkly Audit connector for Grove."""
 
 from time import time
-from typing import Optional
 
 from grove.connectors import BaseConnector
 from grove.connectors.launchdarkly.api import Client
@@ -45,7 +44,7 @@ class Connector(BaseConnector):
         collections. If not, the last week of data will be collected.
         """
         client = Client(token=self.key)
-        cursor: Optional[str] = None
+        cursor: str | None = None
 
         # If no pointer is stored then a previous run hasn't been performed, so set the
         # pointer to a week ago. In the case of the launchdarkly audit API the pointer is

@@ -39,7 +39,7 @@ class Connector(BaseConnector):
             since = datetime.now(timezone.utc) - timedelta(days=7)
             # need RFC2822/5322 for pointer/timestamp
             # note: email.utils method, format_datetime, returns a +0000 and not -0000,
-            # which is what the api returns as a timestamp -> manually formatting 
+            # which is what the api returns as a timestamp -> manually formatting
             self.pointer = since.strftime("%a, %d %b %Y %H:%M:%S -0000")
 
         # page over data using the cursor, saving returned data page by page.

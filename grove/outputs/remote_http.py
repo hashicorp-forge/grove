@@ -4,7 +4,7 @@
 """Grove remote HTTP output handler."""
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import requests
 from pydantic import Field
@@ -29,7 +29,7 @@ class Handler(BaseOutput):
             description="The maximum number of retries before failing the collection.",
             default=5,
         )
-        headers: Optional[str] = Field(
+        headers: str | None = Field(
             description="A pipe delimited set of HTTP headers to add ('key: value').",
             default=None,
         )
@@ -87,9 +87,9 @@ class Handler(BaseOutput):
         identity: str,
         operation: str,
         part: int = 0,
-        kind: Optional[str] = None,
-        descriptor: Optional[str] = None,
-        name: Optional[str] = None,
+        kind: str | None = None,
+        descriptor: str | None = None,
+        name: str | None = None,
     ):
         """Performs an HTTP POST with the body containing collected logs as NDJSON.
 
@@ -136,7 +136,7 @@ class Handler(BaseOutput):
                         f"Unable to submit log data to HTTP endpoint: {err}"
                     )
 
-    def serialize(self, data: List[Any], metadata: Dict[str, Any] = {}) -> bytes:
+    def serialize(self, data: list[Any], metadata: dict[str, Any] = {}) -> bytes:
         """Implements serialization of log entries to NDJSON.
 
         :param data: A list of log entries to serialize to JSON.

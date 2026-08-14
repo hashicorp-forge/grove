@@ -10,23 +10,30 @@ import socket
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict
 
 from aws_lambda_powertools import Logger
 
+from grove.__about__ import __version__
 from grove.constants import (
     DEFAULT_CONFIG_REFRESH,
+    DEFAULT_STALENESS_FACTOR,
     DEFAULT_WORKER_COUNT,
     ENV_GROVE_CONFIG_REFRESH,
     ENV_GROVE_WORKER_COUNT,
 )
+from grove import observers
 from grove.entrypoints import base
 from grove.exceptions import ConcurrencyException, GroveException
 from grove.logging import GroveFormatter
-from grove.models import Run
+from grove.models import (
+    ObserverEvent,
+    ObserverEventSeverity,
+    ObserverEventType,
+    Run,
+)
 
 
-def runtime_information() -> Dict[str, str]:
+def runtime_information() -> dict[str, str]:
     """Attempts to determine the runtime, returning the relevant runtime data.
 
     :return: A dictionary of runtime data.
@@ -95,8 +102,19 @@ def entrypoint():
     # workers specified by the worker count.
     logger.info("Spawning thread pool for connectors", extra={"workers": workers})
 
+    # Observability is optional. A failure to load the observer must not stop the daemon.
+    try:
+        observer = observers.load()
+    except GroveException as err:
+        logger.warning(
+            "Failed to load observer handler, observability is disabled.",
+            extra={"exception": err},
+        )
+        observer = None
+
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        runs: Dict[str, Run] = {}
+        runs: dict[str, Run] = {}
+        stale_notified: dict[str, datetime.datetime] = {}
         while True:
             if refreshed_at:
                 since_refresh = datetime.datetime.now() - refreshed_at  # type:ignore
@@ -192,6 +210,69 @@ def entrypoint():
             for complete in completed:
                 candidate = runs.get(complete)
                 candidate.future = None
+
+            # Check for stale (overdue) connectors and emit observability events. A
+            # connector is considered stale when it has not completed within a multiple
+            # of its configured frequency - which catches hung collections and
+            # connectors which have silently stopped being scheduled. Re-notification is
+            # throttled to at most once per frequency to avoid alert spam.
+            now = datetime.datetime.now(datetime.timezone.utc)
+
+            for configuration in configurations:
+                ref = configuration.reference(suffix=configuration.operation)
+                tracked = runs.get(ref)
+
+                if tracked is None or tracked.last is None:
+                    continue
+
+                try:
+                    factor = int(
+                        getattr(
+                            configuration,
+                            "staleness_factor",
+                            DEFAULT_STALENESS_FACTOR,
+                        )
+                    )
+                except (ValueError, TypeError):
+                    factor = DEFAULT_STALENESS_FACTOR
+
+                frequency = configuration.frequency
+                age = (now - tracked.last).total_seconds()
+
+                # Not stale - clear any previous notification state and continue.
+                if age <= frequency * factor:
+                    stale_notified.pop(ref, None)
+                    continue
+
+                # Throttle re-notification to at most once per frequency.
+                last_notified = stale_notified.get(ref)
+                if (
+                    last_notified is not None
+                    and (now - last_notified).total_seconds() < frequency
+                ):
+                    continue
+
+                observers.emit(
+                    observer,
+                    ObserverEvent(
+                        event=ObserverEventType.stale,
+                        severity=ObserverEventSeverity.warning,
+                        connector=configuration.connector,
+                        name=configuration.name,
+                        identity=configuration.identity,
+                        operation=configuration.operation,
+                        message=(
+                            f"Connector '{configuration.connector}' has not completed "
+                            f"a collection in {int(age)} seconds "
+                            f"(frequency {frequency}s)."
+                        ),
+                        frequency=frequency,
+                        last_run_age_seconds=int(age),
+                        runtime=context,
+                        version=__version__,
+                    ),
+                )
+                stale_notified[ref] = now
 
             # Yield between iterations.
             time.sleep(0.25)

@@ -3,7 +3,6 @@
 
 """Snowflake connector for Grove."""
 
-from typing import Optional
 
 from cryptography.hazmat.primitives import serialization
 
@@ -83,7 +82,7 @@ class SnowflakeConnector(BaseConnector):
             )
 
     @property
-    def warehouse(self) -> Optional[str]:
+    def warehouse(self) -> str | None:
         """Fetches the optional Snowflake warehouse name from the configuration.
 
         :return: The "warehouse" portion of the connector's configuration.
@@ -94,7 +93,7 @@ class SnowflakeConnector(BaseConnector):
             return None
 
     @property
-    def role(self) -> Optional[str]:
+    def role(self) -> str | None:
         """Fetches the optional Snowflake role name from the configuration.
 
         :return: The "role" portion of the connector's configuration.
@@ -105,7 +104,7 @@ class SnowflakeConnector(BaseConnector):
             return None
 
     @property
-    def passphrase(self) -> Optional[str]:
+    def passphrase(self) -> str | None:
         """Fetches the optional private key passphrase from the configuration.
 
         :return: The "passphrase" portion of the connector's configuration.
@@ -116,7 +115,7 @@ class SnowflakeConnector(BaseConnector):
             return None
 
     @property
-    def schema(self) -> Optional[str]:
+    def schema(self) -> str | None:
         """Fetches the optional schema name from the configuration.
 
         The default is "SNOWFLAKE".
@@ -132,7 +131,7 @@ class SnowflakeConnector(BaseConnector):
             return "SNOWFLAKE"
 
     @property
-    def database(self) -> Optional[str]:
+    def database(self) -> str | None:
         """Fetches the optional database name from the configuration.
 
         The default is "ADMIN".

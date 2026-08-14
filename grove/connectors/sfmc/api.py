@@ -13,7 +13,6 @@ This may be replaced in future with the FuelSDK, but for now, we'll keep it simp
 """
 
 import logging
-from typing import Dict, Optional
 
 import requests
 
@@ -27,8 +26,8 @@ API_PAGE_SIZE = 500
 class Client:
     def __init__(
         self,
-        identity: Optional[str] = None,
-        token: Optional[str] = None,
+        identity: str | None = None,
+        token: str | None = None,
     ):
         """Setup a new client.
 
@@ -48,7 +47,7 @@ class Client:
     def _get(
         self,
         url: str,
-        params: Optional[Dict[str, Optional[str]]] = None,
+        params: dict[str, str | None] | None = None,
     ) -> HTTPResponse:
         """A GET wrapper to handle retries for the caller.
 
@@ -71,8 +70,8 @@ class Client:
         self,
         kind: str,
         cursor: int = 1,
-        startdate: Optional[str] = None,
-        enddate: Optional[str] = None,
+        startdate: str | None = None,
+        enddate: str | None = None,
     ) -> AuditLogEntries:
         """Fetches a list of audit events from the relevant audit REST API.
 
@@ -108,8 +107,8 @@ class Client:
     def get_audit_events(
         self,
         cursor: int = 1,
-        startdate: Optional[str] = None,
-        enddate: Optional[str] = None,
+        startdate: str | None = None,
+        enddate: str | None = None,
     ) -> AuditLogEntries:
         """Fetches a list of audit events from the getAuditEvents REST API.
 
@@ -129,8 +128,8 @@ class Client:
     def get_security_events(
         self,
         cursor: int = 1,
-        startdate: Optional[str] = None,
-        enddate: Optional[str] = None,
+        startdate: str | None = None,
+        enddate: str | None = None,
     ) -> AuditLogEntries:
         """Fetches a list of security events from the getSecurityEvents REST API.
 
