@@ -66,14 +66,14 @@ class BaseSecret(abc.ABC):
                     },
                 )
                 continue
-            except (AccessException, IndexError) as err:
+            except (AccessException, IndexError):
                 self.logger.error(
                     "Unable to get secret for connector, skipping",
                     extra={
                         "document": configuration.name,
                         "field": field,
-                        "exception": err,
                     },
+                    exc_info=False,
                 )
                 continue
 
