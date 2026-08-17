@@ -9,7 +9,7 @@ upstream vendors are in a consistent format - whether industry standard, or besp
 """
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import jmespath
 from pydantic import BaseModel, Extra, validator
@@ -28,11 +28,11 @@ class Mapping(BaseModel, extra=Extra.forbid):
 
     # Sources defines a list of JMESPaths to map into the destination. If multiple
     # are provided, the sources are processed in order with the first match winning.
-    sources: List[str] = []
+    sources: list[str] = []
 
     # Static allows a static field to be written into the destination, rather than
     # extraction from the source. This field is incompatible with sources.
-    static: Optional[str]
+    static: str | None
 
     @validator("static")
     def static_or_sources(cls, value, values):
@@ -51,19 +51,19 @@ class Handler(BaseProcessor):
 
         # Remap the original event as a string under the provided path. If not set, any
         # field not mapped will be dropped.
-        raw: Optional[str]
+        raw: str | None
 
         # Defines the field mapping.
-        fields: List[Mapping]
+        fields: list[Mapping]
 
-    def process(self, entry: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def process(self, entry: dict[str, Any]) -> list[dict[str, Any]]:
         """Attempt to extract and map fields from the log entry.
 
         :param entry: A collected log entry.
 
         :return: The processed log entry with fields mapped, as a list.
         """
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
 
         # Map the entire log entry under the given path - if configured.
         if self.configuration.raw:

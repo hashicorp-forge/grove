@@ -5,7 +5,7 @@
 
 import logging
 import time
-from typing import Any, Dict, Optional
+from typing import Any
 
 import requests
 
@@ -19,10 +19,10 @@ API_PAGE_SIZE = 1000
 class Client:
     def __init__(
         self,
-        client_id: Optional[str] = None,
-        client_secret: Optional[str] = None,
-        refresh_token: Optional[str] = None,
-        retry: Optional[bool] = True,
+        client_id: str | None = None,
+        client_secret: str | None = None,
+        refresh_token: str | None = None,
+        retry: bool | None = True,
     ):
         """Setup a new Dropbox team events client.
 
@@ -44,9 +44,9 @@ class Client:
     def _post(
         self,
         url: str,
-        payload: Optional[Dict[str, Any]] = None,
-        params: Optional[Dict[str, Optional[str]]] = None,
-        headers: Optional[Dict[str, str]] = None,
+        payload: dict[str, Any] | None = None,
+        params: dict[str, str | None] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> HTTPResponse:
         """A POST wrapper to handle retries for the caller.
 
@@ -128,9 +128,9 @@ class Client:
 
     def get_events(
         self,
-        cursor: Optional[str] = None,
-        start_time: Optional[str] = None,
-        category: Optional[str] = None,
+        cursor: str | None = None,
+        start_time: str | None = None,
+        category: str | None = None,
     ) -> AuditLogEntries:
         """Returns a list of team events.
 

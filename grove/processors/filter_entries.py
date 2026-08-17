@@ -9,7 +9,7 @@ vendor does not provide a mechanism for filtering events.
 """
 
 import jmespath
-from typing import Any, Dict, List
+from typing import Any
 
 from pydantic import Extra
 
@@ -30,9 +30,9 @@ class Handler(BaseProcessor):
 
         # Filters defines a list of JMESPath queries to be evaluated against each log
         # entry in order.
-        filters: List[str]
+        filters: list[str]
 
-    def process(self, entry: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def process(self, entry: dict[str, Any]) -> list[dict[str, Any]]:
         """Drop log entries which do not match all of the configured JMESPath queries.
 
         :param entry: A collected log entry.

@@ -5,7 +5,7 @@
 
 import logging
 import time
-from typing import Any, Dict, Optional
+from typing import Any
 
 import requests
 
@@ -20,9 +20,9 @@ API_PAGE_SIZE = 1000
 class Client:
     def __init__(
         self,
-        domain: Optional[str] = API_DEFAULT_DOMAIN,
-        token: Optional[str] = None,
-        retry: Optional[bool] = True,
+        domain: str | None = API_DEFAULT_DOMAIN,
+        token: str | None = None,
+        retry: bool | None = True,
     ):
         """Setup a new 1Password audit log client.
 
@@ -43,8 +43,8 @@ class Client:
     def _post(
         self,
         url: str,
-        payload: Optional[Dict[str, Any]] = None,
-        params: Optional[Dict[str, Optional[str]]] = None,
+        payload: dict[str, Any] | None = None,
+        params: dict[str, str | None] | None = None,
     ) -> HTTPResponse:
         """A POST wrapper to handle retries for the caller.
 
@@ -83,8 +83,8 @@ class Client:
     def get_events(
         self,
         event_type: str,
-        cursor: Optional[str] = None,
-        start_time: Optional[str] = None,
+        cursor: str | None = None,
+        start_time: str | None = None,
     ) -> tuple[AuditLogEntries, bool]:
         """Returns a list of logs from a specified endpoint.
 
@@ -124,8 +124,8 @@ class Client:
 
     def get_signinattempts(
         self,
-        cursor: Optional[str] = None,
-        start_time: Optional[str] = None,
+        cursor: str | None = None,
+        start_time: str | None = None,
     ) -> tuple[AuditLogEntries, bool]:
         """Fetches a list of signing attempt logs.
 
@@ -150,8 +150,8 @@ class Client:
 
     def get_itemusages(
         self,
-        cursor: Optional[str] = None,
-        start_time: Optional[str] = None,
+        cursor: str | None = None,
+        start_time: str | None = None,
     ) -> tuple[AuditLogEntries, bool]:
         """Fetches a list of modified, accessed, or used items from a shared vault.
 
@@ -176,8 +176,8 @@ class Client:
 
     def get_auditevents(
         self,
-        cursor: Optional[str] = None,
-        start_time: Optional[str] = None,
+        cursor: str | None = None,
+        start_time: str | None = None,
     ) -> tuple[AuditLogEntries, bool]:
         """Fetches a list of actions performed by members of a 1Password account.
 

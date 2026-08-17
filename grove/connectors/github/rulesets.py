@@ -3,7 +3,7 @@
 
 """GitHub Ruleset connector for Grove."""
 
-from typing import Any, List
+from typing import Any
 
 from grove.connectors import BaseConnector
 from grove.connectors.github.api import Client
@@ -90,7 +90,7 @@ class Connector(BaseConnector):
 
         # Batch records into appropriate sized chunks ourselves, to try and ensure logs
         # are flushed periodically.
-        entries: List[Any] = []
+        entries: list[Any] = []
 
         for ruleset in rulesets:
             try:

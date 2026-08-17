@@ -6,7 +6,6 @@
 import datetime
 import logging
 import time
-from typing import Dict, Optional
 from urllib.parse import unquote
 
 import requests
@@ -22,9 +21,9 @@ class Client:
     def __init__(
         self,
         domain: str = "okta.com",
-        identity: Optional[str] = None,
-        token: Optional[str] = None,
-        retry: Optional[bool] = True,
+        identity: str | None = None,
+        token: str | None = None,
+        retry: bool | None = True,
     ):
         """Setup a new client.
 
@@ -87,7 +86,7 @@ class Client:
     def _get(
         self,
         url: str,
-        params: Optional[Dict[str, Optional[str]]] = None,
+        params: dict[str, str | None] | None = None,
     ) -> HTTPResponse:
         """A GET wrapper to handle pagination for the caller.
 
@@ -137,8 +136,8 @@ class Client:
 
     def get_audit_logs(
         self,
-        since: Optional[str] = None,
-        cursor: Optional[str] = None,
+        since: str | None = None,
+        cursor: str | None = None,
     ) -> AuditLogEntries:
         """Get log data from the upstream API.
 
@@ -182,7 +181,7 @@ class Client:
 
     def get_users(
         self,
-        cursor: Optional[str] = None,
+        cursor: str | None = None,
     ) -> AuditLogEntries:
         """Get user data from the upstream API.
 

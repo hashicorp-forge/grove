@@ -32,7 +32,7 @@ following:
 
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 import jmespath
 from pydantic import Extra
@@ -52,7 +52,7 @@ class Handler(BaseProcessor):
         # JMESPath. The field referenced by this path should be a list.
         source: str
 
-    def process(self, entry: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def process(self, entry: dict[str, Any]) -> list[dict[str, Any]]:
         """Attempt to extract and map fields from the log entry.
 
         :param entry: A collected log entry.

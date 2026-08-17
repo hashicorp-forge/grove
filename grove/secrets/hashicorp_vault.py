@@ -5,7 +5,6 @@
 
 import logging
 import urllib.parse
-from typing import Optional, Tuple
 
 import jmespath
 import requests
@@ -26,15 +25,15 @@ class Configuration(BaseSettings):
     addr: str = Field(
         description="The address of the Vault instance to retrieve secrets from.",
     )
-    token: Optional[str] = Field(
+    token: str | None = Field(
         description="An optional vault token to use when authenticating with Vault.",
         default=None,
     )
-    token_file: Optional[str] = Field(
+    token_file: str | None = Field(
         description="An optional file to read the Vault token from.",
         default=None,
     )
-    namespace: Optional[str] = Field(
+    namespace: str | None = Field(
         description="An optional Vault namespace that should be used.",
         default=None,
     )
@@ -77,7 +76,7 @@ class Handler(BaseSecret):
         # the value from file.
         if self.config.token_file:
             try:
-                with open(self.config.token_file, "r") as fin:
+                with open(self.config.token_file) as fin:
                     self.config.token = fin.readline().strip()
             except OSError as err:
                 raise ConfigurationException(
@@ -113,7 +112,7 @@ class Handler(BaseSecret):
                 f"Secrets handler could not access Vault at {self.config.addr}: {err}"
             )
 
-    def get_field_and_path(self, path: str) -> Tuple[str, str]:
+    def get_field_and_path(self, path: str) -> tuple[str, str]:
         """Extracts and removes 'field' parameters from a provided secret path.
 
         :param path: The path from the connector configuration to process.

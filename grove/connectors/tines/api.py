@@ -8,7 +8,6 @@ This is a bare-bones client designed to interact with audit related APIs only.
 
 import logging
 import time
-from typing import Dict, Optional
 
 import jmespath
 import requests
@@ -23,10 +22,10 @@ API_PAGE_SIZE = 500
 class Client:
     def __init__(
         self,
-        identity: Optional[str] = None,
+        identity: str | None = None,
         domain: str = "tines.com",
-        token: Optional[str] = None,
-        retry: Optional[bool] = True,
+        token: str | None = None,
+        retry: bool | None = True,
     ):
         """Setup a new Tines API client.
 
@@ -48,7 +47,7 @@ class Client:
     def _get(
         self,
         url: str,
-        params: Optional[Dict[str, Optional[str]]] = None,
+        params: dict[str, str | None] | None = None,
     ) -> HTTPResponse:
         """A GET wrapper to handle retries for the caller.
 
@@ -85,9 +84,9 @@ class Client:
 
     def list_audit_logs(
         self,
-        after: Optional[str] = None,
-        operation_name: Optional[str] = None,
-        cursor: Optional[str] = None,
+        after: str | None = None,
+        operation_name: str | None = None,
+        cursor: str | None = None,
     ) -> AuditLogEntries:
         """Fetches a list of audit logs which match the provided filters.
 

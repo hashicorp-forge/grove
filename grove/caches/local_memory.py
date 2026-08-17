@@ -4,7 +4,6 @@
 """Grove in memory cache handler."""
 
 import logging
-from typing import Optional
 
 from grove.caches import BaseCache
 from grove.exceptions import DataFormatException, NotFoundException
@@ -41,7 +40,7 @@ class Handler(BaseCache):
         sk: str,
         value: str,
         not_set: bool = False,
-        constraint: Optional[str] = None,
+        constraint: str | None = None,
     ):
         """Stores the value for the given key in a local dict.
 
@@ -81,7 +80,7 @@ class Handler(BaseCache):
 
         self._data[pk][sk] = value
 
-    def delete(self, pk: str, sk: str, constraint: Optional[str] = None):
+    def delete(self, pk: str, sk: str, constraint: str | None = None):
         """Deletes an entry from dict that has the given PK / SK.
 
         :param pk: Partition key of the value to delete.

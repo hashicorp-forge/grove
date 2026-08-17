@@ -5,7 +5,7 @@
 
 import logging
 import time
-from typing import Any, Dict, Optional
+from typing import Any
 
 import jmespath
 import requests
@@ -17,11 +17,11 @@ from grove.types import AuditLogEntries, HTTPResponse
 class Client:
     def __init__(
         self,
-        token: Optional[str] = None,
-        retry: Optional[bool] = True,
-        params: Optional[Dict[str, Any]] = None,
-        jmespath_queries: Optional[str] = None,
-        api_uri: Optional[str] = None,
+        token: str | None = None,
+        retry: bool | None = True,
+        params: dict[str, Any] | None = None,
+        jmespath_queries: str | None = None,
+        api_uri: str | None = None,
     ):
         """Setup a new FleetDM Vulnerability API client.
 
@@ -46,7 +46,7 @@ class Client:
     def _get(
         self,
         url: str,
-        params: Dict[str, Any],
+        params: dict[str, Any],
     ) -> HTTPResponse:
         """A GET wrapper to handle retries for the caller.
 
@@ -78,10 +78,10 @@ class Client:
 
     def get_hosts(
         self,
-        params: Dict[str, Any],
+        params: dict[str, Any],
         jmespath_queries: str,
         api_uri: str,
-        cursor: Optional[str],
+        cursor: str | None,
     ) -> AuditLogEntries:
         """Fetches a list of hosts which match the provided filters.
 

@@ -4,7 +4,6 @@
 """Grove cache handlers."""
 
 import abc
-from typing import Optional
 
 
 class BaseCache(abc.ABC):
@@ -13,7 +12,6 @@ class BaseCache(abc.ABC):
 
         If not required for the given cache handler, this may be a no-op.
         """
-        pass
 
     @abc.abstractmethod
     def get(self, pk: str, sk: str) -> str:
@@ -27,7 +25,6 @@ class BaseCache(abc.ABC):
 
         :return: The value from the cache.
         """
-        pass
 
     @abc.abstractmethod
     def set(
@@ -36,7 +33,7 @@ class BaseCache(abc.ABC):
         sk: str,
         value: str,
         not_set: bool = False,
-        constraint: Optional[str] = None,
+        constraint: str | None = None,
     ):
         """Stores the value for the given key in a cache.
 
@@ -54,10 +51,9 @@ class BaseCache(abc.ABC):
         :raises ValueError: An incompatible set of parameters were provided.
         :raises DataFormatException: The provided constraint was not satisfied.
         """
-        pass
 
     @abc.abstractmethod
-    def delete(self, pk: str, sk: str, constraint: Optional[str] = None):
+    def delete(self, pk: str, sk: str, constraint: str | None = None):
         """Deletes an entry with the given key from the cache.
 
         If the implementation does not differentiate partition and sort keys, these
@@ -70,4 +66,3 @@ class BaseCache(abc.ABC):
 
         :raises DataFormatException: The provided constraint was not satisfied.
         """
-        pass
