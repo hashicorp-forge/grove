@@ -21,7 +21,7 @@ class Configuration(BaseSettings):
     """
 
     path_prefix: str = Field(
-        str(),
+        "",
         description="An optional prefix to append to configured secret paths.",
     )
 
@@ -61,7 +61,7 @@ class Handler(BaseSecret):
 
         :return: The plain-text secret, read from the specified file.
         """
-        secret = str()
+        secret = ""
         path = os.path.join(self.config.path_prefix, id)
 
         try:

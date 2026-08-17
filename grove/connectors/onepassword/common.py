@@ -21,7 +21,7 @@ class OnePasswordConnector(BaseConnector):
     @property
     def domain(self) -> str:
         """Fetches and validates the domain from the configuration.
-        
+
         :return: The validated domain from configuration or default
         :raises ConfigurationException: If configured domain is not valid
         """
@@ -33,6 +33,6 @@ class OnePasswordConnector(BaseConnector):
                     f"Must be one of: {', '.join(VALID_DOMAINS)}"
                 )
             return domain
-            
+
         except AttributeError:
             return API_DEFAULT_DOMAIN

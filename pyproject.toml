@@ -160,6 +160,22 @@ warn_redundant_casts = true
 warn_unused_configs = true
 warn_unreachable = true
 
+[tool.ruff.lint]
+# Pin the enforced rule set so ruff version upgrades cannot silently add
+# new failures to CI. Only rules listed in 'select' are checked.
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "W",    # pycodestyle warnings
+    "UP",   # pyupgrade
+    "PIE",  # flake8-pie
+    "RUF",  # ruff-specific rules
+]
+ignore = [
+    "E501",    # line-too-long: formatter's responsibility, not ruff
+    "RUF012",  # mutable-class-default: pydantic Field() pattern differs
+]
+
 [tool.isort]
 multi_line_output = 3
 profile = "black"
@@ -167,7 +183,6 @@ profile = "black"
 [tool.pytest.ini_options]
 junit_family = "xunit2"
 norecursedirs = ".*"
-self-contained-html = true
 testpaths = [
     "tests"
 ]

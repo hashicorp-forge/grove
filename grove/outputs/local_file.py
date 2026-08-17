@@ -5,7 +5,6 @@
 
 import datetime
 import os
-from typing import Optional
 
 from pydantic import Field
 
@@ -70,9 +69,9 @@ class Handler(BaseOutput):
         identity: str,
         operation: str,
         part: int = 0,
-        kind: Optional[str] = ".json.gz",
-        descriptor: Optional[str] = "logs/",
-        name: Optional[str] = None,
+        kind: str | None = ".json.gz",
+        descriptor: str | None = "logs/",
+        name: str | None = None,
     ):
         """Persists captured data to a local file path.
 

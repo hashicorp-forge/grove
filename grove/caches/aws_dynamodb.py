@@ -5,7 +5,7 @@
 
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 from boto3.session import Session
 from botocore.exceptions import BotoCoreError, ClientError
@@ -32,15 +32,15 @@ class Configuration(BaseSettings):
         default="grove",
         description="The name of the AWS DynamoDB table to use for the cache.",
     )
-    url: Optional[str] = Field(
+    url: str | None = Field(
         description="An optional URL to use when connecting to AWS DynamoDB.",
         default=None,
     )
-    assume_role_arn: Optional[str] = Field(
+    assume_role_arn: str | None = Field(
         description="An optional AWS role to assume when authenticating with AWS.",
         default=None,
     )
-    table_region: Optional[str] = Field(
+    table_region: str | None = Field(
         description="The region that the DynamoDB table exists in (default us-east-1)",
         default=os.environ.get("AWS_REGION", "us-east-1"),
     )
@@ -180,7 +180,7 @@ class Handler(BaseCache):
         sk: str,
         value: str,
         not_set: bool = False,
-        constraint: Optional[str] = None,
+        constraint: str | None = None,
     ):
         """Stores the value for the given key in DynamoDB.
 
@@ -196,7 +196,7 @@ class Handler(BaseCache):
         :raises AccessException: An issue occurred when storing the value.
         :raises DataFormatException: The provided constraint was not satisfied.
         """
-        options: Dict[str, Any] = {}
+        options: dict[str, Any] = {}
         options["ExpressionAttributeValues"] = {":data": {"S": str(value)}}
 
         if not_set and constraint is not None:
@@ -261,7 +261,7 @@ class Handler(BaseCache):
                 )
                 raise AccessException(err)
 
-    def delete(self, pk: str, sk: str, constraint: Optional[str] = None):
+    def delete(self, pk: str, sk: str, constraint: str | None = None):
         """Deletes an entry from DynamoDB that has the given PK / SK.
 
         :param pk: Partition key of the value to delete.
@@ -272,7 +272,7 @@ class Handler(BaseCache):
         :raises AccessException: An issue occurred when deleting the value.
         :raises DataFormatException: The provided constraint was not satisfied.
         """
-        options: Dict[str, Any] = {}
+        options: dict[str, Any] = {}
 
         # Apply a constraint, if set.
         if constraint is not None:

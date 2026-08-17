@@ -9,7 +9,7 @@ with their comments and attachments.
 
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List
+from typing import Any
 
 
 from grove.connectors import BaseConnector
@@ -91,21 +91,21 @@ class Connector(BaseConnector):
         """
         # Format the start time for Zendesk search
         start_time_str = start_time.strftime("%Y-%m-%d")
-        
+
         # Build the query
         query_parts = [
             "type:ticket",
             f"status:{self.ticket_status}",
             f"updated>={start_time_str}"
         ]
-        
+
         query = " ".join(query_parts)
-        
+
         self.logger.info(
             f"Built search query: {query}",
             extra={"query": query, **self.log_context}
         )
-        
+
         return query
 
     def collect(self):
@@ -117,7 +117,7 @@ class Connector(BaseConnector):
         # Calculate start time with delay for data consistency
         now = datetime.now(timezone.utc)
         delayed_now = now - timedelta(minutes=self.delay_minutes)
-        
+
         # Determine the start time for collection
         try:
             # Parse the existing pointer as an ISO timestamp
@@ -145,7 +145,7 @@ class Connector(BaseConnector):
         # Build and execute the search query
         query = self._build_search_query(start_time)
         tickets = self._client.search_tickets(query)
-        
+
         if not tickets:
             self.logger.info(
                 "No tickets found matching search criteria",
@@ -178,34 +178,34 @@ class Connector(BaseConnector):
             }
         )
 
-    def _enrich_tickets_with_comments(self, tickets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _enrich_tickets_with_comments(self, tickets: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Enrich tickets with their comments and attachments.
 
         :param tickets: List of tickets to enrich.
         :return: List of enriched tickets.
         """
         enriched_tickets = []
-        
+
         for ticket in tickets:
             ticket_id = ticket["id"]
-            
+
             self.logger.debug(
                 f"Enriching ticket {ticket_id} with comments",
                 extra={"ticket_id": ticket_id, **self.log_context}
             )
-            
+
             # Get comments for this ticket
             if self.include_comments:
                 try:
                     comments = self._client.get_ticket_comments(ticket_id)
                     ticket["comments"] = comments
-                    
+
                     # Count attachments if present
                     attachment_count = sum(
                         len(comment.get("attachments", []))
                         for comment in comments
                     )
-                    
+
                     self.logger.debug(
                         f"Retrieved {len(comments)} comments with {attachment_count} attachments",
                         extra={
@@ -215,7 +215,7 @@ class Connector(BaseConnector):
                             **self.log_context
                         }
                     )
-                    
+
                 except Exception as err:
                     self.logger.warning(
                         f"Failed to get comments for ticket {ticket_id}: {err}",
@@ -223,10 +223,10 @@ class Connector(BaseConnector):
                     )
                     # Continue without comments rather than failing
                     ticket["comments"] = []
-            
+
             enriched_tickets.append(ticket)
-            
+
             # Rate limiting between ticket comment requests
             time.sleep(0.2)
-        
+
         return enriched_tickets

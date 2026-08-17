@@ -9,7 +9,7 @@ import hashlib
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import jmespath
 
@@ -55,7 +55,7 @@ class BaseConnector:
     POINTER_PATH = "NOT_SET"
     LOG_ORDER = REVERSE_CHRONOLOGICAL
 
-    def __init__(self, config: ConnectorConfig, context: Dict[str, str]):
+    def __init__(self, config: ConnectorConfig, context: dict[str, str]):
         """Sets up a Grove connector.
 
         :param config: A valid ConnectorConfig object containing information to use
@@ -118,7 +118,7 @@ class BaseConnector:
                 )
 
         # The time that our current lock expires, if we have one.
-        self._lock_expiry: Optional[datetime.datetime] = None
+        self._lock_expiry: datetime.datetime | None = None
 
         try:
             self._lock_duration = int(
@@ -134,8 +134,8 @@ class BaseConnector:
         # This is used to track windows which span multiple pages of results and is only
         # applicable for logs collected in reverse chronological order.
         self._window_passed = False
-        self._window_start = str()
-        self._window_end = str()
+        self._window_start = ""
+        self._window_end = ""
 
         # Paginated / chunked data needs an incrementing identifier to keep things
         # orderly.
@@ -148,14 +148,14 @@ class BaseConnector:
             self._saved[descriptor] = 0
 
         # Tracks hashes of unique log entries, keyed by their pointer value.
-        self._hashes: Dict[str, set[str]] = {}
+        self._hashes: dict[str, set[str]] = {}
 
         # Pointers track the last collected record in order for collection to continue
         # at the correct place between runs. A "next" pointer is only applicable for
         # logs collected in reverse chronological order.
-        self._pointer = str()
-        self._pointer_next = str()
-        self._pointer_previous = str()
+        self._pointer = ""
+        self._pointer_next = ""
+        self._pointer_previous = ""
 
     def due(self) -> bool:
         """Checks whether a collection is (over)due.
@@ -301,7 +301,7 @@ class BaseConnector:
             )
         except AccessException as err:
             self.logger.error(
-                f"Connector '{self.kind}' failed to clean up windows and next pointer from cache.",  # noqa: E501
+                f"Connector '{self.kind}' failed to clean up windows and next pointer from cache.",
                 extra={"exception": err, **self.log_context},
             )
             return
@@ -323,9 +323,8 @@ class BaseConnector:
     @abc.abstractmethod
     def collect(self):
         """Provides a stub for a connector to initiate a collection."""
-        pass
 
-    def process_and_write(self, entries: List[Any]):
+    def process_and_write(self, entries: list[Any]):
         """Write log entries them to the configured output handler.
 
         :param entries: List of log entries to process.
@@ -383,7 +382,7 @@ class BaseConnector:
                 )
             except AccessException as err:
                 self.logger.error(
-                    f"Connector '{self.kind}' failed to write logs to output, cannot continue.",  # noqa: E501
+                    f"Connector '{self.kind}' failed to write logs to output, cannot continue.",
                     extra={
                         "part": self._part,
                         "exception": err,
@@ -394,7 +393,7 @@ class BaseConnector:
                 )
                 raise
 
-    def save(self, entries: List[Any]):
+    def save(self, entries: list[Any]):
         """Saves log entries, and updates the pointer in the cache.
 
         :param entries: List of log entries to save.
@@ -423,7 +422,7 @@ class BaseConnector:
 
         self.finalize()
 
-    def _save_chronological(self, entries: List[Any]):
+    def _save_chronological(self, entries: list[Any]):
         """Saves log entries when retrieved logs are in chronological order.
 
         :param entries: List of log entries to save.
@@ -451,7 +450,7 @@ class BaseConnector:
             )
         except AccessException as err:
             self.logger.error(
-                f"Connector '{self.kind}' failed to save pointer to cache, cannot continue.",  # noqa: E501
+                f"Connector '{self.kind}' failed to save pointer to cache, cannot continue.",
                 extra={"exception": err, **self.log_context},
             )
             raise
@@ -459,7 +458,7 @@ class BaseConnector:
         # Get ready for the next batch of candidate log entries (if required).
         self._part += 1
 
-    def _save_reverse_chronological(self, candidates: List[Any]):  # noqa: C901
+    def _save_reverse_chronological(self, candidates: list[Any]):
         """Save log entries when logs are in reverse chronological order.
 
         Data returned in reverse chronological order is more complicated to handle,
@@ -547,7 +546,7 @@ class BaseConnector:
 
         self.save_window_end()
 
-    def metadata(self) -> Dict[str, Any]:
+    def metadata(self) -> dict[str, Any]:
         """Returns contextual metadata associated with this collection.
 
         :return: A dictionary of metadata for storing with log entries.
@@ -601,7 +600,7 @@ class BaseConnector:
 
         return hashlib.md5(content).hexdigest()
 
-    def hash_entries(self, entries: List[Any]) -> Dict[str, set[str]]:
+    def hash_entries(self, entries: list[Any]) -> dict[str, set[str]]:
         """Hashes a list of log entries.
 
         :param entries: List of log entries to hash
@@ -609,7 +608,7 @@ class BaseConnector:
         :return: A dictionary containing a set of log hashes, keyed by the pointer of
             each event.
         """
-        hashes: Dict[str, set[str]] = {}
+        hashes: dict[str, set[str]] = {}
 
         for entry in entries:
             # If we can't find a pointer in the log entry, just skip it.
@@ -624,7 +623,7 @@ class BaseConnector:
 
         return hashes
 
-    def deduplicate_by_hash(self, candidates: List[Any]):
+    def deduplicate_by_hash(self, candidates: list[Any]):
         """Deduplicate log entries by their hash.
 
         This is performed by generating a hash of the log entry, and comparing these
@@ -641,7 +640,7 @@ class BaseConnector:
         """
         entries = []
         old_hashes = self.hashes
-        new_hashes: Dict[str, set[str]] = {}
+        new_hashes: dict[str, set[str]] = {}
 
         # Check whether these log entries have been seen already.
         for candidate in candidates:
@@ -670,7 +669,7 @@ class BaseConnector:
 
         return entries
 
-    def deduplicate_by_pointer(self, entries: List[Any]):
+    def deduplicate_by_pointer(self, entries: list[Any]):
         """Deduplicate log entries by pointer values.
 
         Deduplicates records which occur before or after a pointer on the current
@@ -692,7 +691,7 @@ class BaseConnector:
         if self.LOG_ORDER == REVERSE_CHRONOLOGICAL:
             return self._deduplicate_by_pointer_reverse_chronological(entries)
 
-    def _deduplicate_by_pointer_chronological(self, entries: List[Any]):
+    def _deduplicate_by_pointer_chronological(self, entries: list[Any]):
         """Deduplicates chronological log entries by their pointer.
 
         :param entries: A list of log entries to deduplicate.
@@ -721,7 +720,7 @@ class BaseConnector:
 
         return results
 
-    def _deduplicate_by_pointer_reverse_chronological(self, entries: List[Any]):
+    def _deduplicate_by_pointer_reverse_chronological(self, entries: list[Any]):
         """Deduplicates reverse chronological log entries by their pointer.
 
         :param entries: A list of log entries to deduplicate.
@@ -753,7 +752,7 @@ class BaseConnector:
 
         return results
 
-    def process(self, entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def process(self, entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Process log entries prior to saving.
 
         :param entries: A list of log entries to process.
@@ -847,12 +846,12 @@ class BaseConnector:
         )
 
     @property
-    def hashes(self) -> Dict[str, set[str]]:
+    def hashes(self) -> dict[str, set[str]]:
         """Return hashes for the most recently seen log entries.
 
         :return: A dictionary of log entry hashes, keyed by their pointer.
         """
-        default: Dict[str, set[str]] = {}
+        default: dict[str, set[str]] = {}
         if self._hashes:
             return self._hashes
 
@@ -877,7 +876,7 @@ class BaseConnector:
         return self._hashes
 
     @hashes.setter
-    def hashes(self, value: Dict[str, set[str]]):
+    def hashes(self, value: dict[str, set[str]]):
         """Sets recent log entry hashes in memory.
 
         :param value: A dictionary of sets to save.
@@ -907,7 +906,7 @@ class BaseConnector:
                 self.cache_key(CACHE_KEY_POINTER_PREV), self.operation
             )
         except NotFoundException:
-            self._pointer_previous = str()
+            self._pointer_previous = ""
 
         return self._pointer_previous
 
@@ -1012,7 +1011,7 @@ class BaseConnector:
                 self.cache_key(CACHE_KEY_WINDOW_START), self.operation
             )
         except NotFoundException:
-            return str()
+            return ""
 
         return self._window_start
 
@@ -1031,7 +1030,7 @@ class BaseConnector:
         )
 
     @property
-    def window_end(self) -> Optional[str]:
+    def window_end(self) -> str | None:
         """Return the window end location from cache, if set.
 
         :return: The window end location.

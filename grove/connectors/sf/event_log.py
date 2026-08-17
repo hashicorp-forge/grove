@@ -5,7 +5,7 @@
 
 import csv
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List
+from typing import Any
 
 import requests
 from simple_salesforce import Salesforce
@@ -39,7 +39,7 @@ class Connector(BaseSalesforceConnector):
     POINTER_PATH = "TIMESTAMP_DERIVED"
     LOG_ORDER = CHRONOLOGICAL
 
-    def collect(self):  # noqa: C901
+    def collect(self):
         """Collects EventLogs from the SF Cloud API.
 
         This will first check whether there are any pointers cached to indicate previous
@@ -62,7 +62,7 @@ class Connector(BaseSalesforceConnector):
                 "Either OAuth 2.0 credentials (client_id, client_secret) or legacy "
                 "credentials (key, identity, token) must be provided"
             )
-        
+
         # Ensure the instance_url has a proper scheme
         # This check needs to be done here because sf client code does not append
         if not instance_url.startswith(("http://", "https://")):
@@ -96,7 +96,7 @@ class Connector(BaseSalesforceConnector):
                 f"Operation must be one of {SF_OPERATIONS}, got '{self.operation}'"
             )
 
-        log_files: Dict[str, List[Any]] = {}
+        log_files: dict[str, list[Any]] = {}
         next_records_url = None
 
         while True:

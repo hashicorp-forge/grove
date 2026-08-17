@@ -9,7 +9,6 @@ the interim.
 
 import logging
 import time
-from typing import Dict, Optional
 from datetime import datetime, timezone
 import requests
 
@@ -22,9 +21,9 @@ API_DATE_FORMAT = "%Y-%m-%dT%H:%M%z"
 class Client:
     def __init__(
         self,
-        identity: Optional[str] = None,
-        token: Optional[str] = None,
-        retry: Optional[bool] = True,
+        identity: str | None = None,
+        token: str | None = None,
+        retry: bool | None = True,
     ):
         """Setup a new client.
 
@@ -46,7 +45,7 @@ class Client:
     def _get(
         self,
         url: str,
-        params: Optional[Dict[str, Optional[str]]] = None,
+        params: dict[str, str | None] | None = None,
     ) -> HTTPResponse:
         """A GET wrapper to handle retries for the caller.
 
@@ -85,7 +84,7 @@ class Client:
 
                 # Work out how long we need to wait, and if too long, just bail early.
                 time_current = int(datetime.now(timezone.utc).strftime("%s"))
-                time_reset = int(datetime.strptime(reset_at, API_DATE_FORMAT).strftime("%s")) # noqa: E501
+                time_reset = int(datetime.strptime(reset_at, API_DATE_FORMAT).strftime("%s"))
                 time_wait = time_reset - time_current
 
                 if time_wait >= 180:
@@ -99,8 +98,8 @@ class Client:
 
     def get_audit(
         self,
-        cursor: Optional[str] = None,
-        from_date: Optional[str] = None,
+        cursor: str | None = None,
+        from_date: str | None = None,
     ) -> AuditLogEntries:
         """Fetches a list of signing attempt logs.
 

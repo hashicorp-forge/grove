@@ -10,7 +10,7 @@ the interim.
 import datetime
 import logging
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any
 from urllib.parse import unquote
 
 import requests
@@ -24,9 +24,9 @@ class Client:
         self,
         hostname: str = "api.github.com",
         scope: str = "orgs",
-        identity: Optional[str] = None,
-        token: Optional[str] = None,
-        retry: Optional[bool] = True,
+        identity: str | None = None,
+        token: str | None = None,
+        retry: bool | None = True,
     ):
         """Setup a new GitHub audit log client.
 
@@ -84,7 +84,7 @@ class Client:
     def _get(
         self,
         url: str,
-        params: Optional[Dict[str, Optional[str]]] = None,
+        params: dict[str, str | None] | None = None,
     ) -> HTTPResponse:
         """A GET wrapper to handle retries for the caller.
 
@@ -137,10 +137,10 @@ class Client:
 
     def get_rulesets(
         self,
-        after: Optional[str] = None,
-        time_period: Optional[str] = "day",
-        rule_suite_result: Optional[str] = "all",
-    ) -> List[str]:
+        after: str | None = None,
+        time_period: str | None = "day",
+        rule_suite_result: str | None = "all",
+    ) -> list[str]:
         """Fetches a list of rulesets identifiers from the Github API.
 
         This method does not return audit log entries, nor results per page. Instead it
@@ -167,7 +167,7 @@ class Client:
         while more_requests:
             if cursor is None:
                 result = self._get(
-                    f"https://{self.hostname}/{self.scope}/{self.identity}/rulesets/rule-suites",  # noqa: E501
+                    f"https://{self.hostname}/{self.scope}/{self.identity}/rulesets/rule-suites",
                     params={
                         "rule_suite_result": rule_suite_result,
                         "time_period": time_period,
@@ -203,7 +203,7 @@ class Client:
 
         return rulesets
 
-    def get_rule_suite(self, rule_suite_id: str) -> Dict[str, Any]:
+    def get_rule_suite(self, rule_suite_id: str) -> dict[str, Any]:
         """Fetches the rule-suite information by identifier.
 
         :param rule_suite_id: The rule-suite identifier to return data for.
@@ -212,7 +212,7 @@ class Client:
         """
         try:
             result = self._get(
-                f"https://{self.hostname}/{self.scope}/{self.identity}/rulesets/rule-suites/{rule_suite_id}",  # noqa: E501
+                f"https://{self.hostname}/{self.scope}/{self.identity}/rulesets/rule-suites/{rule_suite_id}",
             )
         except RequestFailedException as err:
             if hasattr(err, "response"):
@@ -230,10 +230,10 @@ class Client:
 
     def get_audit_log(
         self,
-        phrase: Optional[str] = None,
-        include: Optional[str] = "all",
-        order: Optional[str] = "asc",
-        cursor: Optional[str] = None,
+        phrase: str | None = None,
+        include: str | None = "all",
+        order: str | None = "asc",
+        cursor: str | None = None,
     ) -> AuditLogEntries:
         """Fetches a list of audit logs which match the requested filter and event type.
 

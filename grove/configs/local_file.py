@@ -7,7 +7,6 @@ import glob
 import json
 import logging
 from json import JSONDecodeError
-from typing import List
 
 from pydantic import BaseSettings, Field, ValidationError
 
@@ -52,7 +51,7 @@ class Handler(BaseConfig):
         except ValidationError as err:
             raise ConfigurationException(parsing.validation_error(err))
 
-    def get(self, id: str = "") -> List[ConnectorConfig]:
+    def get(self, id: str = "") -> list[ConnectorConfig]:
         """Get and return one or more connector configuration objects from local files.
 
         :param id: Not used.
@@ -63,7 +62,7 @@ class Handler(BaseConfig):
 
         # Generate a list of documents for later processing.
         for path in glob.glob(f"{self.config.path}/**/*.json", recursive=True):
-            with open(path, "r") as f:
+            with open(path) as f:
                 # We don't want a single bad connector configuration document to break
                 # collection, so log an error and continue on a bad document.
                 try:

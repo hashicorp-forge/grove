@@ -5,7 +5,7 @@
 
 import logging
 import time
-from typing import Any, Dict, Optional, List
+from typing import Any
 from jmespath import search
 
 import requests
@@ -19,8 +19,8 @@ API_BASE_URI = "https://app.launchdarkly.com"
 class Client:
     def __init__(
         self,
-        token: Optional[str] = None,
-        retry: Optional[bool] = True,
+        token: str | None = None,
+        retry: bool | None = True,
     ):
         """Setup a new client.
 
@@ -37,7 +37,7 @@ class Client:
     def _get(
         self,
         url: str,
-        params: Optional[Dict[str, Optional[str]]] = None,
+        params: dict[str, str | None] | None = None,
     ) -> HTTPResponse:
         """A GET wrapper to handle retries for the caller.
 
@@ -80,12 +80,12 @@ class Client:
 
     def get_audit_records_list(
         self,
-        cursor: Optional[str] = None,
-        before: Optional[str] = None,
-        after: Optional[str] = None,
-        limit: Optional[str] = None,
-        q: Optional[str] = None,
-        spec: Optional[str] = None,
+        cursor: str | None = None,
+        before: str | None = None,
+        after: str | None = None,
+        limit: str | None = None,
+        q: str | None = None,
+        spec: str | None = None,
         verbose: bool = False
     ) -> AuditLogEntries:
         """Fetches a list of audit logs which match the provided filters.
@@ -127,7 +127,7 @@ class Client:
             ids = search("items[*]._id", result.body)
 
             # Iterate through the list of IDs to fetch each detailed audit record
-            results: List[Dict[str, Any]] = []
+            results: list[dict[str, Any]] = []
             for id in ids:
                 record = self.get_audit_record_id(id)
                 results.append(record.body)
@@ -135,7 +135,7 @@ class Client:
 
         else:
             return AuditLogEntries(cursor=cursor, entries=result.body.get("items",[]))
-            
+
 
 
         # Return the cursor and the results to allow the caller to page as required.

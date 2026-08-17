@@ -4,7 +4,7 @@
 """SalesForce Setup Audit Trail connector for Grove."""
 
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict
+from typing import Any
 
 from simple_salesforce import Salesforce
 from simple_salesforce.exceptions import SalesforceError
@@ -58,7 +58,7 @@ class Connector(BaseSalesforceConnector):
     POINTER_PATH = "CreatedDate"
     LOG_ORDER = CHRONOLOGICAL
 
-    def __init__(self, config: Any, context: Dict[str, Any]) -> None:
+    def __init__(self, config: Any, context: dict[str, Any]) -> None:
         """Initialize the connector with a configuration and context.
 
         :param config: Configuration options from the connector configuration file.
@@ -70,7 +70,7 @@ class Connector(BaseSalesforceConnector):
         self.start_date = getattr(self.configuration, "start_date", None)
 
 
-    def collect(self):  # noqa: C901
+    def collect(self):
         """Collects Setup Audit Trail events from the SF API.
 
         This will first check whether there are any pointers cached to indicate previous

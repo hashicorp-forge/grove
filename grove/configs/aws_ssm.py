@@ -6,7 +6,6 @@
 import json
 import logging
 import os
-from typing import List, Optional
 
 from boto3.session import Session
 from botocore.exceptions import BotoCoreError, ClientError
@@ -25,15 +24,15 @@ class Configuration(BaseSettings):
     required.
     """
 
-    prefix: Optional[str] = Field(
+    prefix: str | None = Field(
         default="/grove/connectors/",
         description="A prefix to added to the beginning of all parameter store paths.",
     )
-    assume_role_arn: Optional[str] = Field(
+    assume_role_arn: str | None = Field(
         description="An optional AWS role to assume when authenticating with AWS.",
         default=None,
     )
-    ssm_region: Optional[str] = Field(
+    ssm_region: str | None = Field(
         description="The region that the parameter store exists in (default us-east-1)",
         default=os.environ.get("AWS_REGION", "us-east-1"),
     )
@@ -97,7 +96,7 @@ class Handler(BaseConfig):
         except (ClientError, BotoCoreError, KeyError) as err:
             raise AccessException(f"Config handler failed to access AWS SSM: {err}")
 
-    def get(self, id: str = "/") -> List[ConnectorConfig]:
+    def get(self, id: str = "/") -> list[ConnectorConfig]:
         """Gets and returns one or more connector configuration objects from AWS SSM.
 
         Configuration documents are enumerated by their path, allowing multiple
