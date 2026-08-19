@@ -5,7 +5,7 @@
 
 import abc
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 from pydantic import Extra, ValidationError
 
@@ -20,9 +20,8 @@ class BaseProcessor(abc.ABC):
     class Configuration(ProcessorConfig, extra=Extra.forbid):
         """Defines the required configuration and validators for the processor."""
 
-        pass
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         """Sets up a Grove processor.
 
         :param config: The configuration document for this processor, as a dict.
@@ -40,7 +39,7 @@ class BaseProcessor(abc.ABC):
                 f"Processor configuration is invalid. {parsing.validation_error(err)}"
             )
 
-    def process(self, entry: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def process(self, entry: dict[str, Any]) -> list[dict[str, Any]]:
         """Performs a set of processes against a log entry.
 
         :param entry: A collected log entry.

@@ -5,7 +5,6 @@
 
 import logging
 import os
-from typing import Optional
 
 import jmespath
 from boto3.session import Session
@@ -24,11 +23,11 @@ class Configuration(BaseSettings):
     required.
     """
 
-    assume_role_arn: Optional[str] = Field(
+    assume_role_arn: str | None = Field(
         description="An optional AWS role to assume when authenticating with AWS.",
         default=None,
     )
-    ssm_region: Optional[str] = Field(
+    ssm_region: str | None = Field(
         description="The region that the parameter store exists in (default us-east-1)",
         default=os.environ.get("AWS_REGION", "us-east-1"),
     )

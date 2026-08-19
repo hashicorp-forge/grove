@@ -7,7 +7,7 @@ import abc
 import gzip
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseSettings, Extra, ValidationError
 
@@ -22,7 +22,6 @@ class BaseOutput(abc.ABC):
     class Configuration(BaseSettings, extra=Extra.allow):
         """Defines the configuration directives required by all output handlers."""
 
-        pass
 
     def __init__(self):
         """Implements core logic which applies to all handlers.
@@ -42,7 +41,6 @@ class BaseOutput(abc.ABC):
 
         If not required for the given output handler, this may be a no-op.
         """
-        pass
 
     @abc.abstractmethod
     def submit(
@@ -52,9 +50,9 @@ class BaseOutput(abc.ABC):
         identity: str,
         operation: str,
         part: int = 0,
-        suffix: Optional[str] = None,
-        descriptor: Optional[str] = None,
-        name: Optional[str] = None,
+        suffix: str | None = None,
+        descriptor: str | None = None,
+        name: str | None = None,
     ):
         """Implements logic require to write collected log data to the given backend.
 
@@ -74,9 +72,8 @@ class BaseOutput(abc.ABC):
         :param name: Given name of the connector, as specified in the user's custom
             configuration.
         """
-        pass
 
-    def serialize(self, data: List[Any], metadata: Dict[str, Any] = {}) -> bytes:
+    def serialize(self, data: list[Any], metadata: dict[str, Any] = {}) -> bytes:
         """Implements serialization of log entries to a gzipped NDJSON.
 
         :param data: A list of log entries to serialize to JSON.

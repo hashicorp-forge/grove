@@ -5,7 +5,7 @@
 
 import time
 from datetime import datetime
-from typing import Any, Dict, Tuple
+from typing import Any
 
 import requests
 from simple_salesforce import Salesforce, SalesforceLogin
@@ -43,7 +43,7 @@ def parse_salesforce_timestamp(timestamp_str: str) -> datetime:
 class BaseSalesforceConnector(BaseConnector):
     """Base class for Salesforce connectors with shared authentication and query logic."""
 
-    def __init__(self, config: Any, context: Dict[str, Any]) -> None:
+    def __init__(self, config: Any, context: dict[str, Any]) -> None:
         """Initialize the connector with a configuration and context.
 
         :param config: Configuration options from the connector configuration file.
@@ -144,7 +144,7 @@ class BaseSalesforceConnector(BaseConnector):
 
         return oauth_url
 
-    def get_oauth_access_token(self) -> Tuple[str, str]:
+    def get_oauth_access_token(self) -> tuple[str, str]:
         """Obtains an access token using OAuth 2.0 client credentials flow.
 
         This method authenticates with Salesforce using the client credentials flow
@@ -246,7 +246,7 @@ class BaseSalesforceConnector(BaseConnector):
                 f"Unable to authenticate with Salesforce using OAuth 2.0: {err}"
             )
 
-    def get_legacy_credentials(self) -> Tuple[str, str]:
+    def get_legacy_credentials(self) -> tuple[str, str]:
         """Obtains credentials using traditional username/password authentication.
 
         This method authenticates with Salesforce using the legacy username/password
@@ -283,7 +283,7 @@ class BaseSalesforceConnector(BaseConnector):
                 f"Unable to authenticate with Salesforce using legacy authentication: {err}"
             )
 
-    def _query_with_retry(self, client: Salesforce, soql_query: str) -> Dict[str, Any]:
+    def _query_with_retry(self, client: Salesforce, soql_query: str) -> dict[str, Any]:
         """Execute a SOQL query with rate limit handling and retry logic.
 
         :param client: Salesforce client instance

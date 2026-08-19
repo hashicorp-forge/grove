@@ -5,7 +5,6 @@
 
 import datetime
 import os
-from typing import Optional
 
 from boto3.session import Session
 from botocore.exceptions import BotoCoreError, ClientError
@@ -34,23 +33,23 @@ class Handler(BaseOutput):
         bucket: str = Field(
             description="The name of the S3 bucket to output logs to.",
         )
-        aws_access_key_id: Optional[str] = Field(
+        aws_access_key_id: str | None = Field(
             description="An optional AWS access key to use when authenticating",
             default=os.environ.get("AWS_ACCESS_KEY_ID"),
         )
-        aws_secret_access_key: Optional[str] = Field(
+        aws_secret_access_key: str | None = Field(
             description="An optional AWS secret key to use when authenticating",
             default=os.environ.get("AWS_SECRET_ACCESS_KEY"),
         )
-        aws_session_token: Optional[str] = Field(
+        aws_session_token: str | None = Field(
             description="An optional AWS session token to use when authenticating",
             default=os.environ.get("AWS_SESSION_TOKEN"),
         )
-        assume_role_arn: Optional[str] = Field(
+        assume_role_arn: str | None = Field(
             description="An optional AWS role to assume when authenticating with AWS.",
             default=None,
         )
-        bucket_region: Optional[str] = Field(
+        bucket_region: str | None = Field(
             description="The region that S3 the bucket exists in (default us-east-1)",
             default=os.environ.get("AWS_REGION", "us-east-1"),
         )
@@ -124,9 +123,9 @@ class Handler(BaseOutput):
         identity: str,
         operation: str,
         part: int = 0,
-        kind: Optional[str] = ".json.gz",
-        descriptor: Optional[str] = "logs/",
-        name: Optional[str] = None,
+        kind: str | None = ".json.gz",
+        descriptor: str | None = "logs/",
+        name: str | None = None,
     ):
         """Persists captured data to an S3 compatible object store.
 

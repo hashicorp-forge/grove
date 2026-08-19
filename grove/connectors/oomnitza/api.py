@@ -4,7 +4,6 @@
 """Oomnitza API client."""
 
 import logging
-from typing import Dict, Optional
 
 import requests
 
@@ -18,8 +17,8 @@ API_PAGE_SIZE = 2000
 class Client:
     def __init__(
         self,
-        identity: Optional[str] = None,
-        token: Optional[str] = None,
+        identity: str | None = None,
+        token: str | None = None,
     ):
         """Setup a new client.
 
@@ -39,7 +38,7 @@ class Client:
     def _get(
         self,
         url: str,
-        params: Optional[Dict[str, Optional[str]]] = None,
+        params: dict[str, str | None] | None = None,
     ) -> HTTPResponse:
         """A GET wrapper to handle retries for the caller.
 
@@ -61,8 +60,8 @@ class Client:
     def get_activites(
         self,
         cursor: int = 0,
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
     ) -> AuditLogEntries:
         """Fetches a list of signing attempt logs.
 

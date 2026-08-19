@@ -6,7 +6,7 @@
 import json
 import time
 from datetime import datetime, timedelta, timezone, date
-from typing import Any, Optional, Tuple, List, Dict
+from typing import Any
 
 from google.auth.exceptions import GoogleAuthError
 from google.cloud import bigquery
@@ -38,7 +38,7 @@ class Connector(BaseConnector):
             max_batches = getattr(self.configuration, "max_batches", 3)
             self.POINTER_PATH = self.configuration.pointer_path
             time_format = getattr(self.configuration, "time_format", "microseconds")
-            
+
             # New configuration options for optimization
             page_size = getattr(self.configuration, "page_size", 5000)
             bootstrap_days = getattr(self.configuration, "bootstrap_days", 7)
@@ -88,7 +88,7 @@ class Connector(BaseConnector):
 
         # Initialize watermark and pointer
         last_seen_usec = self._initialize_watermark(time_format)
-        
+
         # Configuration for batching
         all_rows = []
         batch_count = 0
@@ -97,14 +97,14 @@ class Connector(BaseConnector):
             # Compute adaptive lookback window
             now_utc = datetime.now(timezone.utc)
             lookback_days = self._compute_lookback_days(
-                last_seen_usec, now_utc, bootstrap_days, min_lookback_days, 
+                last_seen_usec, now_utc, bootstrap_days, min_lookback_days,
                 max_lookback_days, late_buffer_days
             )
-            
+
             # Calculate partition bounds
             min_partition_date = (now_utc - timedelta(days=lookback_days)).date()
             ceiling_usec = int((now_utc - timedelta(seconds=180)).timestamp() * 1_000_000)  # Fixed 3-minute lag
-            
+
             self.logger.debug(f"Fetching batch {batch_count + 1}:")
             self.logger.debug(f"  Lookback days: {lookback_days}")
             self.logger.debug(f"  Min partition date: {min_partition_date}")
@@ -126,7 +126,7 @@ class Connector(BaseConnector):
                     min_partition_date=min_partition_date,
                     ceiling_usec=ceiling_usec
                 )
-                
+
                 if not rows:
                     self.logger.info("No more logs found.")
                     break
@@ -135,10 +135,10 @@ class Connector(BaseConnector):
                     f"Collected {len(rows)} logs in batch {batch_count + 1}. "
                     f"Debug: {debug_metadata}"
                 )
-                
+
                 all_rows.extend(rows)
                 batch_count += 1
-                
+
                 # Update watermark
                 if new_last_seen_usec is not None:
                     last_seen_usec = new_last_seen_usec
@@ -147,12 +147,12 @@ class Connector(BaseConnector):
                         self.pointer = str(last_seen_usec)
                     else:
                         self.pointer = as_bigquery_timestamp_microseconds(last_seen_usec)
-                
+
                 # Check if we've reached the end (less than full page)
                 if len(rows) < page_size:
                     self.logger.info("Reached end of available data.")
                     break
-                    
+
             except Exception as err:
                 self.logger.error(f"BigQuery query failed: {err}")
                 raise RequestFailedException(f"BigQuery query failed: {err}")
@@ -168,7 +168,7 @@ class Connector(BaseConnector):
         """Create BigQuery client with retry logic for auth deadlock."""
         max_retries = 3
         retry_delay = 2  # seconds
-        
+
         for attempt in range(max_retries):
             try:
                 client = bigquery.Client(
@@ -189,11 +189,11 @@ class Connector(BaseConnector):
                 else:
                     self.logger.error(f"Failed to create BigQuery client: {e}")
                     raise
-        
+
         # This should never be reached, but mypy requires it
         raise RuntimeError("Failed to create BigQuery client after all retry attempts")
 
-    def _initialize_watermark(self, time_format: str) -> Optional[int]:
+    def _initialize_watermark(self, time_format: str) -> int | None:
         """Initialize the watermark from stored pointer or set default."""
         try:
             stored_pointer = self.pointer
@@ -223,24 +223,24 @@ class Connector(BaseConnector):
             week_ago = datetime.utcnow() - timedelta(days=7)
             week_ago = week_ago.replace(tzinfo=timezone.utc)
             pointer_epoch_usec = int(week_ago.timestamp() * 1_000_000)
-            
+
             # Update pointer for Grove's tracking
             if time_format == "microseconds":
                 self.pointer = str(pointer_epoch_usec)
             else:
                 self.pointer = as_bigquery_timestamp_microseconds(pointer_epoch_usec)
-            
+
             self.logger.debug(
                 f"No pointer found. Setting pointer to: {self.pointer}"
             )
             return pointer_epoch_usec
-        
+
         # This should never be reached, but mypy requires it
         return None
 
     def _compute_lookback_days(
-        self, 
-        last_seen_usec: Optional[int], 
+        self,
+        last_seen_usec: int | None,
         now_utc: datetime,
         bootstrap_days: int = 7,
         min_days: int = 3,
@@ -250,11 +250,11 @@ class Connector(BaseConnector):
         """Compute adaptive lookback window based on how far behind we are."""
         if last_seen_usec is None:
             return bootstrap_days
-        
+
         last_seen_dt = datetime.fromtimestamp(last_seen_usec / 1_000_000, tz=timezone.utc)
         delta_seconds = (now_utc - last_seen_dt).total_seconds()
         delta_days = max(0, delta_seconds / 86400)
-        
+
         # Add buffer for late arrivals and clamp to bounds
         lookback_days = delta_days + late_buffer_days
         return max(min_days, min(max_days, int(lookback_days)))
@@ -265,23 +265,23 @@ class Connector(BaseConnector):
         project_id: str,
         dataset_name: str,
         table_name: str,
-        columns: List[str],
+        columns: list[str],
         pointer_path: str,
         time_format: str,
-        last_seen_usec: Optional[int],
+        last_seen_usec: int | None,
         page_size: int,
         min_partition_date: date,
         ceiling_usec: int
-    ) -> Tuple[List[Dict[str, Any]], Optional[int], Dict[str, Any]]:
+    ) -> tuple[list[dict[str, Any]], int | None, dict[str, Any]]:
         """
         Fetch a page of data using optimized BigQuery query with partition pruning.
-        
+
         Returns:
             Tuple of (rows, new_last_seen_usec, debug_metadata)
         """
         # Set low watermark for keyset pagination
         low_watermark = last_seen_usec if last_seen_usec is not None else -1
-        
+
         # Build query with parameters for better performance
         query = f"""
         SELECT {', '.join(columns)}
@@ -292,9 +292,9 @@ class Connector(BaseConnector):
         ORDER BY {pointer_path} ASC
         LIMIT @page_size
         """
-        
+
         self.logger.debug(f"Constructed query: {query}")
-        
+
         # Set up query parameters
         query_params = [
             bigquery.ScalarQueryParameter("min_partition_date", "DATE", min_partition_date),
@@ -302,21 +302,21 @@ class Connector(BaseConnector):
             bigquery.ScalarQueryParameter("ceiling_usec", "INT64", ceiling_usec),
             bigquery.ScalarQueryParameter("page_size", "INT64", page_size),
         ]
-        
+
         # Configure query job
         job_config = bigquery.QueryJobConfig(
             query_parameters=query_params,
             use_query_cache=False  # Disable cache for consistent results
         )
-        
+
         try:
             self.logger.info("Executing optimized BigQuery query.")
             query_job = client.query(query, job_config=job_config)
             results = query_job.result()
             self.logger.debug("Query executed successfully.")
-            
+
             rows = [dict(row) for row in results]
-            
+
             # Extract new watermark from last row
             new_last_seen_usec = None
             if rows:
@@ -328,7 +328,7 @@ class Connector(BaseConnector):
                         timestamp_value = timestamp_value.get(part, None)
                     else:
                         break
-                
+
                 if timestamp_value is not None:
                     if time_format == "microseconds":
                         new_last_seen_usec = int(timestamp_value)
@@ -344,7 +344,7 @@ class Connector(BaseConnector):
                             except ValueError:
                                 self.logger.warning(f"Could not parse timestamp value: {timestamp_value}")
                                 new_last_seen_usec = last_seen_usec
-            
+
             # Build debug metadata
             debug_metadata = {
                 "lookback_days": (datetime.now(timezone.utc).date() - min_partition_date).days,
@@ -355,9 +355,9 @@ class Connector(BaseConnector):
                 "bytes_processed": getattr(query_job, 'total_bytes_processed', 'unknown'),
                 "slot_ms": getattr(query_job, 'slot_millis', 'unknown')
             }
-            
+
             return rows, new_last_seen_usec, debug_metadata
-            
+
         except Exception as err:
             self.logger.error(f"BigQuery query failed: {err}")
             raise RequestFailedException(f"BigQuery query failed: {err}")

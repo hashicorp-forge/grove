@@ -5,7 +5,7 @@
 
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
-from typing import Any, Dict
+from typing import Any
 
 from twilio.base.exceptions import TwilioException
 from twilio.rest import Client
@@ -34,7 +34,7 @@ class Connector(BaseConnector):
         except AttributeError:
             return None
 
-    @lru_cache(maxsize=512)  # noqa: B019
+    @lru_cache(maxsize=512)
     def _carrier_lookup(self, number: str):
         """Performs a Carrier lookup via the Twilio API.
 
@@ -52,7 +52,7 @@ class Connector(BaseConnector):
             "carrier": carrier.carrier,
         }
 
-    def collect(self):  # noqa: C901
+    def collect(self):
         """Collects logs of all messages from the Twilio Messages API.
 
         This will first check whether there are any pointers cached to indicate previous
@@ -78,7 +78,7 @@ class Connector(BaseConnector):
         # Our LRU cache only has 512 slots, so during a back fill this may be exhausted.
         # To try and alleviate we'll track results in memory during a single execution,
         # too.
-        carrier_information: Dict[str, Any] = {}
+        carrier_information: dict[str, Any] = {}
 
         # Stream the data from the API, paging as required.
         entries = []

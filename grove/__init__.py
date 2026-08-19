@@ -17,4 +17,4 @@ from grove import (
     processors,  # noqa: F401
     types,  # noqa: F401
 )
-from grove.__about__ import *  # noqa: F401, F403
+from grove.__about__ import *  # noqa: F403

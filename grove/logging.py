@@ -6,7 +6,7 @@
 
 import json
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from aws_lambda_powertools.logging.formatter import (  # type: ignore
     RESERVED_LOG_ATTRS,
@@ -23,7 +23,7 @@ class GroveFormatter(JsonFormatter):
     each message.
     """
 
-    def __init__(self, context: Dict[str, str], *args, **kwargs):
+    def __init__(self, context: dict[str, str], *args, **kwargs):
         self.utc = True
         self.context = context
 
@@ -36,7 +36,7 @@ class GroveFormatter(JsonFormatter):
         self.log_format["location"] = "%(pathname)s:%(lineno)d"
         self.log_format["function"] = "%(funcName)s"
 
-    def extract_keys(self, record: logging.LogRecord) -> Dict[str, Any]:
+    def extract_keys(self, record: logging.LogRecord) -> dict[str, Any]:
         """Extracts and formats log records into dictionaries ready for serialisation.
 
         This is heavily based on the code from the AWS Lambda PowerTools formatter that
@@ -69,7 +69,7 @@ class GroveFormatter(JsonFormatter):
 
         return formatted
 
-    def format(self, record: logging.LogRecord) -> str:  # noqa: A003
+    def format(self, record: logging.LogRecord) -> str:
         """Return the log message including any context provided by the entrypoint.
 
         :param record: A log record to process.

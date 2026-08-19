@@ -9,7 +9,7 @@ allow collection of log data.
 
 import logging
 import time
-from typing import Any, Dict, Optional
+from typing import Any
 
 import requests
 
@@ -23,12 +23,12 @@ API_PAGE_SIZE = 100
 class Client:
     def __init__(
         self,
-        base_url: Optional[str] = None,
-        identity: Optional[str] = None,
-        client_id: Optional[str] = None,
-        client_secret: Optional[str] = None,
-        refresh_token: Optional[str] = None,
-        retry: Optional[bool] = True,
+        base_url: str | None = None,
+        identity: str | None = None,
+        client_id: str | None = None,
+        client_secret: str | None = None,
+        refresh_token: str | None = None,
+        retry: bool | None = True,
     ):
         """Setup a new client.
 
@@ -55,7 +55,7 @@ class Client:
         self._api_base_uri = API_BASE_URI.format(base_url=base_url, identity=identity)
 
     def _get(
-        self, url: str, params: Optional[Dict[str, Optional[str]]] = None
+        self, url: str, params: dict[str, str | None] | None = None
     ) -> HTTPResponse:
         """A GET wrapper to handle retries for the caller.
 
@@ -89,9 +89,9 @@ class Client:
     def _post(
         self,
         url: str,
-        headers: Optional[Dict[str, Any]] = None,
-        data: Optional[Dict[str, Optional[str]]] = None,
-    ) -> Dict[str, Any]:
+        headers: dict[str, Any] | None = None,
+        data: dict[str, str | None] | None = None,
+    ) -> dict[str, Any]:
         """A POST wrapper to handle retries for the caller.
 
         :param url: URL to perform the HTTP POST against.
@@ -142,8 +142,8 @@ class Client:
     def get_activity_logging(
         self,
         cursor: int = 0,
-        to_date: Optional[str] = None,
-        from_date: Optional[str] = None,
+        to_date: str | None = None,
+        from_date: str | None = None,
     ) -> AuditLogEntries:
         """Fetches a list of audit logs which match the provided filters.
 

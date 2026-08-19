@@ -36,7 +36,7 @@ class Connector(BaseConnector):
         This will collect all users from the Okta organization. Since user data
         doesn't change frequently, this connector is designed to be run daily to
         capture the current state of all users in the organization.
-        
+
         Grove's built-in frequency mechanism handles when to run this connector.
         """
 

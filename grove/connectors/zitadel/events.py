@@ -4,7 +4,7 @@
 """Zitadel Events connector for Grove."""
 
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import requests
 
@@ -46,7 +46,7 @@ class Connector(BaseConnector):
             return 100
 
     @property
-    def aggregate_event_types(self) -> List[str]:
+    def aggregate_event_types(self) -> list[str]:
         """Fetches a list of aggregate event types from the configuration.
 
         :return: A list of "aggregate_event_types" from the connector's configuration.
@@ -56,14 +56,14 @@ class Connector(BaseConnector):
         except AttributeError:
             return []
 
-    def _build_query(self, last_sequence: Optional[str] = None) -> Dict[str, Any]:
+    def _build_query(self, last_sequence: str | None = None) -> dict[str, Any]:
         """Convenience method to construct a Zitadel API request body.
 
         :param last_sequence: An optional sequence number to query events after.
 
         :return: A dictionary expressing a Zitadel API request body.
         """
-        query: Dict[str, Any] = {
+        query: dict[str, Any] = {
             "limit": self.batch_size,
             "asc": True,
         }
@@ -76,7 +76,7 @@ class Connector(BaseConnector):
 
         return query
 
-    def _make_request(self, query: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def _make_request(self, query: dict[str, Any]) -> dict[str, Any] | None:
         """Convenience method to perform an HTTP request to collect events.
 
         :param query: A set of parameters to be provided as the query to the API.

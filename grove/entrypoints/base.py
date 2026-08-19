@@ -7,7 +7,7 @@ import datetime
 import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any, Dict, List
+from typing import Any
 
 from aws_lambda_powertools import Logger
 
@@ -27,7 +27,7 @@ from grove.logging import GroveFormatter
 from grove.models import ConnectorConfig
 
 
-def dispatch(config: ConnectorConfig, context: Dict[str, str]) -> datetime.datetime:
+def dispatch(config: ConnectorConfig, context: dict[str, str]) -> datetime.datetime:
     """Executes a connector, blocking until complete.
 
     This function is intended to be called via a ThreadPoolExecutor to enable concurrent
@@ -47,7 +47,7 @@ def dispatch(config: ConnectorConfig, context: Dict[str, str]) -> datetime.datet
     return instance.last
 
 
-def configure() -> List[ConnectorConfig]:
+def configure() -> list[ConnectorConfig]:
     """Fetches all configuration documents and associated secrets."""
     configs = plugin.load_handler(
         os.environ.get(ENV_GROVE_CONFIG_HANDLER, DEFAULT_CONFIG_HANDLER),
@@ -76,7 +76,7 @@ def configure() -> List[ConnectorConfig]:
     return secrets.load(loaded)
 
 
-def entrypoint(context: Dict[str, Any]):
+def entrypoint(context: dict[str, Any]):
     """Provides the main entrypoint for Grove.
 
     This function should be called from various wrappers in order to execute Grove when

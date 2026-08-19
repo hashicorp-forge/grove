@@ -5,7 +5,7 @@
 
 import logging
 import time
-from typing import Any, Dict, Optional
+from typing import Any
 
 import requests
 
@@ -21,9 +21,9 @@ API_ORGANIZATION = "/organization/{identity}/logs" # org name will be inserted f
 class Client:
     def __init__(
         self,
-        identity: Optional[str] = None,
-        token: Optional[str] = None,
-        retry: Optional[bool] = True,
+        identity: str | None = None,
+        token: str | None = None,
+        retry: bool | None = True,
     ):
         """Setup a new Quay.io API client.
 
@@ -46,7 +46,7 @@ class Client:
     def _get(
         self,
         url: str,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> HTTPResponse:
         """A GET wrapper to handle retries for the caller.
 
@@ -55,12 +55,12 @@ class Client:
 
         :raises RateLimitException: A rate limit was encountered.
         :raises RequestFailedException: An HTTP request failed.
-        
+
         :return: HTTP Response object containing the headers and body of a response.
         """
         # retry loop
-        while True: 
-            try: 
+        while True:
+            try:
                 response = requests.get(
                     url,
                     headers=self.headers,
@@ -74,19 +74,19 @@ class Client:
                 if getattr(err.response, "status_code", None) == 429:
                     self.logger.warning("Rate-limit was exceeded during request")
                     if self.retry:
-                        time.sleep(1) 
+                        time.sleep(1)
                         continue
                     else:
                         raise RateLimitException(err)
 
                 raise RequestFailedException(err)
         return HTTPResponse(headers=response.headers, body=response.json())
-    
+
     # public method wrapper to get organization audit logs
     def get_organization_logs(
         self,
-        after: Optional[str] = None,
-        cursor: Optional[str] = None,
+        after: str | None = None,
+        cursor: str | None = None,
     ) -> AuditLogEntries:
         """Get audit logs for a specific organization.
 
@@ -112,7 +112,7 @@ class Client:
             "starttime": start_time,
             "next_page": cursor,
         }
-        
+
         url = f"{self.api_base_uri}{API_ORGANIZATION.format(identity=self.identity)}"
         response = self._get(url, params=params)
 
@@ -123,14 +123,14 @@ class Client:
             if date_time and after_timestamp and date_time < after_timestamp:
                 continue
             filtered.append(entry)
-        
+
         return AuditLogEntries(
             entries=filtered,
             cursor=response.body.get("next_page"),
     )
 
-def parse_time(timestamp: str) -> Optional[datetime]:
-    """" It is possible the timestamp may be '' (default), 
+def parse_time(timestamp: str) -> datetime | None:
+    """" It is possible the timestamp may be '' (default),
     adding this check to avoid errors.
     """
     if not timestamp:

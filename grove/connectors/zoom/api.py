@@ -10,7 +10,7 @@ created in the interim.
 import base64
 import logging
 import time
-from typing import Any, Dict, Optional
+from typing import Any
 
 import requests
 
@@ -23,10 +23,10 @@ API_BASE_URI = "https://api.zoom.us"
 class Client:
     def __init__(
         self,
-        identity: Optional[str] = None,
-        client_id: Optional[str] = None,
-        key: Optional[str] = None,
-        retry: Optional[bool] = True,
+        identity: str | None = None,
+        client_id: str | None = None,
+        key: str | None = None,
+        retry: bool | None = True,
     ):
         """Setup a new client.
 
@@ -48,7 +48,7 @@ class Client:
         }
 
     def _get(
-        self, url: str, params: Optional[Dict[str, Optional[str]]] = None
+        self, url: str, params: dict[str, str | None] | None = None
     ) -> HTTPResponse:
         """A GET wrapper to handle retries for the caller.
 
@@ -83,8 +83,8 @@ class Client:
     def _post(
         self,
         url: str,
-        headers: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        headers: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """A POST wrapper to handle retries for the caller.
 
         :return: the json response.
@@ -138,9 +138,9 @@ class Client:
         self,
         endpoint: str,
         result_field: str,
-        to_date: Optional[str] = None,
-        from_date: Optional[str] = None,
-        cursor: Optional[str] = None,
+        to_date: str | None = None,
+        from_date: str | None = None,
+        cursor: str | None = None,
     ) -> AuditLogEntries:
         """Fetches a list of logs from Zoom which match the provided filters.
 
@@ -177,9 +177,9 @@ class Client:
 
     def get_operationlogs(
         self,
-        from_date: Optional[str],
-        to_date: Optional[str] = None,
-        cursor: Optional[str] = None,
+        from_date: str | None,
+        to_date: str | None = None,
+        cursor: str | None = None,
     ) -> AuditLogEntries:
         """Fetches a list of audit logs from Zoom which match the provided filters.
 
@@ -199,9 +199,9 @@ class Client:
 
     def get_activities(
         self,
-        from_date: Optional[str],
-        to_date: Optional[str] = None,
-        cursor: Optional[str] = None,
+        from_date: str | None,
+        to_date: str | None = None,
+        cursor: str | None = None,
     ) -> AuditLogEntries:
         """Fetches a list of activity logs from Zoom which match the provided filters.
 

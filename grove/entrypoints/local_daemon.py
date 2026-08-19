@@ -10,7 +10,6 @@ import socket
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict
 
 from aws_lambda_powertools import Logger
 
@@ -26,7 +25,7 @@ from grove.logging import GroveFormatter
 from grove.models import Run
 
 
-def runtime_information() -> Dict[str, str]:
+def runtime_information() -> dict[str, str]:
     """Attempts to determine the runtime, returning the relevant runtime data.
 
     :return: A dictionary of runtime data.
@@ -96,7 +95,7 @@ def entrypoint():
     logger.info("Spawning thread pool for connectors", extra={"workers": workers})
 
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        runs: Dict[str, Run] = {}
+        runs: dict[str, Run] = {}
         while True:
             if refreshed_at:
                 since_refresh = datetime.datetime.now() - refreshed_at  # type:ignore

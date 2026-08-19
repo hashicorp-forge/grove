@@ -3,14 +3,14 @@
 
 """Grove AWS Lambda entrypoint."""
 
-from typing import Any, Dict
+from typing import Any
 
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 from grove.entrypoints import base
 
 
-def entrypoint(event: Dict[str, Any], context: LambdaContext) -> Dict[str, Any]:
+def entrypoint(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
     """Grove AWS Lambda wrapper.
 
     :param event: Unused event data for this AWS Lambda invocation.

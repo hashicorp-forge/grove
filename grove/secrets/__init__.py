@@ -5,7 +5,6 @@
 
 import abc
 import logging
-from typing import List
 
 from grove.exceptions import AccessException, DataFormatException
 from grove.models import ConnectorConfig, decode
@@ -23,9 +22,8 @@ class BaseSecret(abc.ABC):
         :param path: The path to the credential to get.
         :return: The decoded plain-text credential for use by connectors.
         """
-        pass
 
-    def load(self, configurations: List[ConnectorConfig]) -> List[ConnectorConfig]:
+    def load(self, configurations: list[ConnectorConfig]) -> list[ConnectorConfig]:
         """Gets secrets from the backend, inserting them into configuration objects.
 
         This method should not be implemented by secrets handlers, as the operations

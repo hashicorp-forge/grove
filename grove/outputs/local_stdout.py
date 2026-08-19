@@ -5,7 +5,7 @@
 
 import datetime
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from grove.constants import DATESTAMP_FORMAT, GROVE_METADATA_KEY
 from grove.exceptions import DataFormatException
@@ -20,9 +20,9 @@ class Handler(BaseOutput):
         identity: str,
         operation: str,
         part: int = 0,
-        kind: Optional[str] = "json",
-        descriptor: Optional[str] = "raw",
-        name: Optional[str] = None,
+        kind: str | None = "json",
+        descriptor: str | None = "raw",
+        name: str | None = None,
     ):
         """Print captured data to stdout.
 
@@ -57,7 +57,7 @@ class Handler(BaseOutput):
                 flush=True,
             )
 
-    def serialize(self, data: List[Any], metadata: Dict[str, Any] = {}) -> bytes:
+    def serialize(self, data: list[Any], metadata: dict[str, Any] = {}) -> bytes:
         """Serialize data to a standard format (NDJSON).
 
         :param data: A list of log entries to serialize to JSON.

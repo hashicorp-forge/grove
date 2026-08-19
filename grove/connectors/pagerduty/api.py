@@ -5,7 +5,6 @@
 
 import logging
 import time
-from typing import Dict, Optional
 
 import requests
 
@@ -18,8 +17,8 @@ API_BASE_URI = "https://api.pagerduty.com"
 class Client:
     def __init__(
         self,
-        token: Optional[str] = None,
-        retry: Optional[bool] = True,
+        token: str | None = None,
+        retry: bool | None = True,
     ):
         """Setup a new client.
 
@@ -38,7 +37,7 @@ class Client:
     def _get(
         self,
         url: str,
-        params: Optional[Dict[str, Optional[str]]] = None,
+        params: dict[str, str | None] | None = None,
     ) -> HTTPResponse:
         """A GET wrapper to handle retries for the caller.
 
@@ -71,9 +70,9 @@ class Client:
 
     def get_records(
         self,
-        since: Optional[str] = None,
-        cursor: Optional[str] = None,
-        limit: Optional[str] = None,
+        since: str | None = None,
+        cursor: str | None = None,
+        limit: str | None = None,
     ) -> AuditLogEntries:
         """Fetches a list of audit logs which match the provided filters.
 
