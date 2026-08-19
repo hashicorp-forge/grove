@@ -30,6 +30,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+kafka = [
+    "confluent-kafka>=2.0.0,<3.0",
+]
 tests = [
     "black",
     "coverage",
@@ -117,6 +120,7 @@ local_file = "grove.caches.local_file:Handler"
 
 [project.entry-points."grove.outputs"]
 aws_s3 = "grove.outputs.aws_s3:Handler"
+kafka = "grove.outputs.kafka:Handler"
 local_file = "grove.outputs.local_file:Handler"
 local_stdout = "grove.outputs.local_stdout:Handler"
 remote_http = "grove.outputs.remote_http:Handler"

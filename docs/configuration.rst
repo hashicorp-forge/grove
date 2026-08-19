@@ -166,3 +166,116 @@ returned from SSM would then be used in place of the field named :code:`key`.
 The use of a secrets backend allows sensitive information to be removed from
 configuration documents, allowing configuration documents to be stored directly on disk,
 or in other less sensitive backends where non-administrative users may have read-access.
+
+Output Handlers
+===============
+
+Grove supports pluggable output handlers that control where collected log data is
+written or published. The output handler is selected by setting the :code:`GROVE_OUTPUT`
+environment variable to the name of the desired handler.
+
+Kafka
+-----
+
+The :code:`kafka` output handler publishes collected log data to an Apache Kafka topic
+or Confluent Platform cluster. Each Grove batch may produce one or more Kafka messages
+depending on the number of records and the configured size thresholds.
+
+.. note::
+   The Kafka output handler requires an additional dependency. Install it with:
+
+   .. code-block:: shell
+
+      pip install grove[kafka]
+
+Required configuration
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Environment Variable
+     - Description
+   * - :code:`GROVE_OUTPUT_KAFKA_BOOTSTRAP_SERVERS`
+     - Comma-separated list of Kafka broker addresses (:code:`host:port`).
+   * - :code:`GROVE_OUTPUT_KAFKA_TOPIC`
+     - Default Kafka topic to publish log data to. Connectors that set a
+       :code:`descriptor` will override this value on a per-batch basis.
+
+Optional configuration
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 20 40
+
+   * - Environment Variable
+     - Default
+     - Description
+   * - :code:`GROVE_OUTPUT_KAFKA_SECURITY_PROTOCOL`
+     - :code:`PLAINTEXT`
+     - Protocol used to communicate with brokers (:code:`PLAINTEXT`,
+       :code:`SSL`, :code:`SASL_PLAINTEXT`, :code:`SASL_SSL`).
+   * - :code:`GROVE_OUTPUT_KAFKA_SASL_MECHANISM`
+     - *(unset)*
+     - SASL mechanism for authentication (:code:`PLAIN`, :code:`SCRAM-SHA-256`,
+       :code:`OAUTHBEARER`, etc.).
+   * - :code:`GROVE_OUTPUT_KAFKA_SASL_USERNAME`
+     - *(unset)*
+     - SASL username for broker authentication.
+   * - :code:`GROVE_OUTPUT_KAFKA_SASL_PASSWORD`
+     - *(unset)*
+     - SASL password for broker authentication.
+   * - :code:`GROVE_OUTPUT_KAFKA_SSL_CA_LOCATION`
+     - *(unset)*
+     - Path to a CA certificate file for TLS verification.
+   * - :code:`GROVE_OUTPUT_KAFKA_SSL_CERTIFICATE_LOCATION`
+     - *(unset)*
+     - Path to a client certificate file for mutual TLS.
+   * - :code:`GROVE_OUTPUT_KAFKA_SSL_KEY_LOCATION`
+     - *(unset)*
+     - Path to a client private key file for mutual TLS.
+   * - :code:`GROVE_OUTPUT_KAFKA_MAX_RECORDS_PER_MESSAGE`
+     - :code:`500`
+     - Maximum number of log records per Kafka message.
+   * - :code:`GROVE_OUTPUT_KAFKA_MAX_BYTES_PER_MESSAGE`
+     - :code:`750000`
+     - Maximum serialized payload size in bytes per Kafka message. This is
+       intentionally conservative relative to the Kafka default of 1 MiB
+       to allow headroom for message headers.
+   * - :code:`GROVE_OUTPUT_KAFKA_COMPRESSION_TYPE`
+     - :code:`lz4`
+     - Compression codec applied by the producer (:code:`none`, :code:`gzip`,
+       :code:`snappy`, :code:`lz4`, :code:`zstd`).
+   * - :code:`GROVE_OUTPUT_KAFKA_FLUSH_TIMEOUT`
+     - :code:`30`
+     - Seconds to wait for delivery confirmation before raising an error.
+   * - :code:`GROVE_OUTPUT_KAFKA_USE_IDENTITY_AS_KEY`
+     - :code:`false`
+     - When :code:`true`, the connector identity is used as the Kafka message
+       key. This ensures all records from the same identity are routed to the
+       same partition.
+
+Examples
+~~~~~~~~
+
+Publishing to a local Kafka cluster over plaintext:
+
+.. code-block:: shell
+
+   GROVE_OUTPUT=kafka
+   GROVE_OUTPUT_KAFKA_BOOTSTRAP_SERVERS=kafka.internal:9092
+   GROVE_OUTPUT_KAFKA_TOPIC=grove-logs
+
+Publishing to Confluent Cloud with SASL_SSL authentication:
+
+.. code-block:: shell
+
+   GROVE_OUTPUT=kafka
+   GROVE_OUTPUT_KAFKA_BOOTSTRAP_SERVERS=pkc-xxxxx.us-east-1.aws.confluent.cloud:9092
+   GROVE_OUTPUT_KAFKA_TOPIC=grove-logs
+   GROVE_OUTPUT_KAFKA_SECURITY_PROTOCOL=SASL_SSL
+   GROVE_OUTPUT_KAFKA_SASL_MECHANISM=PLAIN
+   GROVE_OUTPUT_KAFKA_SASL_USERNAME=<API_KEY>
+   GROVE_OUTPUT_KAFKA_SASL_PASSWORD=<API_SECRET>
