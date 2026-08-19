@@ -28,7 +28,7 @@ Out of the box, Grove provides:
 
 **Please note**: While this is not an official HashiCorp project, security is still very
 important to us! If you have found a potential security issue with Grove, please contact
-us via email at security@hashicorp.com, rather than filing a GitHub issue.
+us via email at hashicorp.security@ibm.com, rather than filing a GitHub issue.
 
 Supported Sources
 -----------------
