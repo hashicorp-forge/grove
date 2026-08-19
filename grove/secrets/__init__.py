@@ -56,14 +56,14 @@ class BaseSecret(abc.ABC):
                         candidate = decode(candidate, configuration.encoding[field])
 
                     setattr(configuration, field, candidate)
-            except DataFormatException as err:
+            except DataFormatException:
                 self.logger.error(
                     "Unable to decode secret for connector, skipping",
                     extra={
                         "document": configuration.name,
                         "field": field,
-                        "exception": err,
                     },
+                    exc_info=False,
                 )
                 continue
             except (AccessException, IndexError) as err:
