@@ -183,7 +183,6 @@ profile = "black"
 [tool.pytest.ini_options]
 junit_family = "xunit2"
 norecursedirs = ".*"
-self-contained-html = true
 testpaths = [
     "tests"
 ]
