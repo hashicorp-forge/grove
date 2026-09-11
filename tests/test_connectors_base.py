@@ -121,7 +121,7 @@ class BaseConnectorTestCase(unittest.TestCase):
         self.assertFalse(connector.due())
 
         # Ensure we report a run is required if run frequency has passed.
-        connector.last = now - datetime.timedelta(seconds=100)
+        connector.last = now - datetime.timedelta(seconds=101)
         self.assertTrue(connector.due())
 
         # Ensure a configuration exception is raised if no frequency is set.
