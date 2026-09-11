@@ -45,7 +45,6 @@ class BaseSecret(abc.ABC):
                         "Attempting to get query secret from backend",
                         extra={
                             "field": field,
-                            "identifier": identifier,
                             "document": configuration.name,
                         },
                     )
