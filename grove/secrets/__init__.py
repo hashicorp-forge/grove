@@ -43,10 +43,6 @@ class BaseSecret(abc.ABC):
                 for field, identifier in configuration.secrets.items():
                     self.logger.debug(
                         "Attempting to get query secret from backend",
-                        extra={
-                            "field": field,
-                            "document": configuration.name,
-                        },
                     )
                     candidate = self.get(identifier)
 
@@ -58,20 +54,12 @@ class BaseSecret(abc.ABC):
             except DataFormatException:
                 self.logger.error(
                     "Unable to decode secret for connector, skipping",
-                    extra={
-                        "document": configuration.name,
-                        "field": field,
-                    },
                     exc_info=False,
                 )
                 continue
             except (AccessException, IndexError):
                 self.logger.error(
                     "Unable to get secret for connector, skipping",
-                    extra={
-                        "document": configuration.name,
-                        "field": field,
-                    },
                     exc_info=False,
                 )
                 continue
