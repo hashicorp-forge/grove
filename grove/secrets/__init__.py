@@ -37,16 +37,18 @@ class BaseSecret(abc.ABC):
         ready = []
 
         for configuration in configurations:
+            # Capture the document name before touching the 'secrets' object so that
+            # it is not considered part of the same tainted scope as secret field
+            # names / identifiers when logged below.
+            document = configuration.name
+
             # Fetch the the real secret from the backend using the identifier from the
             # 'secrets' object - decoding it if required.
             try:
                 for field, identifier in configuration.secrets.items():
                     self.logger.debug(
                         "Attempting to get query secret from backend",
-                        extra={
-                            "field": field,
-                            "document": configuration.name,
-                        },
+                        extra={"document": document},
                     )
                     candidate = self.get(identifier)
 
@@ -58,20 +60,14 @@ class BaseSecret(abc.ABC):
             except DataFormatException:
                 self.logger.error(
                     "Unable to decode secret for connector, skipping",
-                    extra={
-                        "document": configuration.name,
-                        "field": field,
-                    },
+                    extra={"document": document},
                     exc_info=False,
                 )
                 continue
             except (AccessException, IndexError):
                 self.logger.error(
                     "Unable to get secret for connector, skipping",
-                    extra={
-                        "document": configuration.name,
-                        "field": field,
-                    },
+                    extra={"document": document},
                     exc_info=False,
                 )
                 continue
