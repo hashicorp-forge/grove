@@ -598,7 +598,10 @@ class BaseConnector:
         """
         content = bytes(json.dumps(entry, separators=(",", ":"), default=str), "utf-8")
 
-        return hashlib.md5(content).hexdigest()
+        # SHA-256 is used here rather than MD5 to avoid use of a weak hashing algorithm,
+        # even though this hash is only used for deduplication rather than any
+        # security-sensitive purpose.
+        return hashlib.sha256(content).hexdigest()
 
     def hash_entries(self, entries: list[Any]) -> dict[str, set[str]]:
         """Hashes a list of log entries.
